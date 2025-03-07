@@ -1,0 +1,9 @@
+@mixin SecondaryFont{
+    font-family: 'Times New Roman', Times, serif;
+   }
+
+@mixin GradientText{
+    background-image: var(--Gradient);
+    background-clip: text; /* Applica il gradiente solo al testo */
+    color: transparent; /* Rende il testo trasparente per far vedere il gradiente */
+}

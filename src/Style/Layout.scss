@@ -1,0 +1,17 @@
+@use './Mixins.scss' as *;
+/* Containers */
+.ContainerMiddle, CM {  // due classi hanno questo stile
+    position: absolute;
+    top: 2%;
+    left: 50%;
+    transform: translateX(-50%); /* posiziona al centro anche con scritte piu lunghe*/
+    }
+  
+.Center, C{
+  align-self: center;
+  align-items: center;
+}
+
+.SecondaryFont{
+    @include SecondaryFont();
+  }
