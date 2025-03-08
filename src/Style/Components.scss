@@ -1,6 +1,6 @@
 @use './Var.scss' as *;
 
 .Title{
-    font-size: $FontXL;
+    font-size: var(--FontXL);
     color: var(--TextPrimary);
 }

@@ -1,0 +1,130 @@
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(1.02);
+  }
+  20% {
+    transform: scale(1.04);
+  }
+  30% {
+    transform: scale(1.08);
+  }
+  40% {
+    transform: scale(1.1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  60% {
+    transform: scale(1.06);
+  }
+  70% {
+    transform: scale(1.04);
+  }
+  80% {
+    transform: scale(1.02);
+  }
+  90% {
+    transform: scale(1.01);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes blur-motion {
+  0% {
+    filter: blur(0px);
+    transform: translateX(0);
+  }
+  50% {
+    filter: blur(3px);
+    transform: translateX();
+  }
+  100% {
+    filter: blur(0px);
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer-animation {
+    0% {
+        left: -100%; /* Inizia a sinistra */
+    }
+    100% {
+        left: 100%; /* Si sposta a destra */
+    }
+}
+.Menu {
+  width: 70px;
+  height: 100vh;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-color: var(--PrimaryLight);
+  color: var(--TextPrimary);
+}
+
+.Extend {
+  width: 200px;
+}
+
+.Icon {
+  width: 30px !important;
+  color: rgb(255, 255, 255) !important;
+
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
+
+.Icon.Hover {
+  color: #00ffc8 !important;
+  transition: all 0.3s ease;
+  animation: pulse 1.2s infinite;
+  filter: drop-shadow(0 0 5px var(--Secondary));
+  transition: filter 0.3s;
+}
+
+.Text {
+    padding: 5px;
+  font-size: var(--FontM);
+}
+.Text.Hover {
+color: #00ffc8;
+}
+
+.Text.Blur {
+  filter: blur(2px);
+  transition: all 0.4s ;
+}
+
+.shimmer {
+    font-size: 48px; /* Dimensione del testo */
+    font-weight: bold;
+    color: #fff; /* Colore del testo */
+    position: relative;
+    overflow: hidden; /* Nasconde la parte dell'animazione che esce dal contenitore */
+}
+
+.shimmer::before {
+    content: 'text';
+    position: absolute;
+    top: 0;
+    left: -100%; /* Inizia fuori dal contenitore a sinistra */
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0) 100%);
+    animation: shimmer-animation 2s infinite; /* Durata e ripetizione dell'animazione */
+}
+
+@keyframes shimmer-animation {
+    0% {
+        left: -100%; /* Inizia a sinistra */
+    }
+    100% {
+        left: 100%; /* Si sposta a destra */
+    }
+}
