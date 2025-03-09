@@ -26,7 +26,7 @@
 
 /* Text */
 --TextPrimary: #ffffff; 
---TextSecondary: #666666; 
+--TextSecondary: #999999; 
 
 --Border: var(--Secondary); 
 
@@ -43,6 +43,7 @@
 body {
   font-family: 'Default','Times New Roman', Times, serif; /* Font di default */
   background-color: var(--Background);
+  overflow-x: hidden;
 }
 
 a {

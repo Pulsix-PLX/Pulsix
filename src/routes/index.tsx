@@ -1,11 +1,17 @@
 import { Title } from "@solidjs/meta";
-import Text from "~/components/Menus/text";
+import CanvasAnimation from "./UI/Waves";
+
+
 
 export default function Home() {
   return (
     <>
-      <h1 class="Title">Pulsix</h1>
-      <Text />
+     
+
+     <CanvasAnimation></CanvasAnimation>
+
+
+      
     </>
   );
 }

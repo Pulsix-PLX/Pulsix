@@ -1,8 +1,12 @@
+import Title from '~/components/Title'
+import './index.scss'
 
-function prova() {
-  return (
-    <p>PROVA</p>
+export default function Wallets() {
+  return (<>
+    <Title title='Wallets'></Title>
+  
+  
+    </>
   )
 }
 
-export default prova

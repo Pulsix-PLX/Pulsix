@@ -1,6 +1,6 @@
 @use './Mixins.scss' as *;
 /* Containers */
-.ContainerMiddle, CM {  // due classi hanno questo stile
+.ContainerMiddle, .CM {  // due classi hanno questo stile
     position: absolute;
     top: 2%;
     left: 50%;
