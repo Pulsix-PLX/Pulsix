@@ -20,10 +20,13 @@
         "./src/components/*"
       ],
       "@API/*": [
-        "./src/components/*"
+        "./src/routes/API/*"
       ],
       "@server/*": [
         "./src/server/*"
+      ],
+      "@store/*": [
+        "./src/GlobalStores/*"
       ]
     }
   }
