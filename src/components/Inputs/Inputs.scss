@@ -1,0 +1,364 @@
+/* src/components/Inputs.scss */
+:root {
+    --primary: #6D58FF;
+    --primary-dark: #362A89;
+    --dark: #2B3044;
+    --grey-dark: #404660;
+    --grey: #8A91B4;
+    --grey-light: #A6ACCD;
+    --light: #BBC1E1;
+    --pale: #ECEFFC;
+    --white: #FFFFFF;
+    --red: #F04949;
+    --glint: white;
+  }
+  
+  @media(prefers-color-scheme: dark) {
+    :root {
+      --glint: black;
+    }
+  }
+  
+  /* Input container styles */
+  .input-container {
+    position: relative;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  /* Common input styles */
+  .input {
+    position: relative;
+  }
+  
+  .input label {
+    pointer-events: none;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    position: absolute;
+    top: 8px;
+    left: 0;
+    transform-origin: 0 50%;
+    transform: translateY(var(--label-y, 0)) scale(var(--label-scale, 1)) translateZ(0);
+    transition: transform .3s, color .3s;
+    color: var(--label-color, var(--grey-light));
+  }
+  
+  .input input {
+    width: 100%;
+    border-radius: 0;
+    -webkit-appearance: none;
+    background: none;
+    outline: none;
+    border: none;
+    color: var(--grey-dark);
+    font-weight: 500;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: .025em;
+    line-height: 22px;
+    caret-color: var(--primary);
+  }
+  
+  .input input:not(:placeholder-shown) + label,
+  .input input:focus + label {
+    --label-y: -17px;
+    --label-scale: .8;
+    --label-color: var(--grey);
+  }
+  
+  /* Text, Email, Number, Date inputs */
+  .input.text input,
+  .input.email input,
+  .input.number input,
+  .input.date input {
+    padding: 7px 0 5px 0;
+    box-shadow: inset 0 -1px 0 0 var(--grey);
+  }
+  
+  /* Password input */
+  .input.password {
+    height: 34px;
+    position: relative;
+  }
+  
+  .input.password .dots {
+    position: absolute;
+    display: flex;
+    left: 0;
+    top: 50%;
+    transform: translateY(-2px);
+    width: calc(100% - 50px);
+    height: 15px;
+    overflow: visible;
+  }
+  
+  /* Fix for password text placement */
+  .input.password .password-text {
+    font-family: monospace;
+    color: var(--grey-dark);
+    font-size: 14px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .input.password .dots i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--grey-dark);
+    display: block;
+    margin-right: 4px;
+    animation: scale-in .05s linear forwards;
+    will-change: transform, opacity;
+  }
+  
+  .input.password .dots i.remove {
+    animation: scale-out .05s linear forwards;
+  }
+  
+  .input.password .cursor {
+    position: absolute;
+    height: 15px;
+    width: 1px;
+    left: 0;
+    top: 10px;
+    background: var(--primary);
+    opacity: 0;
+    transform: translateX(var(--cursor-x, 0));
+    transition: transform var(--cursor-duration, .1s);
+  }
+  
+  .input.password input {
+    opacity: 0;
+    padding: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: calc(100% - 50px);
+  }
+  
+  .input.password input:focus + label + .cursor {
+    animation: cursor 1s ease infinite;
+  }
+  
+  /* Line and tick animations */
+  .input .line,
+  .input .tick {
+    pointer-events: none;
+    position: absolute;
+    left: var(--left, 0);
+    bottom: var(--bottom, -10px);
+    opacity: var(--opacity, 1);
+    transition: opacity 0s linear var(--tick-opacity-delay, .5s);
+  }
+  
+  .input .line svg,
+  .input .tick svg {
+    stroke: var(--line-stroke, var(--grey));
+    stroke-width: 1;
+    fill: none;
+    display: block;
+    width: var(--width, 900px);
+    height: var(--height, 22px);
+    transform: translateX(var(--x, var(--line-x, 0)));
+    transition: transform var(--line-x-duration, 0s) ease, stroke .3s;
+  }
+  
+  .input .line {
+    overflow: hidden;
+    width: 100%;
+    transform-origin: 0 50%;
+  }
+  
+  .input .tick {
+    --left: 100%;
+    --bottom: -1px;
+    --width: 32px;
+    --height: 28px;
+    --x: -16px;
+    --opacity: 0;
+  }
+  
+  .input .tick svg {
+    stroke: var(--tick-stroke, var(--grey));
+    stroke-dasharray: 17 81;
+    stroke-dashoffset: var(--tick-offset, 34px);
+    transition: stroke-dashoffset .5s ease var(--tick-delay, 0s), stroke .5s ease var(--tick-delay, 0s);
+  }
+  
+  /* Eye button styles */
+  .eye-button {
+    position: absolute;
+    right: 25px;
+    top: 7px;
+    width: 24px;
+    height: 24px;
+    background-color: transparent !important;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--grey);
+    transition: color 0.3s;
+    z-index: 5;
+    display: block;
+    overflow: visible;
+  }
+  
+  .eye-button:hover {
+    color: var(--primary);
+  }
+  
+  .eye-button svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+  }
+  
+  .eye-button .eye circle {
+    fill: currentColor;
+  }
+  
+  .eye-button .lid--upper,
+  .eye-button .lid--lower {
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  
+  /* Clear button styles */
+  .clear-button {
+    position: absolute;
+    right: 0;
+    top: 7px;
+    width: 20px;
+    height: 20px;
+    background-color: transparent !important;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--grey);
+    transition: color 0.3s;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .clear-button:hover {
+    color: var(--red);
+  }
+  
+  .clear-button svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+  
+  /* Error message */
+  .error-message {
+    color: var(--red);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  
+  /* Animation states */
+  .input-container.error .input .line {
+    --line-x: -80%;
+    --line-x-duration: 2s;
+    --line-stroke: var(--red);
+    --cursor-duration: 1s;
+  }
+  
+  .input-container.error .input .dots i {
+    animation: flip .4s linear var(--delay) forwards;
+  }
+  
+  .input-container.success .input .tick {
+    --opacity: 1;
+    --tick-offset: 98px;
+    --tick-delay: .45s;
+    --tick-opacity-delay: 0s;
+    --tick-stroke: var(--primary);
+    animation: tick .4s linear forwards;
+  }
+  
+  .input-container.success .input .line {
+    animation: line .5s linear forwards;
+  }
+  
+  /* Animations */
+  @keyframes cursor {
+    50% {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes tick {
+    70%, 80% {
+      transform: translateX(-10px);
+    }
+  }
+  
+  @keyframes line {
+    70% {
+      transform: scaleX(.8);
+    }
+  }
+  
+  @keyframes flip {
+    25% {
+      transform: translateY(8px);
+    }
+    35% {
+      transform: translateY(12px);
+    }
+    65% {
+      transform: translateY(-4px);
+    }
+    100% {
+      transform: translateY(-12px) scale(0);
+    }
+  }
+  
+  @keyframes scale-in {
+    from {
+      transform: scale(0);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes scale-out {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(0);
+    }
+  }
+  
+  /* Eye component animation */
+  .eye {
+    transform-origin: 50% 50%;
+    transition: translate 0.2s, rotate 0.2s;
+  }
+  
+  .lid--upper, .lid--lower {
+    fill: none;
+  }
+  
+  /* Prevent unwanted selection */
+  .input.password input::selection {
+    background: transparent;
+  }
