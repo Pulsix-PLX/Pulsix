@@ -1,0 +1,42 @@
+name: Automatic Backup
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Esegui ogni giorno a mezzanotte
+  push:
+    branches: [ main ]   # Esegui anche ad ogni push sul branch main
+  workflow_dispatch:     # Permette di eseguire manualmente il workflow
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Scarica l'intera storia del repository
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      
+      - name: Create backup timestamp
+        id: timestamp
+        run: echo "::set-output name=date::$(date +'%Y%m%d_%H%M%S')"
+      
+      - name: Create backup archive
+        run: |
+          zip -r backup_${{ steps.timestamp.outputs.date }}.zip . \
+          -x "node_modules/*" \
+          -x ".git/*" \
+          -x "dist/*" \
+          -x ".solid/*" \
+          -x ".output/*"
+      
+      - name: Upload backup as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: project-backup-${{ steps.timestamp.outputs.date }}
+          path: backup_${{ steps.timestamp.outputs.date }}.zip
+          retention-days: 30  # Conserva il backup per 30 giorni
