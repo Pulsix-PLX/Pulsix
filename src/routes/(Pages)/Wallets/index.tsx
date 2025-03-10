@@ -8,7 +8,7 @@ export default function Wallets() {
 
 
 onMount(() => {
-    // Imposta esplicitamente i campi richiesti come non validi all'avvio
+    // Imposta esplicitamente i campi richiesti come non validi all'avvio...main
     SetForm({});
   });
   
