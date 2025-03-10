@@ -12,18 +12,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Scarica l'intera storia del repository
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
       
       - name: Create backup timestamp
         id: timestamp
-        run: echo "::set-output name=date::$(date +'%Y%m%d_%H%M%S')"
+        run: echo "date=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
       
       - name: Create backup archive
         run: |
@@ -35,7 +35,7 @@ jobs:
           -x ".output/*"
       
       - name: Upload backup as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: project-backup-${{ steps.timestamp.outputs.date }}
           path: backup_${{ steps.timestamp.outputs.date }}.zip
