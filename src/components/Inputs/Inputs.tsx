@@ -223,7 +223,7 @@ export default function Input(props: InputProps) {
         </Match>
       </Switch>
       
-      {/* Mostra il messaggio di errore solo se il campo è stato toccato */}
+      {/* Mostra il messaggio di errore solo se il campo è stato toccato.*/}
       {touched() && errorMessage() && (
         <div class="error-message">{errorMessage()}</div>
       )}
