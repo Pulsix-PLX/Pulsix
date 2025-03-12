@@ -4,6 +4,7 @@ import { onMount } from 'solid-js';
 import { SetForm,allInputsValid } from '~/GlobalStores/FormStore';
 import Input from '~/components/Inputs/Inputs';
 
+
 export default function Wallets() {
 
 
@@ -18,7 +19,6 @@ onMount(() => {
   
   return (<>
     <Title title='Wallets'></Title>
-  
     <form
         action={''}
         method="post"
@@ -35,16 +35,14 @@ onMount(() => {
           type="password"
           required={true}
           placeholder="Password"
-        /><Input
-        name="Text"
-        type="text"
-        required={true}
-        placeholder="Text"
-      />
+        />
                 <button type="submit" disabled={!allInputsValid()}>
           Verifica
         </button>
       </form>
+      <div class='mt-110'>
+
+      </div>
     </>
   )
 }
