@@ -1,0 +1,50 @@
+:root{
+  --Widht: 100px;
+  --Height: 70px;
+}
+
+@keyframes Spark{
+  0%{
+
+  }
+  25%{
+
+  }
+  50%{
+
+  }
+}
+.animatedButton {
+  width: 150px;
+  height: 70px;
+  position: relative;
+  border-radius: 100px;
+  border-top: 2px solid hsla(0, 0, 25, 0.5);
+  background-color: hsla(0, 0, 12, 0.5);
+  &:hover {
+  }
+  p{
+    font-size: calc(var(--Widht)*0.23);
+    background-image: linear-gradient(to right, rgba(24, 24, 24, 0.827), white); /* Changed to background-image */
+    background-clip: text;
+    color: transparent;
+  }
+  p::first-letter{
+    color:red
+  }
+}
+
+.animatedButton::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: calc(100% + 10px); /* Slightly larger than the button */
+  height: calc(100% + 10px);
+  background: linear-gradient(45deg, #fb0094, #00f, #0f0, #ff0, #f00, #fb0094, #00f, #0f0, #ff0, #f00);
+  z-index: -1; /* Place behind the button content */
+  background-size: 300%;
+  border-radius: 50%;
+  transition: all 0.5s ease; /* Smooth transition for all properties */
+}
+

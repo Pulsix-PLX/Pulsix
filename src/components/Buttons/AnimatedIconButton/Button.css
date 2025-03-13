@@ -8,7 +8,7 @@
     position: relative;
   }
   
-  button {
+  .button {
     --cut: 0.1em;
     --active: 0;
     --bg:
