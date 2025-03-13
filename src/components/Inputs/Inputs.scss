@@ -1,17 +1,4 @@
 /* src/components/Inputs.scss */
-:root {
-    --primary: #6D58FF;
-    --primary-dark: #362A89;
-    --dark: #2B3044;
-    --grey-dark: #404660;
-    --grey: #8A91B4;
-    --grey-light: #A6ACCD;
-    --light: #BBC1E1;
-    --pale: #ECEFFC;
-    --white: #FFFFFF;
-    --red: #F04949;
-    --glint: white;
-  }
   
   @media(prefers-color-scheme: dark) {
     :root {

@@ -1,10 +1,15 @@
-import { createSignal, Match, onCleanup, onMount, Switch } from "solid-js";
-import { Form, SetForm } from "../../GlobalStores/FormStore";
+import { createSignal, lazy, Match, onMount, Switch, Suspense } from 'solid-js';
+import { Form, SetForm } from '../../GlobalStores/FormStore';
+import { Dynamic } from 'solid-js/web';
+import Eye from './UI/Eye/Eye';
+import InputPassword from './InputPassword';
 
+export const [hidePassword, setHidePassword] = createSignal(true);
+export const [value, setValue] = createSignal('');
 interface InputProps {
   name: string;
-  type: "text" | "password" | "email" | "number" | "date";
-  placeholder?:string,
+  type: 'text' | 'password' | 'email' | 'number' | 'date';
+  placeholder?: string;
   required?: boolean;
   label?: string;
   class?: string;
@@ -25,42 +30,38 @@ export default function Input(props: InputProps) {
 
   // Globals
   const [loading, setLoading] = createSignal(false);
-  const [errorMessage, setErrorMessage] = createSignal("");
+  const [errorMessage, setErrorMessage] = createSignal('');
   const [touched, setTouched] = createSignal<boolean>(false);
-  // Input
-  const [value, setValue] = createSignal("");
-  const [hidePassword, setHidePassword] = createSignal(true);
 
   // Schema Validation
   function validateInput(e: Event) {
     // Imposta touched a true quando l'utente interagisce con l'input
     setTouched(true);
-    
+
     const target = e.target as HTMLInputElement;
     const inputValue = target.value;
-    
+
     // Aggiorna il valore locale
     setValue(inputValue);
-  
+
     console.log(props.name, value());
-  
+
     // Se il campo non è richiesto e vuoto, impostalo su true
-    if (!props.required && inputValue === "") {
+    if (!props.required && inputValue === '') {
       SetForm(props.name, true);
       return; // Esci dalla funzione per evitare ulteriori validazioni
     }
-  
+
     // Se è presente uno schema di validazione personalizzato, usalo
     if (props.ValidationSchema) {
       const response = props.ValidationSchema(inputValue);
       SetForm(props.name, response);
       return;
     }
-  
+
     // Altrimenti usa la validazione predefinita
     defaultValidationSchema(inputValue);
   }
-  
 
   function defaultValidationSchema(inputValue: string) {
     if (!inputValue && props.required) {
@@ -68,12 +69,12 @@ export default function Input(props: InputProps) {
       setErrorMessage('Provide something');
       return;
     }
-    
+
     console.log(Form);
-    
+
     // Default Validation Schema
     switch (props.type) {
-      case "text":
+      case 'text':
         if (!inputValue) {
           SetForm(props.name, false);
           setErrorMessage('Provide something');
@@ -82,8 +83,8 @@ export default function Input(props: InputProps) {
           setErrorMessage('');
         }
         break;
-        
-      case "password":
+
+      case 'password':
         // At least 8 characters
         if (inputValue.length < 8) {
           SetForm(props.name, false);
@@ -105,8 +106,8 @@ export default function Input(props: InputProps) {
         SetForm(props.name, true);
         setErrorMessage('');
         break;
-        
-      case "email":
+
+      case 'email':
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(inputValue)) {
           SetForm(props.name, false);
@@ -116,8 +117,8 @@ export default function Input(props: InputProps) {
           setErrorMessage('');
         }
         break;
-        
-      case "number":
+
+      case 'number':
         const isNumber = !isNaN(Number(inputValue));
         if (!isNumber) {
           SetForm(props.name, false);
@@ -127,8 +128,8 @@ export default function Input(props: InputProps) {
           setErrorMessage('');
         }
         break;
-        
-      case "date":
+
+      case 'date':
         const dateValid = !isNaN(Date.parse(inputValue));
         if (!dateValid) {
           SetForm(props.name, false);
@@ -141,38 +142,25 @@ export default function Input(props: InputProps) {
     }
   }
 
+  ///  UI   ///
   return (
     <div class="input-container">
-      {props.label && (
-        <label for={props.name}>{props.label}</label>
-      )}
-      
+      {props.label && <label for={props.name}>{props.label}</label>}
+
       <Switch>
-        <Match when={props.type === "password"}>
-          <div class="password-input-wrapper">
-            <input
-              id={props.name}
-              name={props.name}
-              placeholder={props.placeholder}
-              class={props.class}
-              style={props.style}
-              type={hidePassword() ? "password" : "text"}
-              onInput={validateInput}
-              onChange={validateInput}
-            />
-            <button 
-              type="button" 
-              class="toggle-password"
-              onClick={() => setHidePassword(!hidePassword())}
-            >
-              {hidePassword() ? "Show" : "Hide"}
-            </button>
-          </div>
+        <Match when={props.type === 'password'}>
+          <InputPassword
+            name={props.name}
+            placeholder={props.placeholder}
+            class={props.class}
+            style={props.style}
+            type="password"
+            onInput={validateInput}
+          />
         </Match>
-        
-        <Match when={props.type === "text"}>
+
+        <Match when={props.type === 'text'}>
           <input
-            id={props.name}
             name={props.name}
             placeholder={props.placeholder}
             class={props.class}
@@ -182,10 +170,9 @@ export default function Input(props: InputProps) {
             onChange={validateInput}
           />
         </Match>
-        
-        <Match when={props.type === "email"}>
+
+        <Match when={props.type === 'email'}>
           <input
-            id={props.name}
             name={props.name}
             placeholder={props.placeholder}
             class={props.class}
@@ -195,10 +182,9 @@ export default function Input(props: InputProps) {
             onChange={validateInput}
           />
         </Match>
-        
-        <Match when={props.type === "number"}>
+
+        <Match when={props.type === 'number'}>
           <input
-            id={props.name}
             name={props.name}
             placeholder={props.placeholder}
             class={props.class}
@@ -208,10 +194,9 @@ export default function Input(props: InputProps) {
             onChange={validateInput}
           />
         </Match>
-        
-        <Match when={props.type === "date"}>
+
+        <Match when={props.type === 'date'}>
           <input
-            id={props.name}
             name={props.name}
             placeholder={props.placeholder}
             class={props.class}
@@ -222,11 +207,9 @@ export default function Input(props: InputProps) {
           />
         </Match>
       </Switch>
-      
+
       {/* Mostra il messaggio di errore solo se il campo è stato toccato.*/}
-      {touched() && errorMessage() && (
-        <div class="error-message">{errorMessage()}</div>
-      )}
+      {touched() && errorMessage() && <div class="error-message">{errorMessage()}</div>}
     </div>
   );
 }
