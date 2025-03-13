@@ -36,7 +36,7 @@
     border-radius: 100px;
     position: relative;
     box-shadow:
-      0 0 calc(var(--active) * 6em) calc(var(--active) * 3em) hsl(260 97% 61% / 0.75),
+      0 0 calc(var(--active) * 6em) calc(var(--active) * 3em) var(--Secondary),
       0 0.05em 0 0 hsl(260 calc(var(--active) * 97%) calc((var(--active) * 50%) + 30%)) inset,
       0 -0.05em 0 0 hsl(260 calc(var(--active) * 97%) calc(var(--active) * 60%)) inset;
     transition: box-shadow var(--transition), scale var(--transition), background var(--transition);
@@ -61,7 +61,10 @@
     animation-duration: 0.6s;
     transition: color var(--transition);
   }
-  
+  .sparkle:hover path {
+    color: var(--Secondary);
+
+  }
   button:is(:hover, :focus-visible) path {
     animation-name: bounce;
   }
@@ -95,7 +98,7 @@
     position: absolute;
     inset: -0.25em;
     z-index: -1;
-    border: 0.25em solid hsl(260 97% 50% / 0.5);
+    border: 0.25em solid var(--Secondary);
     border-radius: 100px;
     opacity: var(--active, 0);
     transition: opacity var(--transition);

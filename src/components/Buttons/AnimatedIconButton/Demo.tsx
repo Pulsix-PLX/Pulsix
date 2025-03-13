@@ -1,7 +1,7 @@
 // App.tsx
 import { Component } from 'solid-js';
 import SparkleButton from '~/components/Buttons/AnimatedIconButton/Button';
-import '.Button.css';
+import './Button.css';
 
 const RocketIcon = () => (
   <svg class="sparkle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

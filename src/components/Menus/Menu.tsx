@@ -86,8 +86,7 @@ export default function Menu() {
       href: "/Wallets",
       svg: IconsPath[2].svg,
     },
-    { name: "Assets", icon: "Assets", href: "/Assets" },
-    { name: "Categories", icon: "Categories", href: "/Categories" },
+   
   ];
 
   // Funzione per raggruppare le proprietà di hover
