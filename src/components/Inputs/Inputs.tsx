@@ -1,11 +1,8 @@
-import { createSignal, lazy, Match, onMount, Switch, Suspense } from 'solid-js';
+import { createSignal, Match, onMount, Switch } from 'solid-js';
 import { Form, SetForm } from '../../GlobalStores/FormStore';
-import { Dynamic } from 'solid-js/web';
-import Eye from './UI/Eye/Eye';
 import InputPassword from './InputPassword';
+import InputField from './Input';
 
-export const [hidePassword, setHidePassword] = createSignal(true);
-export const [value, setValue] = createSignal('');
 interface InputProps {
   name: string;
   type: 'text' | 'password' | 'email' | 'number' | 'date';
@@ -18,6 +15,12 @@ interface InputProps {
 }
 
 export default function Input(props: InputProps) {
+  // Stato locale per questo componente
+  const [value, setValue] = createSignal('');
+  const [loading, setLoading] = createSignal(false);
+  const [errorMessage, setErrorMessage] = createSignal('');
+  const [touched, setTouched] = createSignal<boolean>(false);
+
   onMount(() => {
     // Se il campo è richiesto, inizializzalo come non valido (false)
     // Se non è richiesto, inizializzalo come valido (true)
@@ -27,11 +30,6 @@ export default function Input(props: InputProps) {
       SetForm(props.name, true);
     }
   });
-
-  // Globals
-  const [loading, setLoading] = createSignal(false);
-  const [errorMessage, setErrorMessage] = createSignal('');
-  const [touched, setTouched] = createSignal<boolean>(false);
 
   // Schema Validation
   function validateInput(e: Event) {
@@ -142,7 +140,6 @@ export default function Input(props: InputProps) {
     }
   }
 
-  ///  UI   ///
   return (
     <div class="input-container">
       {props.label && <label for={props.name}>{props.label}</label>}
@@ -160,14 +157,13 @@ export default function Input(props: InputProps) {
         </Match>
 
         <Match when={props.type === 'text'}>
-          <input
+          <InputField
             name={props.name}
             placeholder={props.placeholder}
             class={props.class}
             style={props.style}
             type="text"
             onInput={validateInput}
-            onChange={validateInput}
           />
         </Match>
 

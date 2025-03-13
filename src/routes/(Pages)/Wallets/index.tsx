@@ -9,12 +9,7 @@ export default function Wallets() {
 
 
 onMount(() => {
-    // Imposta esplicitamente i campi richiesti come non validi all'avvio...main
     SetForm({});
- 
-
-
-
   });
   
   return (<>
@@ -33,6 +28,18 @@ onMount(() => {
         <Input
           name="password"
           type="password"
+          required={true}
+          placeholder="Password"
+        />
+           <Input
+          name="password"
+          type="password"
+          required={true}
+          placeholder="Password"
+        />
+         <Input
+          name="text"
+          type="text"
           required={true}
           placeholder="Password"
         />

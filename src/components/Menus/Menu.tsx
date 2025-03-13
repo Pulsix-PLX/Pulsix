@@ -107,7 +107,7 @@ export default function Menu() {
           setHoveredIcon(null); // Resetta l'icona hoverata quando esci dal menu
         }}
       >
-        <div class="flex flex-col ml-15 gap-40 mt-60">
+        <div class="flex flex-col ml-15 gap-31 mt-60">
           {menuItems.map((item) => (
             <A
               href={item.href}
