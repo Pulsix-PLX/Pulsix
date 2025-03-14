@@ -1,7 +1,7 @@
 // Libraries
-import { A } from "@solidjs/router";
-import { createSignal, Show } from "solid-js";
-import "./Menu.scss";
+import { A, useLocation } from '@solidjs/router';
+import { createSignal, Show } from 'solid-js';
+import './Menu.scss';
 
 export default function Menu() {
   const [extend, setExtend] = createSignal(false);
@@ -9,35 +9,40 @@ export default function Menu() {
 
   const IconsPath = [
     {
-      name: "Home",
+      name: 'Home',
       svg: (
         <svg
           class="Icon"
           stroke-width="0"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
-          style="overflow: visible; color: currentcolor;"
+          style={{
+            overflow: 'visible',
+            color: 'currentcolor',
+            width: '24px',
+            height: '24px'
+          }}
         >
-          <path
-            fill="currentColor"
-            d="M21 20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.489a1 1 0 0 1 .386-.79l8-6.222a1 1 0 0 1 1.228 0l8 6.222a1 1 0 0 1 .386.79v10.51Zm-2-1V9.978l-7-5.445-7 5.445V19h14Z"
-          ></path>
+          <path fill="currentColor" d="M21 20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.489a1 1 0 0 1 .386-.79l8-6.222a1 1 0 0 1 1.228 0l8 6.222a1 1 0 0 1 .386.79v10.51Zm-2-1V9.978l-7-5.445-7 5.445V19h14Z"></path>
         </svg>
       ),
     },
     {
-      name: "Dashboard",
+      name: 'Dashboard',
       svg: (
         <svg
+          class="Icon"
           fill="none"
+          stroke="currentColor"
           stroke-width="2"
           xmlns="http://www.w3.org/2000/svg"
-          class="Icon"
           viewBox="0 0 24 24"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          style="overflow: visible; color: currentcolor;"
+          style={{
+            overflow: 'visible',
+            color: 'currentcolor',
+            width: '24px',
+            height: '24px'
+          }}
         >
           <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
           <path d="M9 12v-4"></path>
@@ -51,15 +56,20 @@ export default function Menu() {
       ),
     },
     {
-      name: "Wallets",
+      name: 'Wallets',
       svg: (
         <svg
           class="Icon"
-          stroke-width="0"
+          stroke-width="1.5"
           xmlns="http://www.w3.org/2000/svg"
           stroke="currentColor"
           viewBox="0 0 24 24"
-          style="overflow: visible; color: currentcolor;"
+          style={{
+            overflow: 'none',
+            color: 'currentcolor',
+            width: '24px',
+            height: '24px'
+          }}
         >
           <path
             stroke-linecap="round"
@@ -73,20 +83,21 @@ export default function Menu() {
   ];
   // Definizione degli elementi del menu
   const menuItems = [
-    { name: "Home", icon: "Home", href: "/", svg: IconsPath[0].svg },
+    { name: 'Home', icon: 'Home', href: '/', svg: IconsPath[0].svg },
     {
-      name: "Dashboard",
-      icon: "Dashboard",
-      href: "/Dashboard",
+      name: 'Dashboard',
+      icon: 'Dashboard',
+      href: '/Dashboard',
       svg: IconsPath[1].svg,
     },
     {
-      name: "Wallets",
-      icon: "Wallet",
-      href: "/Wallets",
+      name: 'Wallets',
+      icon: 'Wallet',
+      href: '/Wallets',
       svg: IconsPath[2].svg,
     },
-   
+
+
   ];
 
   // Funzione per raggruppare le proprietà di hover
@@ -110,7 +121,7 @@ export default function Menu() {
           {menuItems.map((item) => (
             <A
               href={item.href}
-              class={`Icon ${hoveredIcon() === item.name ? "Hover" : ""}`}
+              class={`Icon ${hoveredIcon() === item.name ? 'Hover' : ''}`}
               {...hoverProps(item.name)} // Applica le proprietà di hover
             >
               {item.svg}
@@ -119,12 +130,14 @@ export default function Menu() {
         </div>
 
         <Show when={extend()}>
-          <div class="flex flex-col gap-31 mt-58">
+          <div class="flex flex-col gap-27 mt-60">
             {menuItems.map((item) => (
               <A
                 href={item.href}
-                class={`Text ${hoveredIcon() === item.name ? "Hover" : ""} ${hoveredIcon() !== item.name && hoveredIcon() ? "Blur" : ""}`}
-                {...hoverProps(item.name)} 
+                class={`Text ${hoveredIcon() === item.name ? 'Hover' : ''} ${
+                  hoveredIcon() !== item.name && hoveredIcon() ? 'Blur' : ''
+                }`}
+                {...hoverProps(item.name)}
               >
                 {item.name}
               </A>
@@ -134,4 +147,13 @@ export default function Menu() {
       </div>
     </>
   );
+}
+export const [showMenu, setShowMenu] = createSignal(true);
+export function MenuView(){
+  
+  return(
+    <Show when={showMenu()}>
+      <Menu/>
+    </Show>
+  )
 }

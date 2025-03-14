@@ -6,8 +6,8 @@
   --button-bg-primary: hsl(270, 97%, 72%);    /* Colore primario del gradiente */
 --button-bg-secondary: hsl(0, 0%, 13%);  /* Colore secondario del gradiente */
 --button-bg-base: hsl(263, 36%, 4%);       /* Colore di sfondo base */
---shadow-color: rgba(0, 255, 234, 0.877);     /* Colore dell'ombra */
---shadow-size: 20px;          
+--shadow-color: rgba(0, 255, 234, 0.534);     /* Colore dell'ombra */
+--shadow-size: 40px;          
 }
 
 .sparkle-button {
@@ -46,9 +46,13 @@
     0 0.05em 0 0 hsl(260 calc(var(--active) * 97%) calc((var(--active) * 50%) + 30%)) inset,
     0 -0.05em 0 0 hsl(260 calc(var(--active) * 97%) calc(var(--active) * 60%)) inset;
   transition: box-shadow var(--transition), scale var(--transition), background var(--transition);
-  scale: calc(1 + (var(--active) * 0.1));
-}
 
+}
+ 
+.button:hover{
+  transform: scale(1.1);
+  translate: -50%;
+}
 .button:active {
   scale: 1;
 }
@@ -70,7 +74,7 @@ svg {
 .sparkle:hover path {
   color: var(--shadow-color);
 }
-button:is(:hover, :focus-visible) path {
+.button:is(:hover, :focus-visible) path {
   animation-name: bounce;
 }
 
@@ -230,8 +234,8 @@ button:is(:hover, :focus-visible) path {
 }
 
 /* Hover state activation */
-button:hover,
-button:focus-visible {
+.button:hover,
+.button:focus-visible {
   --active: 1;
 }
 

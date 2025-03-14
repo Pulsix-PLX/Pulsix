@@ -1,12 +1,8 @@
-import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
-import Demo from '~/components/Buttons/AnimatedIconButton/Demo';
 
 function index() {
   return (
-    <>
-      
-    </>
-  );
+    <div>index</div>
+  )
 }
 
-export default index;
+export default index

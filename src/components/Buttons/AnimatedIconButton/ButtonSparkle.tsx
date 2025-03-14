@@ -23,11 +23,18 @@ interface SparkleButtonProps {
   onClick?: () => void;
   class?: string;
   size?: 'small' | 'medium' | 'large' | number; // Add size prop
+  shadow?: number;
 }
 
 const RANDOM = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min);
 
 export default function ButtonSparkle(props: SparkleButtonProps) {
+
+let shadowSize = props.shadow ? `${props.shadow}px` : '40px';
+if (typeof window !== 'undefined') {
+  document.documentElement.style.setProperty('--shadow-size', shadowSize);
+}
+
   const [particles, setParticles] = createStore<ParticleProps[]>([]);
   const [isActive, setIsActive] = createSignal(false);
   const [isMounted, setIsMounted] = createSignal(false); // Add this line
@@ -112,7 +119,7 @@ export default function ButtonSparkle(props: SparkleButtonProps) {
         {props.icon /* || defaultIcon*/}
         <span class="text">{props.text}</span>
       </button>
-      <div class="bodydrop" style={{ '--active': isActive() ? '1' : '0' }}></div>
+  
       {isMounted() && (
         <span
           aria-hidden="true"

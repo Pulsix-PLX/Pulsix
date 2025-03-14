@@ -65,17 +65,22 @@
   width: 200px;
 }
 
-.Icon {
-  width: 35px !important;
-  color: rgb(255, 255, 255) !important;
+.menu-icon {
+  width: 30px !important;
+  height: 30px !important;
+  flex-shrink: 0;
+  transform-origin: center;
+}
 
-  transform-style: preserve-3d;
-  transition: transform 0.5s;
+.Icon {
+  width: 30px !important;
+  height: 30px !important;
+  flex-shrink: 0;
+  transform-origin: center;
 }
 
 .Icon.Hover {
   color: #00ffc8 !important;
-  width: 35px !important;
   transition: all 0.3s ease;
   animation: pulseIcon 1.2s infinite;
   filter: drop-shadow(0 0 5px var(--Secondary));
