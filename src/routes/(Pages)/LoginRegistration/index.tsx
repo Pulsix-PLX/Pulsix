@@ -5,7 +5,7 @@ function index() {
   return (
     <>
     <ButtonProva></ButtonProva>
-    <Home></Home>
+     <Home></Home>
     </>
   )
 }
