@@ -2,7 +2,7 @@
 
 import { createSignal, onMount, For, JSX } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import './Button.css';
+import './ButtonSparkle.css';
 interface ParticleProps {
   x: number;
   y: number;
@@ -14,18 +14,20 @@ interface ParticleProps {
   size: number;
 }
 
+// Update the SparkleButtonProps interface
 interface SparkleButtonProps {
   text: string;
   icon?: JSX.Element;
   particleIcon?: JSX.Element;
   particleCount?: number;
   onClick?: () => void;
-  className?: string;
+  class?: string;
+  size?: 'small' | 'medium' | 'large' | number; // Add size prop
 }
 
 const RANDOM = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min);
 
-export default function SparkleButton(props: SparkleButtonProps) {
+export default function ButtonSparkle(props: SparkleButtonProps) {
   const [particles, setParticles] = createStore<ParticleProps[]>([]);
   const [isActive, setIsActive] = createSignal(false);
   const [isMounted, setIsMounted] = createSignal(false); // Add this line
@@ -68,11 +70,39 @@ export default function SparkleButton(props: SparkleButtonProps) {
   const handleMouseEnter = () => setIsActive(true);
   const handleMouseLeave = () => setIsActive(false);
 
+  // Add function to calculate button size
+  const getButtonStyle = () => {
+    const baseSize = 16; // Base font size in pixels
+    let scale: number;
+    
+    if (typeof props.size === 'number') {
+      scale = props.size;
+    } else {
+      switch (props.size) {
+        case 'small':
+          scale = 0.875;
+          break;
+        case 'large':
+          scale = 1.25;
+          break;
+        case 'medium':
+        default:
+          scale = 1;
+      }
+    }
+
+    return {
+      '--active': isActive() ? '1' : '0',
+      '--button-scale': scale,
+      'font-size': `${baseSize * scale}px`,
+    };
+  };
+
   return (
     <div class="sparkle-button">
       <button
-        class={`${props.className || ''}`}
-        style={{ '--active': isActive() ? '1' : '0' }}
+        class={`button ${props.class || ''}`}
+        style={getButtonStyle()}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={props.onClick}

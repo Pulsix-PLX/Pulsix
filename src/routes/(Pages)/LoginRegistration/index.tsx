@@ -1,13 +1,12 @@
-import ButtonProva from "~/components/Buttons/AnimatedIconButton/ButtonProva"
-import Home from "~/components/Buttons/AnimatedIconButton/Demo"
+import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
+import Demo from '~/components/Buttons/AnimatedIconButton/Demo';
 
 function index() {
   return (
     <>
-    <ButtonProva></ButtonProva>
-     <Home></Home>
+      
     </>
-  )
+  );
 }
 
-export default index
+export default index;
