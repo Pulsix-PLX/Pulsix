@@ -1,7 +1,7 @@
 :root {
   // Steps
-  --step-size: 60px;
-  --step-size-active: 65px;
+  --step-size: 45px;
+  --step-size-active: 50px;
   --base-color-step: hsla(0, 0%, 100%, 0.08);
   --base-color-step-hover: hsla(0, 0%, 100%, 0.12);
   --step-border: 2px solid rgba(0, 209, 164, 0.3);
@@ -37,6 +37,9 @@
   --circle-shadow-color: rgba(0, 209, 164, 0.6);
 }
 
+.Icon{
+  width: 30px;
+}
 .ProgressBar {
   display: flex;
   flex-direction: column;
@@ -101,8 +104,8 @@
 }
 
 .Steps {
+  margin-left: 90px;
   z-index: 2;
-  gap: 100px;
   display: flex;
   flex-direction: row;
   position: relative;
@@ -371,7 +374,7 @@
 }
 
 .ConnectorActive {
-  background: linear-gradient(to bottom, var(--connector-active-color), rgba(0, 209, 164, 0.3));
+  background: linear-gradient(to bottom, var(--connector-active-color), transparent);
   opacity: 1;
   box-shadow: var(--connector-glow);
   height: calc(var(--connector-height) + 5px);

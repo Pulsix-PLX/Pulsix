@@ -60,6 +60,8 @@
 /* Ripple effect for step clicks */
 .ripple {
   position: absolute;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   transform: scale(0);
   animation: ripple-animation 0.8s linear;
@@ -86,5 +88,60 @@
   to {
     height: var(--connector-height);
     opacity: 1;
+  }
+}
+
+/* Lightning pulse animation */
+@keyframes lightning-pulse {
+  0%, 100% {
+    opacity: 0.7;
+    box-shadow: 0 0 10px rgba(0, 209, 164, 0.5);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 30px rgba(0, 209, 164, 0.9);
+  }
+}
+
+/* Tunnel effect animation */
+@keyframes tunnel-animation {
+  0% {
+    transform: translateZ(-500px) scale(0.1);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateZ(500px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Particles animation */
+.particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(0, 209, 164, 0.8);
+  filter: blur(1px);
+  animation: particle-animation 2s ease-out infinite;
+}
+
+@keyframes particle-animation {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x, 50px), var(--y, 50px)) scale(0);
+    opacity: 0;
   }
 }

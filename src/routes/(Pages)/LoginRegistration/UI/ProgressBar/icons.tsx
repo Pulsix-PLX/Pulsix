@@ -1,9 +1,11 @@
+import style from'./index.module.scss'
+
 export const ProgressIcons = [
   {
     name: 'User',
     svg: (
       <svg
-        class="Icon"
+        class={style.Icon}
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         style={{
@@ -24,7 +26,7 @@ export const ProgressIcons = [
     name: 'Email',
     svg: (
       <svg
-        class="Icon"
+        class={style.Icon}
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         style={{
@@ -45,7 +47,7 @@ export const ProgressIcons = [
     name: 'Phone',
     svg: (
       <svg
-        class="Icon"
+        class={style.Icon}
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         style={{

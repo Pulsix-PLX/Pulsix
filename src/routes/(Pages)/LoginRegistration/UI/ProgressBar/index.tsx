@@ -59,8 +59,8 @@ export default function ProgressBar() {
   };
   return (
     <>
-      <div class={`CM mt-200 ${style.ProgressBar}`}>
-        <div class={`CM gap-100 ${style.Steps}`}>
+      <div class={`CM mt-20 ${style.ProgressBar}`}>
+        <div class={`CM gap-150 ${style.Steps}`}>
           <div
             class={`${style.Step}`}
             classList={{ [style.StepDone]: next() >= 1 }}
@@ -140,7 +140,7 @@ export default function ProgressBar() {
             />
           </div>
         </div>
-        <div class={`mt-31 ${style.Line}`} />
+        <div class={`mt-0 ${style.Line}`} />
       </div>
 
       <button onclick={() => setNext(next() + 1)} class="CM mt-500 bg-white text-black w-185 h-100">
