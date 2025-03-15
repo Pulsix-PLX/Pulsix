@@ -221,7 +221,8 @@ export default function InputPassword(props: InputProps) {
           </button>
           <Show when={value().length > 0}>
             <button 
-              class="visible absolute text-white ml-20 text-m -mt-2"
+              class="visible absolute text-white ml-50 text-m mt-15"
+              style={{width:'20px', height:'20px'}}
               onClick={clearInput}
               disabled={clearing()}
             >

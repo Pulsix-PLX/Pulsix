@@ -2,8 +2,6 @@ import { createSignal, Show, onMount } from 'solid-js'
 import { gsap } from 'gsap'
 import './Eye.css'
 
-import { hidePassword,setHidePassword } from '../../Inputs'
-
 export default function Eye() {
   const [clearing, setClearing] = createSignal(false)
   const [eyeClosed, setEyeClosed] = createSignal(false)

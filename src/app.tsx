@@ -5,7 +5,7 @@ import { createSignal, Suspense } from 'solid-js';
 import './app.css';
 import './Style/Layout.scss';
 import './Style/Components.scss';
-import Menu, { MenuView } from './components/Menus/Menu';
+import  { MenuView } from './components/Menus/Menu';
 import CustomCursor from './routes/UI/Cursor';
 
 export default function App() {

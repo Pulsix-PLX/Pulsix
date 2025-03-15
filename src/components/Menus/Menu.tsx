@@ -1,6 +1,6 @@
 // Libraries
 import { A, useLocation } from '@solidjs/router';
-import { createSignal, Show } from 'solid-js';
+import { createSignal, onMount, Show } from 'solid-js';
 import './Menu.scss';
 
 export default function Menu() {
@@ -87,7 +87,7 @@ export default function Menu() {
     {
       name: 'Dashboard',
       icon: 'Dashboard',
-      href: '/Dashboard',
+      href: '/',
       svg: IconsPath[1].svg,
     },
     {
@@ -150,7 +150,7 @@ export default function Menu() {
 }
 export const [showMenu, setShowMenu] = createSignal(true);
 export function MenuView(){
-  
+
   return(
     <Show when={showMenu()}>
       <Menu/>

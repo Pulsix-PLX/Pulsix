@@ -103,6 +103,7 @@ body {
     background-color: var(--cursor-color);
     animation: textCursorPulse 1.5s infinite ease-in-out;
     box-shadow: 0 0 5px rgba(0, 209, 164, 0.5);
+    caret-color: transparent; /* Nasconde il cursore di testo */
   }
 
   &.clicking {
@@ -125,11 +126,11 @@ body {
 }
 
 /* Stile per il cursore quando si passa sopra gli input di testo */
-body.text-input-hover .cursor-outer {
+.cursor-outer.text-input {
   opacity: 0;
 }
 
-body.text-input-hover .cursor-inner {
+.cursor-inner.text-input {
   width: 2px;
   height: 24px;
   border-radius: 1px;

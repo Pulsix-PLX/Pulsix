@@ -1,87 +1,399 @@
 :root {
-  //steps
-  --step-size: 50px;
-  --base-color-step: hsla(0, 0%, 100%, 0.048);
+  // Steps
+  --step-size: 60px;
+  --step-size-active: 65px;
+  --base-color-step: hsla(0, 0%, 100%, 0.08);
+  --base-color-step-hover: hsla(0, 0%, 100%, 0.12);
+  --step-border: 2px solid rgba(0, 209, 164, 0.3);
+  --step-shadow: 0 0 15px rgba(0, 209, 164, 0.2);
+  --step-transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  //line
-  --base-color-line: hsla(0, 0%, 100%, 0.089);
+  // Line
+  --base-color-line: hsla(0, 0%, 100%, 0.12);
+  --line-height: 4px;
+  --line-shadow: 0 0 8px rgba(0, 209, 164, 0.15);
 
-  //UpLine
+  // UpLine
   --width-upline: 10%;
   --base-color-upline: rgb(0, 209, 164);
+  --upline-glow: 0 0 10px rgba(0, 209, 164, 0.6);
+
+  // Text
+  --text-color: rgba(255, 255, 255, 0.9);
+  --text-color-active: rgb(255, 255, 255);
+  --text-shadow: 0 0 5px rgba(0, 209, 164, 0.5);
+
+  // Connectors
+  --connector-width: 3px;
+  --connector-color: rgba(0, 209, 164, 0.4);
+  --connector-active-color: rgba(0, 209, 164, 1);
+  --connector-height: 35px;
+  --connector-transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --connector-glow: 0 0 12px rgba(0, 209, 164, 0.7);
+
+  // Shadows
+  --circle-shadow: 0 0 25px rgba(0, 209, 164, 0.6);
+  --circle-shadow-active: 0 0 35px rgba(0, 209, 164, 0.8);
+  --circle-shadow-color: rgba(0, 209, 164, 0.6);
 }
 
 .ProgressBar {
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .Line {
+  position: relative;
   background-color: var(--base-color-line);
   border-radius: 10px;
   width: 700px;
-  height: 5px;
+  height: var(--line-height);
+  box-shadow: var(--line-shadow);
+  overflow: hidden;
+  z-index: 1;
+  transition: all 0.5s ease;
+
   &::before {
     content: '';
     position: absolute;
-    background-color: var(--base-color-upline);
+    background: linear-gradient(90deg, var(--base-color-upline), rgba(0, 255, 200, 0.8));
     width: var(--width-upline);
-    height: 5px;
+    height: var(--line-height);
     border-radius: 10px;
+    box-shadow: var(--upline-glow);
+    transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    animation: pulse 2s infinite, flow 3s linear infinite;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 2.5s infinite;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 5px rgba(0, 209, 164, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(0, 209, 164, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(0, 209, 164, 0.4);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
   }
 }
 
 .Steps {
-  z-index: 1;
+  z-index: 2;
   gap: 100px;
   display: flex;
   flex-direction: row;
+  position: relative;
+  margin-bottom: 30px;
 }
 
 .Step {
   width: var(--step-size);
   height: var(--step-size);
   background-color: var(--base-color-step);
-  border-radius: 50px;
+  border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  transition: var(--step-transition);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  animation: float 3s ease-in-out infinite;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    background: transparent;
+    border: var(--step-border);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(0, 209, 164, 0.1) 0%, transparent 70%);
+    filter: blur(5px);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+    background-color: var(--base-color-step-hover);
+    box-shadow: 0 0 15px rgba(0, 209, 164, 0.3);
+
+    &::before {
+      opacity: 0.5;
+    }
+
+    &::after {
+      opacity: 0.8;
+    }
+
+    p {
+      color: var(--text-color-active);
+    }
+  }
 
   p {
     z-index: 2;
     font-size: 18px;
     font-weight: bold;
-    color: rgb(0, 0, 0);
+    color: var(--text-color);
     text-align: center;
+    transition: color 0.3s ease;
   }
-
-  
 }
 
 .StepDone {
-  /* Crea un gradiente radiale con le seguenti caratteristiche:
-   * - Il centro del gradiente è posizionato al 50% orizzontalmente e 80% verticalmente
-   * - Inizia con un colore trasparente al 20% dal centro
-   * - Passa al colore della upline (--base-color-upline) al 100%
-   * - Include una tonalità di rosso (hsl(0, 79%, 39%)) al 50%
-   * - Ritorna trasparente al 20% e al bordo esterno
-   * Questo crea un effetto di brillantezza/alone intorno al punto completato
-   */
-  background: radial-gradient(340% 40% at 50% 10%, var(--base-color-upline) 0%, transparent 80%),
-  radial-gradient(180% 75% at 50% 20%, rgb(18, 255, 204) 0%, transparent 92%),
-    //i primi due potenza orizzontale e verticale, i secondi per posizione (x,y)
-    radial-gradient(540% 150% at 50% 110%, #0e0e0e 0%, transparent 100%);
-  animation: move 3s ease-in-out infinite;
+  background: radial-gradient(
+    circle,
+    rgba(0, 209, 164, 0.9) 0%,
+    rgba(0, 209, 164, 0.5) 60%,
+    transparent 80%
+  );
+  border: 2px solid rgba(0, 209, 164, 0.8);
+  box-shadow: var(--circle-shadow-active), 0 0 25px rgba(0, 209, 164, 0.5) inset;
+  transform: translateY(-10px) scale(1.15);
+  animation: float-active 3s ease-in-out infinite;
+  width: var(--step-size-active);
+  height: var(--step-size-active);
+
+  // Shadow effect behind the circle
+  &::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: -12px;
+    right: -12px;
+    bottom: -12px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 209, 164, 0.3);
+    box-shadow: var(--circle-shadow);
+    animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+    z-index: -1;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(0, 209, 164, 0.8) 0%,
+      rgba(0, 209, 164, 0.4) 60%,
+      transparent 80%
+    );
+    opacity: 0.7;
+    animation: pulse-core 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+
+  p {
+    color: var(--text-color-active);
+    text-shadow: var(--text-shadow);
+    animation: pulse-text 2s ease infinite;
+  }
+
+  &:hover {
+    transform: translateY(-12px) scale(1.08);
+  }
+
+  // Particles effect for active steps
+  .particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .particle {
+    position: absolute;
+    width: var(--particle-size);
+    height: var(--particle-size);
+    background-color: var(--particle-color);
+    border-radius: 50%;
+    opacity: 0;
+    animation: particle-animation 2s ease-out infinite;
+  }
 }
 
-@keyframes move {
+@keyframes pulse-ring {
   0% {
-    transform: translateY(-50%);
+    transform: scale(1);
+    opacity: 0.5;
   }
   50% {
-    transform: translateY(-65%);
+    transform: scale(1.1);
+    opacity: 0.3;
   }
   100% {
-    transform: translateY(-50%);
+    transform: scale(1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes pulse-core {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-active {
+  0% {
+    transform: translateY(-10px) scale(1.05);
+  }
+  50% {
+    transform: translateY(-15px) scale(1.05);
+  }
+  100% {
+    transform: translateY(-10px) scale(1.05);
+  }
+}
+
+@keyframes particle-animation {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x, 50px), var(--y, 50px));
+    opacity: 0;
+  }
+}
+
+// Connector styles
+.Connector {
+  position: absolute;
+  width: var(--connector-width);
+  height: var(--connector-height);
+  background: linear-gradient(to bottom, var(--connector-color), transparent);
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: var(--connector-transition);
+  opacity: 0.6;
+  box-shadow: 0 0 8px rgba(0, 209, 164, 0.3);
+  z-index: 1;
+  overflow: hidden;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--connector-color);
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 5px rgba(0, 209, 164, 0.5);
+  }
+
+  &::before {
+    top: -4px;
+    animation: pulse 2s infinite alternate;
+  }
+
+  &::after {
+    bottom: -4px;
+    animation: pulse 2s infinite alternate-reverse;
+  }
+
+  // Energy flow effect
+  &::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 10px;
+    background: rgba(0, 209, 164, 0.3);
+    top: 0;
+    left: 0;
+    animation: energy-flow 2s infinite linear;
+  }
+}
+
+.ConnectorActive {
+  background: linear-gradient(to bottom, var(--connector-active-color), rgba(0, 209, 164, 0.3));
+  opacity: 1;
+  box-shadow: var(--connector-glow);
+  height: calc(var(--connector-height) + 5px);
+
+  &::before,
+  &::after {
+    background-color: var(--connector-active-color);
+    box-shadow: 0 0 8px rgba(0, 209, 164, 0.8);
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@keyframes pulse-text {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(0, 209, 164, 0.8);
+  }
+  100% {
+    opacity: 0.8;
   }
 }

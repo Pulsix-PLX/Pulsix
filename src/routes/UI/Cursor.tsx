@@ -8,6 +8,7 @@ const SpectacularCursor = () => {
   const [isClicking, setIsClicking] = createSignal(false);
   const [velocity, setVelocity] = createSignal({ x: 0, y: 0 });
   const [prevPosition, setPrevPosition] = createSignal({ x: 0, y: 0 });
+  const [isTextInput, setIsTextInput] = createSignal(false);
 
   // Configurazione dell'effetto scia
   const trailLength = 8;
@@ -17,6 +18,11 @@ const SpectacularCursor = () => {
     let lastX = 0;
     let lastY = 0;
     let lastTimestamp = performance.now();
+
+    // Ensure the default cursor is hidden on all elements
+    const style = document.createElement('style');
+    style.textContent = '* { cursor: none !important; }';
+    document.head.appendChild(style);
 
     // Segui la posizione del mouse con effetto di ritardo
     const updatePosition = (e) => {
@@ -46,7 +52,7 @@ const SpectacularCursor = () => {
     // Funzione per rilevare gli elementi interattivi
     const checkHoverable = (e) => {
       const target = e.target;
-      const isTextInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+      const isInputElement = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
 
       const isHoverable =
         target.tagName === 'A' ||
@@ -54,15 +60,11 @@ const SpectacularCursor = () => {
         target.classList.contains('clickable') ||
         target.closest('button') ||
         target.closest('a') ||
-        isTextInput;
+        isInputElement;
 
-      // Aggiungiamo una classe al body per gestire il cursore di testo
-      if (isTextInput) {
-        document.body.classList.add('text-input-hover');
-      } else {
-        document.body.classList.remove('text-input-hover');
-      }
-
+      // Gestiamo lo stato del cursore di testo direttamente nel componente
+      // invece di aggiungere una classe al body
+      setIsTextInput(isInputElement);
       setIsHovering(isHoverable);
     };
 
@@ -70,6 +72,11 @@ const SpectacularCursor = () => {
     const handleMouseDown = (e) => {
       setIsClicking(true);
       createClickRipple(e.clientX, e.clientY);
+
+      // Gestiamo lo stato del cursore di testo direttamente nel componente
+      const target = e.target;
+      const isInputElement = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+      setIsTextInput(isInputElement);
     };
 
     const handleMouseUp = () => {
@@ -99,18 +106,12 @@ const SpectacularCursor = () => {
       const relatedTarget = e.relatedTarget;
 
       // Se stiamo uscendo da un input o textarea
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-        // Rimuovi sempre la classe quando usciamo da un input, indipendentemente da dove andiamo
-        document.body.classList.remove('text-input-hover');
-      }
-    };
-
-    // Funzione aggiuntiva per gestire il click fuori dagli input
-    const handleDocumentClick = (e) => {
-      const target = e.target;
-      // Se clicchiamo su qualcosa che non è un input o textarea, rimuoviamo la classe
-      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-        document.body.classList.remove('text-input-hover');
+      if (
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') &&
+        (!relatedTarget ||
+          (relatedTarget.tagName !== 'INPUT' && relatedTarget.tagName !== 'TEXTAREA'))
+      ) {
+        setIsTextInput(false);
       }
     };
 
@@ -120,7 +121,6 @@ const SpectacularCursor = () => {
     document.addEventListener('mouseout', handleMouseOut);
     document.addEventListener('mousedown', handleMouseDown);
     document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('click', handleDocumentClick);
 
     // Nascondi il cursore predefinito
     document.body.style.cursor = 'none';
@@ -132,7 +132,6 @@ const SpectacularCursor = () => {
       document.removeEventListener('mouseout', handleMouseOut);
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('click', handleDocumentClick);
       clearInterval(trailTimer);
     });
   });
@@ -163,6 +162,7 @@ const SpectacularCursor = () => {
         classList={{
           hovering: isHovering(),
           clicking: isClicking(),
+          'text-input': isTextInput(),
         }}
       />
 
@@ -176,6 +176,7 @@ const SpectacularCursor = () => {
         classList={{
           hovering: isHovering(),
           clicking: isClicking(),
+          'text-input': isTextInput(),
         }}
       />
 

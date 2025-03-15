@@ -11,7 +11,9 @@ function index() {
   });
   return (
     <>
-    <ProgressBar />
+    <div class="CM">
+     <ProgressBar />
+    </div>
     </>
   )
 }

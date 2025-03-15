@@ -65,7 +65,8 @@ export default function InputField(props: InputProps) {
         <div class="form-group__actions">
           <Show when={value().length > 0}>
             <button
-              class="visible absolute text-white ml-20 text-m -mt-2"
+              class="visible absolute text-white -ml-17 text-m mt-15"
+              style={{width:'20px', height:'20px'}}
               onClick={clearInput}
               disabled={clearing()}
             >
