@@ -1,0 +1,87 @@
+:root {
+  //steps
+  --step-size: 50px;
+  --base-color-step: hsla(0, 0%, 100%, 0.048);
+
+  //line
+  --base-color-line: hsla(0, 0%, 100%, 0.089);
+
+  //UpLine
+  --width-upline: 10%;
+  --base-color-upline: rgb(0, 209, 164);
+}
+
+.ProgressBar {
+  display: flex;
+  flex-direction: column;
+}
+
+.Line {
+  background-color: var(--base-color-line);
+  border-radius: 10px;
+  width: 700px;
+  height: 5px;
+  &::before {
+    content: '';
+    position: absolute;
+    background-color: var(--base-color-upline);
+    width: var(--width-upline);
+    height: 5px;
+    border-radius: 10px;
+  }
+}
+
+.Steps {
+  z-index: 1;
+  gap: 100px;
+  display: flex;
+  flex-direction: row;
+}
+
+.Step {
+  width: var(--step-size);
+  height: var(--step-size);
+  background-color: var(--base-color-step);
+  border-radius: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  p {
+    z-index: 2;
+    font-size: 18px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+    text-align: center;
+  }
+
+  
+}
+
+.StepDone {
+  /* Crea un gradiente radiale con le seguenti caratteristiche:
+   * - Il centro del gradiente è posizionato al 50% orizzontalmente e 80% verticalmente
+   * - Inizia con un colore trasparente al 20% dal centro
+   * - Passa al colore della upline (--base-color-upline) al 100%
+   * - Include una tonalità di rosso (hsl(0, 79%, 39%)) al 50%
+   * - Ritorna trasparente al 20% e al bordo esterno
+   * Questo crea un effetto di brillantezza/alone intorno al punto completato
+   */
+  background: radial-gradient(340% 40% at 50% 10%, var(--base-color-upline) 0%, transparent 80%),
+  radial-gradient(180% 75% at 50% 20%, rgb(18, 255, 204) 0%, transparent 92%),
+    //i primi due potenza orizzontale e verticale, i secondi per posizione (x,y)
+    radial-gradient(540% 150% at 50% 110%, #0e0e0e 0%, transparent 100%);
+  animation: move 3s ease-in-out infinite;
+}
+
+@keyframes move {
+  0% {
+    transform: translateY(-50%);
+  }
+  50% {
+    transform: translateY(-65%);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}

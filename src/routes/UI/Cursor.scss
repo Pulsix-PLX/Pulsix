@@ -1,0 +1,144 @@
+:root {
+  --cursor-color: var(--base-color-upline, rgb(0, 209, 164));
+  --cursor-size: 20px;
+  --cursor-inner-size: 5px;
+}
+
+@keyframes pulseClick {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes textCursorPulse {
+  0% {
+    opacity: 0.7;
+    height: 24px;
+  }
+  50% {
+    opacity: 1;
+    height: 28px;
+  }
+  100% {
+    opacity: 0.7;
+    height: 24px;
+  }
+}
+
+body {
+  cursor: none !important;
+  * {
+    cursor: none !important;
+  }
+}
+
+.cursor-outer {
+  position: fixed;
+  width: var(--cursor-size);
+  height: var(--cursor-size);
+  border: 2px solid var(--cursor-color);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s ease-out;
+
+  &.hovering {
+    width: calc(var(--cursor-size) * 1.2);
+    height: calc(var(--cursor-size) * 1.2);
+    border-color: var(--cursor-color);
+  }
+
+  &.clicking {
+    opacity: 0;
+  }
+}
+
+.cursor-inner {
+  position: fixed;
+  width: var(--cursor-inner-size);
+  height: var(--cursor-inner-size);
+  background-color: var(--cursor-color);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+
+  &.hovering {
+    width: var(--cursor-inner-size);
+    height: var(--cursor-inner-size);
+  }
+
+  &.clicking {
+    width: var(--cursor-inner-size);
+    height: var(--cursor-inner-size);
+  }
+}
+
+.cursor-inner {
+  position: fixed;
+  width: var(--cursor-inner-size);
+  height: var(--cursor-inner-size);
+  background-color: var(--cursor-color);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  /* Removing transition to prevent lag */
+
+  &.hovering {
+    opacity: 0;
+  }
+
+  input:hover ~ &,
+  textarea:hover ~ & {
+    width: 2px;
+    height: 24px;
+    border-radius: 1px;
+    background-color: var(--cursor-color);
+    animation: textCursorPulse 1.5s infinite ease-in-out;
+    box-shadow: 0 0 5px rgba(0, 209, 164, 0.5);
+  }
+
+  &.clicking {
+    opacity: 1;
+    width: calc(var(--cursor-inner-size) * 3);
+    height: calc(var(--cursor-inner-size) * 3);
+    background-color: var(--cursor-color);
+    box-shadow: 0 0 10px var(--cursor-color);
+  }
+}
+
+@keyframes cursorBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Stile per il cursore quando si passa sopra gli input di testo */
+body.text-input-hover .cursor-outer {
+  opacity: 0;
+}
+
+body.text-input-hover .cursor-inner {
+  width: 2px;
+  height: 24px;
+  border-radius: 1px;
+  background-color: var(--cursor-color);
+  animation: textCursorPulse 1.5s infinite ease-in-out;
+  box-shadow: 0 0 5px rgba(0, 209, 164, 0.5);
+}
+
+/* Rimuoviamo l'effetto ripple al click come richiesto */
+.cursor-click-ripple {
+  display: none;
+}

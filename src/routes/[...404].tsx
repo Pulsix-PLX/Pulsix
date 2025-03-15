@@ -2,6 +2,7 @@ import { onCleanup, onMount } from 'solid-js';
 import { setShowMenu } from '../components/Menus/Menu';
 import './404.scss';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
+import { A } from '@solidjs/router';
 export default function NotFound() {
   // Nasconde il menu quando la pagina 404 viene caricata
   onMount(() => {
@@ -20,9 +21,7 @@ export default function NotFound() {
           <div class="cloak"></div>
         </div>
       </div>
-
-       <ButtonSparkle text='Go to Home' size={1.5}  class='CM mt-220 mb-250' shadow={50}/>
-
+       <ButtonSparkle text='Go to Home' size={1.5}  class='CM mt-220 mb-250' shadow={50} onClick={()=>window.location.href='/'}/>
     </>
   );
 }
