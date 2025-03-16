@@ -1,0 +1,41 @@
+:root{
+  --primary:rgb(0, 255, 200);
+}
+
+.container{
+  width: 600px;
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+ //border: solid red 2px;
+}
+
+.line {
+  width: 400px;
+  height: 5px;
+  background-color: var(--primary);
+}
+
+.container::before {
+  content: "";
+  position: absolute;
+ margin-left: 16.85%;
+  top: -30%;
+  left: 0;
+  width: 400px;
+  height: 120%; /* Altezza dell'effetto luminoso */
+  background:
+  linear-gradient(to bottom, var(--primary), transparent 100%);
+  ;
+ // filter: blur(2px); /* Aggiunge sfocatura per l'effetto luminoso */
+}
+
+
+
+.bulb{
+background: radial-gradient(ellipse at center, var(--primary), transparent 100%);
+margin-left: 220px;
+width: 150px;
+height: 50px;
+
+}

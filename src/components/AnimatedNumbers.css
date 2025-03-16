@@ -3,7 +3,7 @@
   font-family: "Geist Sans";
   src: url("https://assets.codepen.io/605876/GeistVF.ttf") format("truetype");
 }
-
+/*
 *,
 *:after,
 *:before {
@@ -238,7 +238,7 @@ fieldset {
   transform: translate3d(0, 0, 100vmin);
 }
 
-/* Transitions */
+/* Transitions *//*
 [data-explode] #app {
   transform: rotateX(-24deg) rotateY(-40deg);
 }
@@ -320,3 +320,4 @@ fieldset {
   transition: color 0.5s 2s;
   color: hsl(0 0% 100% / 0.25);
 }
+*/

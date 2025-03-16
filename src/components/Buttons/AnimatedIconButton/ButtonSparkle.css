@@ -1,12 +1,13 @@
+
 :root {
   --transition: 0.25s;
   --spark: 1.8s;
   --primary-color: hsl(260, 97%, 70%);
   --secondary-color: hsl(270, 97%, 72%);
-  --button-bg-primary: hsl(270, 97%, 72%);    /* Colore primario del gradiente */
---button-bg-secondary: hsl(0, 0%, 13%);  /* Colore secondario del gradiente */
---button-bg-base: hsl(263, 36%, 4%);       /* Colore di sfondo base */
---shadow-color: rgba(0, 255, 234, 0.534);     /* Colore dell'ombra */
+  --button-bg-primary: hsl(270, 97%, 72%);   
+--button-bg-secondary: hsl(0, 0%, 13%);  
+--button-bg-base: hsl(263, 36%, 4%);       
+--shadow-color: rgba(0, 255, 234, 0.534);     
 --shadow-size: 40px;          
 }
 
