@@ -24,6 +24,7 @@ interface SparkleButtonProps {
   class?: string;
   size?: 'small' | 'medium' | 'large' | number; // Add size prop
   shadow?: number;
+  shadowColor?:any
 }
 
 const RANDOM = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min);
@@ -31,9 +32,7 @@ const RANDOM = (min: number, max: number) => Math.floor(Math.random() * (max - m
 export default function ButtonSparkle(props: SparkleButtonProps) {
 
 let shadowSize = props.shadow ? `${props.shadow}px` : '40px';
-if (typeof window !== 'undefined') {
-  document.documentElement.style.setProperty('--shadow-size', shadowSize);
-}
+let shadowColorNew= props.shadowColor ? props.shadowColor : 'rgba(0, 255, 234, 0.534)';
 
   const [particles, setParticles] = createStore<ParticleProps[]>([]);
   const [isActive, setIsActive] = createSignal(false);

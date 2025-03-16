@@ -1,20 +1,28 @@
-.toggle{
+.toggle {
+  position: absolute;
   width: 280px;
   height: 60px;
   border-radius: 50px;
-  border-top: solid hsl(0, 0%, 13%) 2px;
-  background-color: hsl(0, 0%, 3%);
-&:before{
+  border: solid hsl(0, 0%, 13%) 2px;
+}
+
+.toggle::before {
   content: '';
   position: absolute;
-  background: radial-gradient();
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: hsl(0, 0%, 3%);
+  border-radius: 50px;
+  -webkit-mask: radial-gradient(ellipse 36px 22px at 140px 30px, transparent 98%, black 100%);
+  mask: radial-gradient(ellipse 38px 23px at 136px 28px, transparent 98%, black 100%);
 }
+.text{
+  color: hsla(0, 0%, 89%, 0.432);
 }
 
-.login{
-  color: white;
-}
-
-.registration{
-  color: white;
+.activeText{
+  color: hsl(0, 0%, 90%);
+  transform: scale(1.1);
 }

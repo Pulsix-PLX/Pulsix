@@ -8,7 +8,7 @@
 --button-bg-secondary: hsl(0, 0%, 13%);  
 --button-bg-base: hsl(263, 36%, 4%);       
 --shadow-color: rgba(0, 255, 234, 0.534);     
---shadow-size: 40px;          
+--shadow-size: 10px;          
 }
 
 .sparkle-button {

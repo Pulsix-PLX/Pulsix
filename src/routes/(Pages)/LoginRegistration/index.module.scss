@@ -1,0 +1,9 @@
+@keyframes hiddenButton {
+  100% {
+    opacity: 0%;
+  }
+}
+
+.hidden {
+  animation: hiddenButton 1s forwards;
+}
