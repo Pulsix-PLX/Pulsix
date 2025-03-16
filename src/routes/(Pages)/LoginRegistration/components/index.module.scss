@@ -1,0 +1,20 @@
+.toggle{
+  width: 280px;
+  height: 60px;
+  border-radius: 50px;
+  border-top: solid hsl(0, 0%, 13%) 2px;
+  background-color: hsl(0, 0%, 3%);
+&:before{
+  content: '';
+  position: absolute;
+  background: radial-gradient();
+}
+}
+
+.login{
+  color: white;
+}
+
+.registration{
+  color: white;
+}
