@@ -24,16 +24,14 @@ interface SparkleButtonProps {
   class?: string;
   size?: 'small' | 'medium' | 'large' | number; // Add size prop
   shadow?: number;
-  shadowColor?:any
+  shadowColor?: any;
+  disabled?:any;
 }
 
 const RANDOM = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min);
 
 export default function ButtonSparkle(props: SparkleButtonProps) {
-
-let shadowSize = props.shadow ? `${props.shadow}px` : '40px';
-let shadowColorNew= props.shadowColor ? props.shadowColor : 'rgba(0, 255, 234, 0.534)';
-
+  
   const [particles, setParticles] = createStore<ParticleProps[]>([]);
   const [isActive, setIsActive] = createSignal(false);
   const [isMounted, setIsMounted] = createSignal(false); // Add this line
@@ -58,6 +56,7 @@ let shadowColorNew= props.shadowColor ? props.shadowColor : 'rgba(0, 255, 234, 0
     // Set mounted flag first
     setIsMounted(true);
     // Generate random particle properties
+    /*
     const count = props.particleCount || 20;
     const newParticles = Array.from({ length: count }, () => ({
       x: RANDOM(20, 80),
@@ -68,18 +67,28 @@ let shadowColorNew= props.shadowColor ? props.shadowColor : 'rgba(0, 255, 234, 0
       originX: Math.random() > 0.5 ? RANDOM(300, 800) * -1 : RANDOM(300, 800),
       originY: Math.random() > 0.5 ? RANDOM(300, 800) * -1 : RANDOM(300, 800),
       size: RANDOM(40, 90) / 100,
-    }));
+    
+    })
+      );
 
-    setParticles(newParticles);
+    setParticles(newParticles);*/
   });
 
   const handleMouseEnter = () => setIsActive(true);
   const handleMouseLeave = () => setIsActive(false);
 
   // Add function to calculate button size
+  
   const getButtonStyle = () => {
     const baseSize = 16; // Base font size in pixels
     let scale: number;
+    let secondaryColor;
+    if (typeof window !== 'undefined') {
+      document.documentElement.style.setProperty('--shadow-color-custom', `${props.shadowColor}`);
+      secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--Secondary');
+    }
+    
+    props.shadowColor;
     
     if (typeof props.size === 'number') {
       scale = props.size;
@@ -96,29 +105,33 @@ let shadowColorNew= props.shadowColor ? props.shadowColor : 'rgba(0, 255, 234, 0
           scale = 1;
       }
     }
-
+    const shadowSize = props.shadow ? `${props.shadow}px` : '20px';
     return {
       '--active': isActive() ? '1' : '0',
       '--button-scale': scale,
       'font-size': `${baseSize * scale}px`,
+
+      'box-shadow': `0 0 calc(var(--active) * ${shadowSize}) calc(var(--active) * var(--shadow-size) / 2) ${
+        props.shadowColor || secondaryColor
+      },0 0.05em 0 0 hsl(260 calc(var(--active) * 97%) calc((var(--active) * 50%) + 30%)) inset,0 -0.05em 0 0 hsl(260 calc(var(--active) * 97%) calc(var(--active) * 60%)) inset`,
     };
   };
-
   return (
     <div class="sparkle-button">
       <button
-        class={`button ${props.class || ''}`}
-        style={getButtonStyle()}
+        class={`button ${props.class || ''} ${isActive() && props.shadowColor ? 'hover' : ''}`}
+        style={ getButtonStyle()}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={props.onClick}
+        disabled={props.disabled}
       >
         <span class="spark"></span>
         <span class="backdrop"></span>
         {props.icon /* || defaultIcon*/}
         <span class="text">{props.text}</span>
       </button>
-  
+
       {isMounted() && (
         <span
           aria-hidden="true"

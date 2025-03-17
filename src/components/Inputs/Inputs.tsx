@@ -1,11 +1,12 @@
-import { createSignal, Match, onMount, Switch } from 'solid-js';
-import { Form, SetForm } from '../../GlobalStores/FormStore';
+import { createSignal, Match, onMount, Switch, createEffect } from 'solid-js';
+import { Form, SetForm, FormValues, SetFormValues } from '../../GlobalStores/FormStore';
 import InputPassword from './InputPassword';
 import InputField from './Input';
+import { usernameAlreadyexist } from '~/routes/API/Auth/usernameAlreadyexist';
 
 interface InputProps {
   name: string;
-  type: 'text' | 'password' | 'email' | 'number' | 'date';
+  type: 'text' | 'password' | 'email' | 'number' | 'date' | 'passwordConfirm' | 'username';
   placeholder?: string;
   required?: boolean;
   label?: string;
@@ -31,6 +32,18 @@ export default function Input(props: InputProps) {
     }
   });
 
+  // Rivalidare passwordConfirm quando password cambia
+  createEffect(() => {
+    if (props.type === 'password' && FormValues.passwordConfirm) {
+      // Rivalidare passwordConfirm quando password cambia
+      const confirmInput = document.querySelector('[name="passwordConfirm"]') as HTMLInputElement;
+      if (confirmInput && confirmInput.value) {
+        const event = new Event('input', { bubbles: true });
+        confirmInput.dispatchEvent(event);
+      }
+    }
+  });
+
   // Schema Validation
   function validateInput(e: Event) {
     // Imposta touched a true quando l'utente interagisce con l'input
@@ -41,6 +54,9 @@ export default function Input(props: InputProps) {
 
     // Aggiorna il valore locale
     setValue(inputValue);
+
+    // Salva il valore dell'input nello store
+    SetFormValues(props.name, inputValue);
 
     console.log(props.name, value());
 
@@ -61,7 +77,7 @@ export default function Input(props: InputProps) {
     defaultValidationSchema(inputValue);
   }
 
-  function defaultValidationSchema(inputValue: string) {
+  async function defaultValidationSchema(inputValue: string) {
     if (!inputValue && props.required) {
       SetForm(props.name, false);
       setErrorMessage('Provide something');
@@ -105,6 +121,45 @@ export default function Input(props: InputProps) {
         setErrorMessage('');
         break;
 
+      case 'passwordConfirm':
+        // Confronta con il valore della password
+        if (inputValue !== FormValues.password) {
+          SetForm(props.name, false);
+          setErrorMessage('Le password non corrispondono');
+          return;
+        }
+        // At least 8 characters
+        if (inputValue.length < 8) {
+          SetForm(props.name, false);
+          setErrorMessage('At least 8 characters');
+          return;
+        }
+        // At least one uppercase letter
+        if (!/[A-Z]/.test(inputValue)) {
+          SetForm(props.name, false);
+          setErrorMessage('At least one uppercase letter');
+          return;
+        }
+        // At least one number
+        if (!/[0-9]/.test(inputValue)) {
+          SetForm(props.name, false);
+          setErrorMessage('At least one number');
+          return;
+        }
+        SetForm(props.name, true);
+        setErrorMessage('');
+        break;
+/*
+      case 'username':
+        const response = await usernameAlreadyexist(inputValue);
+        if (response === 'already exist') {
+          SetForm(props.name, false);
+          setErrorMessage('Username already exist');
+        } else {
+          SetForm(props.name, true);
+        }
+        break;
+*/
       case 'email':
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(inputValue)) {
@@ -152,6 +207,28 @@ export default function Input(props: InputProps) {
             class={props.class}
             style={props.style}
             type="password"
+            onInput={validateInput}
+          />
+        </Match>
+
+        <Match when={props.type === 'passwordConfirm'}>
+          <InputPassword
+            name={props.name}
+            placeholder={props.placeholder}
+            class={props.class}
+            style={props.style}
+            type="password"
+            onInput={validateInput}
+          />
+        </Match>
+
+        <Match when={props.type === 'username'}>
+          <InputField
+            name={props.name}
+            placeholder={props.placeholder}
+            class={props.class}
+            style={props.style}
+            type="text"
             onInput={validateInput}
           />
         </Match>
@@ -205,7 +282,11 @@ export default function Input(props: InputProps) {
       </Switch>
 
       {/* Mostra il messaggio di errore solo se il campo è stato toccato.*/}
-      {touched() && errorMessage() && <div class="error-message">{errorMessage()}</div>}
+      {touched() && errorMessage() && (
+        <div class="error-message" style={{ color: 'var(--Secondary)' }}>
+          {errorMessage()}
+        </div>
+      )}
     </div>
   );
 }

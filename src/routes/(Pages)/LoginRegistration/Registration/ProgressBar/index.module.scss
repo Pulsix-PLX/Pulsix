@@ -27,7 +27,7 @@
   --connector-width: 3px;
   --connector-color: rgba(0, 209, 164, 0.4);
   --connector-active-color: rgba(0, 209, 164, 1);
-  --connector-height: 35px;
+  --connector-height: 25px;
   --connector-transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   --connector-glow: 0 0 12px rgba(0, 209, 164, 0.7);
 
@@ -47,10 +47,11 @@
 }
 
 .Line {
+  margin-top: 75px;
   position: relative;
   background-color: var(--base-color-line);
   border-radius: 10px;
-  width: 700px;
+  width: 500px;
   height: var(--line-height);
   box-shadow: var(--line-shadow);
   overflow: hidden;
@@ -104,12 +105,9 @@
 }
 
 .Steps {
-  margin-left: 90px;
   z-index: 2;
   display: flex;
   flex-direction: row;
-  position: relative;
-  margin-bottom: 30px;
 }
 
 .Step {
@@ -328,7 +326,7 @@
   width: var(--connector-width);
   height: var(--connector-height);
   background: linear-gradient(to bottom, var(--connector-color), transparent);
-  bottom: -35px;
+  bottom: -25px;
   left: 50%;
   transform: translateX(-50%);
   transition: var(--connector-transition);

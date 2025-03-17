@@ -6,6 +6,7 @@ import Toggle from './components/Toggle';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
 
 import { value } from './riv';
+import { A, Navigate, useNavigate } from '@solidjs/router';
 function index() {
   onMount(() => {
     setShowMenu(false);
@@ -13,6 +14,7 @@ function index() {
   onCleanup(() => {
     setShowMenu(true);
   });
+  const navigate = useNavigate();
   return (
     <>
       <div class="-mt-[22.5%] ml-[4.5%] absolute">
@@ -23,14 +25,38 @@ function index() {
           onLoad={() => console.log('Animation loaded!')}
         />
       </div>
+      <p class="text-7xl bg-black CM -mt-30 -ml-10 pl-60 pr-60 pt-30">Pulsix now for</p>
       <div class="CM mt-249 -ml-32">
         <Toggle />
       </div>
-      <div class="CM mt-[34%] -ml-[15%] ">
-          <ButtonSparkle text="Access" shadow={10} shadowColor='rgba(150, 205, 234, 0.534)' class={`${!value() ? style.hidden : ''}`}/>
+      {/* Login */}
+      <div class={`CM flex flex-col mt-[21.5%] -ml-[15.5%] ${!value() ? style.hidden : ''}`}>
+        <p class={`${style.titles}`}>Welcome back</p>
+        <p class={`  ${style.paragraf}`}>Update your financial goals </p>
+        <p class={`-mt-16 ${style.paragraf}`}> Continue tracking your progress</p>
+        <div class="mt-[15%] ml-[23%]">
+          <ButtonSparkle
+            text="Go to dashboard"
+            
+            shadow={40}
+            
+            onClick={() => navigate('/LoginRegistration/Login')}
+          />
+        </div>
       </div>
-      <div class="CM mt-[34%] ml-[15%] ">
-          <ButtonSparkle text="Access" shadow={10} shadowColor='rgba(150, 205, 234, 0.534)' class={`${value() ? style.hidden : ''}`}/>
+      {/* Registration */}
+      <div class={`CM flex flex-col mt-[21.5%] ml-[16.5%] ${value() ? style.hidden : ''}`}>
+        <p class={`${style.titles}`}>Be one of us</p>
+        <p class={`  ${style.paragraf}`}>Smart tracking</p>
+        <p class={`-mt-16 ${style.paragraf}`}> Smarter decisions</p>
+        <div class="mt-[15%] ml-[23%]">
+          <ButtonSparkle
+            text="Join Now"
+            shadow={40}
+            shadowColor="rgba(255, 27, 77, 1)"
+            onClick={() => navigate('/LoginRegistration/Registration')}
+          />
+        </div>
       </div>
     </>
   );

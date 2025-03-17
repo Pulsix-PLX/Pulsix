@@ -2,12 +2,12 @@
 :root {
   --transition: 0.25s;
   --spark: 1.8s;
-  --primary-color: hsl(260, 97%, 70%);
-  --secondary-color: hsl(270, 97%, 72%);
-  --button-bg-primary: hsl(270, 97%, 72%);   
+  --primary-color: hsl(177, 100%, 46%);
+  --secondary-color: hsl(170, 100%, 48%);
+  --button-bg-primary: hsl(167, 100%, 49%);   
 --button-bg-secondary: hsl(0, 0%, 13%);  
---button-bg-base: hsl(263, 36%, 4%);       
---shadow-color: rgba(0, 255, 234, 0.534);     
+--button-bg-base: hsl(171, 33%, 4%);       
+--shadow-color: rgba(0, 224, 205, 0.534);     
 --shadow-size: 10px;          
 }
 
@@ -107,12 +107,18 @@ svg {
   position: absolute;
   inset: -0.25em;
   z-index: -1;
-  border: 0.25em solid var(--shadow-color);
+  border: 0.20em solid var(--Secondary);
   border-radius: 100px;
   opacity: var(--active, 0);
   transition: opacity var(--transition);
 }
 
+.hover{
+  border: 0.20em solid var(--shadow-color-custom);
+}
+.hover:before{
+  border: 0.20em solid var(--shadow-color-custom);
+}
 .spark {
   position: absolute;
   inset: 0;
@@ -234,6 +240,7 @@ svg {
 }
 
 /* Hover state activation */
+
 .button:hover,
 .button:focus-visible {
   --active: 1;

@@ -42,7 +42,6 @@
     border: none;
     color: var(--grey-dark);
     font-weight: 500;
-    font-family: inherit;
     font-size: 13px;
     letter-spacing: .025em;
     line-height: 22px;
@@ -84,7 +83,6 @@
   
   /* Fix for password text placement */
   .input.password .password-text {
-    font-family: monospace;
     color: var(--grey-dark);
     font-size: 14px;
     position: absolute;
@@ -253,7 +251,7 @@
   
   /* Error message */
   .error-message {
-    color: var(--red);
+    color: var(--Secondary);
     font-size: 12px;
     margin-top: 4px;
   }

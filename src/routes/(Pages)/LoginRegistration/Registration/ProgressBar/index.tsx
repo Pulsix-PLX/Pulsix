@@ -2,9 +2,9 @@ import { createEffect, createMemo, createSignal } from 'solid-js';
 import './animations.css';
 import { ProgressIcons } from './icons';
 import style from './index.module.scss';
-
+export const [next, setNext] = createSignal<number>(0);
 export default function ProgressBar() {
-  const [next, setNext] = createSignal<number>(0);
+
   const [hoveredStep, setHoveredStep] = createSignal<number | null>(null);
   const steps: number = 3;
   const stepsArray = Array.from({ length: steps }, (_, i) => i + 1);

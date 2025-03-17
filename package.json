@@ -12,6 +12,14 @@
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.0",
     "@solidjs/start": "^1.1.0",
+    "@suid/css": "^0.4.0",
+    "@suid/icons-material": "^0.8.1",
+    "@suid/material": "^0.18.0",
+    "@suid/styled-engine": "^0.8.1",
+    "@suid/system": "^0.13.0",
+    "@suid/types": "^0.7.1",
+    "@suid/vite-plugin": "^0.3.1",
+    "axios": "^1.8.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dat.gui": "^0.7.9",
@@ -19,6 +27,7 @@
     "lucide-react": "^0.477.0",
     "lucide-solid": "^0.477.0",
     "motion": "^12.4.7",
+    "pg": "^8.14.1",
     "react-element-to-jsx-string": "^17.0.0",
     "simplex-noise": "^4.0.3",
     "solid-app-router": "^0.4.2",
@@ -26,14 +35,18 @@
     "solid-motionone": "^1.0.3",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.8.2",
     "vinxi": "^0.5.3",
-    "vite-plugin-node-polyfills": "^0.23.0"
+    "vite": "^6.2.2",
+    "vite-plugin-node-polyfills": "^0.23.0",
+    "vite-plugin-solid": "^2.11.6"
   },
   "engines": {
     "node": ">=22"
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.13",
+    "@types/pg": "^8.11.11",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
     "sass-embedded": "^1.85.1",
