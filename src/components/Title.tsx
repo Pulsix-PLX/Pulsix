@@ -322,11 +322,10 @@ if (secondaryColor.startsWith('rgb(') && !secondaryColor.includes('rgba')) {
   
   return (
     <div 
-    class="ContainerMiddle"
+    class={`CM ${props.class}`}
       style={{
         display: "flex",
         overflow: "hidden",
-        "margin-top": "-3.2%",
         
       }}
     >

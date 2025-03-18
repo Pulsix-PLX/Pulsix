@@ -149,17 +149,34 @@ export default function Input(props: InputProps) {
         SetForm(props.name, true);
         setErrorMessage('');
         break;
+        // Problem
 /*
-      case 'username':
-        const response = await usernameAlreadyexist(inputValue);
-        if (response === 'already exist') {
-          SetForm(props.name, false);
-          setErrorMessage('Username already exist');
-        } else {
-          SetForm(props.name, true);
-        }
-        break;
-*/
+        case 'username':
+          try {
+            console.log('Validating username:', inputValue);
+            setLoading(true);
+            const response = await usernameAlreadyexist(inputValue);
+            console.log('Username check response:', response);
+            setLoading(false);
+            
+            if (response === 'already exist') {
+              SetForm(props.name, false);
+              setErrorMessage('Username already exist');
+            } else if (response && response.startsWith('error:')) {
+              SetForm(props.name, false);
+              setErrorMessage('Error checking username');
+              console.error(response);
+            } else {
+              SetForm(props.name, true);
+              setErrorMessage('');
+            }
+          } catch (error) {
+            console.error('Error in username validation:', error);
+            setLoading(false);
+            SetForm(props.name, false);
+            setErrorMessage('Error checking username');
+          }
+          break;*/
       case 'email':
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(inputValue)) {

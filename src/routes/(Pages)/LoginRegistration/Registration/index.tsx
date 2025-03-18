@@ -17,7 +17,7 @@ function index() {
       <Fade in={true} fadeIn={4000} fadeOut={300} class={'CM'}> 
           <ProgressBar></ProgressBar>
       </Fade>
-      <Fade in={next()==0} fadeIn={2000} fadeOut={300} class={'CM mt-200'}> 
+      <Fade in={next()==0} fadeIn={2000} fadeOut={300} class={'CM mt-160'}> 
           <Credentials/>
       </Fade>
     </>
