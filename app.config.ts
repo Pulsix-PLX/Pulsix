@@ -3,7 +3,11 @@ import { defineConfig } from "@solidjs/start/config";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 export default defineConfig({
-  // Invece di utilizzare direttamente plugins
+  server: {
+    prerender: {
+      routes: ["/", "/LoginRegistration"]
+    }
+  },
   vite: {
     plugins: [nodePolyfills()],
     worker: {

@@ -1,0 +1,15 @@
+// src/routes/api/users.ts
+import { db } from '~/Server/db.server';
+
+export async function GET() {
+  try {
+    const result = await db.query('SELECT * FROM users');
+    return result.rows
+  } catch (error) {
+    console.error('Database error:', error);
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
