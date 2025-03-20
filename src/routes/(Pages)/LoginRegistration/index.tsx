@@ -26,7 +26,7 @@ function index() {
         />
       </div>
       <p class="text-7xl bg-black CM -mt-30 -ml-10 pl-60 pr-60 pt-30">Pulsix now for</p>
-      <div class="CM mt-249 -ml-32">
+      <div class="CM mt-[13.1%] -ml-[6%]">
         <Toggle />
       </div>
       {/* Login */}

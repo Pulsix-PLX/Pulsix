@@ -53,8 +53,8 @@ export default function RiveCanvas(props: any) {
     <canvas
       ref={setCanvas}
       onClick={handleClick}
-      width={props.width || 7800}
-      height={props.height || 7800}
+      width={props.width || 2000}
+      height={props.height || 2000}
       style={{ width: '96%', height: '96%', ...props.style }}
     />
   );

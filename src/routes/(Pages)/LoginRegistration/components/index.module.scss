@@ -1,7 +1,7 @@
 .toggle {
   position: absolute;
-  width: 280px;
-  height: 60px;
+  width: 320%;
+  height: 150%;
   border-radius: 50px;
   border: solid hsl(0, 0%, 13%) 2px;
 }
@@ -15,8 +15,8 @@
   bottom: 0;
   background: hsl(0, 0%, 3%);
   border-radius: 50px;
-  -webkit-mask: radial-gradient(ellipse 36px 22px at 140px 30px, transparent 98%, black 100%);
-  mask: radial-gradient(ellipse 38px 23px at 136px 28px, transparent 98%, black 100%);
+  -webkit-mask: radial-gradient(ellipse 30% 35% at 55% 40%, transparent 98%, black 100%);
+  mask: radial-gradient(ellipse 16% 39% at 52% 50%, transparent 98%, black 100%);
 }
 .text{
   color: hsla(0, 0%, 89%, 0.432);
