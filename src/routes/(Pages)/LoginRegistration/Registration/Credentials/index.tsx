@@ -8,22 +8,11 @@ import Title from '~/components/Title';
 import style from './index.module.scss';
 import { api } from '~/Server/Axios';
 import axios from 'axios';
-import { prova } from '~/routes/API/prova';
 export default function Credentials() {
-
-  const provaAction = useAction(prova);
- 
-
   onMount(async () => {
     SetForm({});
     SetFormValues({});
-    try {
-      const response = await provaAction();
-      console.log('Risposta da provaAction:', response);
-    } catch (error) {
-      console.error('Errore durante l\'esecuzione di provaAction:', error);
-    }
-    console.log('Fine onMount');
+   
   });
   return (
     <>

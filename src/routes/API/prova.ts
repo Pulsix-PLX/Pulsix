@@ -1,14 +1,16 @@
-import { action } from "@solidjs/router";
+import { action } from '@solidjs/router';
 import { db } from '~/Server/db.server';
-import { json } from "@solidjs/router";
+export const usernameAlreadyexist = action(async () => {
+  'use server';
+  console.log('Action called with username:');
 
-export const provaAction = action(async () => {
   try {
     const result = await db.query('SELECT * FROM users');
-    return json({ success: result });
+    console.log(result);
+    return result.rows;
   } catch (error) {
-    console.error('Errore nell\'action:', error);
-    return json({ status: 'error', message: 'Query al database fallita' }, { status: 500 });
+    console.error('Error checking username:', error);
+    return { status: 'error' };
   }
-});
+}, 'usernameChecks');
 

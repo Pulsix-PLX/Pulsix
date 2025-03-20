@@ -3,6 +3,7 @@ import { Form, SetForm, FormValues, SetFormValues } from '../../GlobalStores/For
 import InputPassword from './InputPassword';
 import InputField from './Input';
 import { usernameAlreadyexist } from '~/routes/API/Auth/usernameAlreadyexist';
+import { useAction } from '@solidjs/router';
 
 interface InputProps {
   name: string;
@@ -150,22 +151,20 @@ export default function Input(props: InputProps) {
         setErrorMessage('');
         break;
         // Problem
-/*
+
         case 'username':
           try {
             console.log('Validating username:', inputValue);
-            setLoading(true);
-            const response = await usernameAlreadyexist(inputValue);
+            const check = useAction(usernameAlreadyexist);
+            const response = await check(inputValue);
             console.log('Username check response:', response);
-            setLoading(false);
-            
+        
             if (response === 'already exist') {
               SetForm(props.name, false);
-              setErrorMessage('Username already exist');
-            } else if (response && response.startsWith('error:')) {
+              setErrorMessage('Username già esistente');
+            } else if (response.startsWith('error:')) {
               SetForm(props.name, false);
-              setErrorMessage('Error checking username');
-              console.error(response);
+              setErrorMessage(`Errore verifica username: ${response.split(':')[1]}`);
             } else {
               SetForm(props.name, true);
               setErrorMessage('');
@@ -174,9 +173,9 @@ export default function Input(props: InputProps) {
             console.error('Error in username validation:', error);
             setLoading(false);
             SetForm(props.name, false);
-            setErrorMessage('Error checking username');
+            setErrorMessage('Errore generico di verifica');
           }
-          break;*/
+          break;
       case 'email':
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(inputValue)) {
