@@ -17,6 +17,8 @@ interface InputProps {
 }
 
 export default function Input(props: InputProps) {
+
+  const check = useAction(usernameAlreadyexist);
   // Stato locale per questo componente
   const [value, setValue] = createSignal('');
   const [loading, setLoading] = createSignal(false);
@@ -155,7 +157,6 @@ export default function Input(props: InputProps) {
         case 'username':
           try {
             console.log('Validating username:', inputValue);
-            const check = useAction(usernameAlreadyexist);
             const response = await check(inputValue);
             console.log('Username check response:', response);
         
@@ -167,7 +168,7 @@ export default function Input(props: InputProps) {
               setErrorMessage(`Errore verifica username: ${response.split(':')[1]}`);
             } else {
               SetForm(props.name, true);
-              setErrorMessage('');
+              setErrorMessage('Username avaible');
             }
           } catch (error) {
             console.error('Error in username validation:', error);
