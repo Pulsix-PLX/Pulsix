@@ -22,8 +22,6 @@ function MioComponente() {
   );
 }
 
-
-
 import { createEffect, createSignal, onCleanup } from "solid-js";
 
 export default function Fade(props:any) {
