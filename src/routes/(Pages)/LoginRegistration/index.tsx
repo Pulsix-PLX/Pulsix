@@ -1,4 +1,4 @@
-import { onCleanup, onMount } from 'solid-js';
+import { onCleanup, onMount, Suspense } from 'solid-js';
 import { setShowMenu } from '~/components/Menus/Menu';
 import style from './index.module.scss';
 import RiveCanvas from './riv';
@@ -17,6 +17,7 @@ function index() {
   const navigate = useNavigate();
   return (
     <>
+    <Suspense fallback={'Caricamento...'}>
       <div class="-mt-[22.5%] ml-[4.5%] absolute">
         <RiveCanvas
           src="/rivs/LoginRegistration.riv"
@@ -58,6 +59,7 @@ function index() {
           />
         </div>
       </div>
+      </Suspense>
     </>
   );
 }

@@ -152,7 +152,6 @@ export default function Input(props: InputProps) {
         SetForm(props.name, true);
         setErrorMessage('');
         break;
-        // Problem
 
         case 'username':
           try {
@@ -177,6 +176,7 @@ export default function Input(props: InputProps) {
             setErrorMessage('Errore generico di verifica');
           }
           break;
+          
       case 'email':
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(inputValue)) {
