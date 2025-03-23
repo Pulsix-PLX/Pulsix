@@ -1,10 +1,12 @@
 import pg from 'pg';
 const { Pool } = pg;
 
+
+
 export const db = new Pool({
-  user: 'matteo',
-  host: '16.171.146.210',
-  database: 'prova',
-  password: 'matt9946',
-  port: 5432,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : undefined,
+  database: process.env.DB_NAME
 });

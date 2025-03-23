@@ -1,137 +1,31 @@
-// src/routes/email-verification.tsx
-import { createSignal, onMount } from "solid-js";
+import { createSignal } from "solid-js";
 import axios from "axios";
 
 export default function EmailVerification() {
   const [nome, setNome] = createSignal("");
   const [email, setEmail] = createSignal("");
   const [stato, setStato] = createSignal("idle"); // idle, loading, success, error
-  const [token, setToken] = createSignal("");
+  const [codiceVerifica, setCodiceVerifica] = createSignal("");
+  const [codiceInserito, setCodiceInserito] = createSignal("");
   const [isVerified, setIsVerified] = createSignal(false);
   const [errorMessage, setErrorMessage] = createSignal("");
   const [debugInfo, setDebugInfo] = createSignal({});
 
-  // Verifica se l'URL contiene un token
-  const checkUrlForToken = () => {
-    try {
-      // Usa window.location.href per ottenere l'URL completo
-      const currentUrl = window.location.href;
-      setDebugInfo(prev => ({...prev, currentUrl}));
-      
-      // Estrai il token direttamente dall'URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const tokenFromUrl = urlParams.get("token");
-      
-      setDebugInfo(prev => ({...prev, tokenFromUrl, searchParams: window.location.search}));
-      
-      if (tokenFromUrl) {
-        // Recupera il token dal localStorage
-        const storedToken = localStorage.getItem("verificationToken");
-        
-        setDebugInfo(prev => ({
-          ...prev, 
-          storedToken, 
-          match: storedToken === tokenFromUrl
-        }));
-        
-        if (storedToken === tokenFromUrl) {
-          setIsVerified(true);
-          localStorage.removeItem("verificationToken");
-        } else {
-          // Prova a verificare con il codice hash nell'URL stesso
-          // Estratto da #token=VALORE
-          const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
-          const hashToken = hashParams.get("token");
-          
-          setDebugInfo(prev => ({
-            ...prev,
-            hashParams: window.location.hash,
-            hashToken
-          }));
-          
-          if (hashToken && hashToken === storedToken) {
-            setIsVerified(true);
-            localStorage.removeItem("verificationToken");
-          } else {
-            setErrorMessage("Il token nell'URL non corrisponde al token salvato. Verifica che stai usando il link più recente.");
-          }
-        }
-      } else {
-        // Controlla se il token è nel fragment (hash) dell'URL
-        // Formato: #token=VALORE
-        if (window.location.hash) {
-          const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
-          const hashToken = hashParams.get("token");
-          
-          setDebugInfo(prev => ({
-            ...prev,
-            hashPresent: true,
-            hashValue: window.location.hash,
-            hashToken
-          }));
-          
-          if (hashToken) {
-            const storedToken = localStorage.getItem("verificationToken");
-            if (storedToken === hashToken) {
-              setIsVerified(true);
-              localStorage.removeItem("verificationToken");
-              return;
-            }
-          }
-        }
-        
-        console.log("Nessun token nell'URL");
-      }
-    } catch (error) {
-      console.error("Errore durante la verifica del token:", error);
-      setErrorMessage(`Errore durante la verifica: ${error.message}`);
-    }
-  };
-
-  // Invio email con bottone di verifica
+  // Invio email con codice di verifica
   const inviaEmailVerifica = async (e) => {
     e.preventDefault();
     setStato("loading");
     setErrorMessage("");
     
     try {
-      // Genera un token più lungo e complesso
-      const newToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      setToken(newToken);
+      // Genera un codice numerico di 6 cifre
+      const codice = Math.floor(100000 + Math.random() * 900000).toString();
+      setCodiceVerifica(codice);
       
-      // Salva il token in localStorage
-      localStorage.setItem("verificationToken", newToken);
+      setDebugInfo(prev => ({...prev, codiceGenerato: codice}));
       
-      setDebugInfo(prev => ({...prev, tokenGenerato: newToken}));
-      
-      // Usa un URL completamente esplicito per la verifica
-      const baseUrl = "https://8c31-95-252-211-63.ngrok-free.app";
-      const currentPath = window.location.pathname;
-      
-      // Crea tre tipi di URL:
-      // 1. Con query parameter standard (?token=)
-      const queryParamUrl = `${baseUrl}${currentPath}?token=${newToken}`;
-      
-      // 2. Con hash/fragment (#token=)
-      const hashUrl = `${baseUrl}${currentPath}#token=${newToken}`;
-      
-      // 3. URL diretto alla pagina con parametro speciale
-      const directUrl = `${baseUrl}/verify-email/${newToken}`;
-      
-      // Usa il link con hash che è più robusto nei redirect
-      const verificationUrl = hashUrl;
-      
-      setDebugInfo(prev => ({
-        ...prev, 
-        verificationUrl,
-        queryParamUrl,
-        hashUrl,
-        directUrl,
-        currentPath,
-        fullUrl: window.location.href
-      }));
-      
-      console.log("URL di verifica:", verificationUrl);
+      // Utilizza una variabile d'ambiente per l'API key
+      const apiKey = import.meta.env.VITE_BREVO_API_KEY;
       
       // Invia l'email usando Brevo API
       const response = await axios.post('https://api.brevo.com/v3/smtp/email', {
@@ -145,40 +39,33 @@ export default function EmailVerification() {
             name: nome()
           }
         ],
-        subject: "Verifica il tuo indirizzo email",
+        subject: "Il tuo codice di verifica",
         htmlContent: `
           <!DOCTYPE html>
           <html>
           <head>
             <style>
-              .button {
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 15px 32px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 16px;
-                margin: 4px 2px;
-                cursor: pointer;
+              .code {
+                font-size: 24px;
+                font-weight: bold;
+                color: #4a4a4a;
+                background-color: #f0f0f0;
+                padding: 15px;
                 border-radius: 8px;
+                text-align: center;
+                letter-spacing: 5px;
+                margin: 20px 0;
               }
             </style>
           </head>
           <body>
-            <h2>Verifica il tuo indirizzo email</h2>
+            <h2>Codice di Verifica Email</h2>
             <p>Ciao ${nome()},</p>
-            <p>Grazie per esserti registrato. Per completare la verifica, clicca sul pulsante qui sotto:</p>
+            <p>Ecco il tuo codice di verifica:</p>
             
-            <a href="${verificationUrl}" class="button">Verifica Email</a>
+            <div class="code">${codice}</div>
             
-            <p>Se il pulsante non funziona, copia e incolla questo link nel tuo browser:</p>
-            <p>${verificationUrl}</p>
-            
-            <p>Oppure inserisci manualmente questo codice di verifica nella pagina web:</p>
-            <p style="font-size: 18px; font-weight: bold; text-align: center; padding: 10px; background-color: #f0f0f0; border-radius: 5px;">${newToken}</p>
-            
+            <p>Inserisci questo codice nella pagina di verifica per completare la registrazione.</p>
             <p>Se non hai richiesto questa verifica, puoi ignorare questa email.</p>
             <p>Cordiali saluti,<br>Il tuo team</p>
           </body>
@@ -186,7 +73,7 @@ export default function EmailVerification() {
         `
       }, {
         headers: {
-          'api-key': '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',
+          'api-key': apiKey,
           'Content-Type': 'application/json'
         }
       });
@@ -210,42 +97,21 @@ export default function EmailVerification() {
     }
   };
 
-  // Controlla se c'è un token nell'URL quando il componente si carica
-  onMount(() => {
-    // Verifica immediatamente i parametri URL
-    setTimeout(() => {
-      checkUrlForToken();
-    }, 100); // Piccolo ritardo per assicurarsi che l'URL sia completamente caricato
+  // Funzione per verificare il codice inserito
+  const verificaCodice = (e) => {
+    e.preventDefault();
     
-    // Registra anche un listener per gli eventi di navigazione e hash change
-    window.addEventListener('hashchange', checkUrlForToken);
-    window.addEventListener('popstate', checkUrlForToken);
-    
-    // Pulisci il listener quando il componente viene smontato
-    return () => {
-      window.removeEventListener('hashchange', checkUrlForToken);
-      window.removeEventListener('popstate', checkUrlForToken);
-    };
-  });
-
-  // Funzione per inserire manualmente un token (per il debug)
-  const verificaTokenManuale = () => {
-    const tokenManuale = prompt("Inserisci il token di verifica ricevuto via email:");
-    if (tokenManuale) {
-      // Verifica direttamente il token senza aggiornare l'URL
-      const storedToken = localStorage.getItem("verificationToken");
-      if (storedToken === tokenManuale) {
-        setIsVerified(true);
-        localStorage.removeItem("verificationToken");
-      } else {
-        setErrorMessage("Token non valido o non corrisponde.");
-      }
+    if (codiceInserito() === codiceVerifica()) {
+      setIsVerified(true);
+      setCodiceVerifica("");
+      setCodiceInserito("");
+    } else {
+      setErrorMessage("Codice non valido. Controlla e riprova.");
     }
   };
 
   return (
     <div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      <p class="text-black">FUNZIONA SOLO LA VERIFICA MANUALE</p>
       {isVerified() ? (
         <div class="text-center">
           <h1 class="text-2xl font-bold mb-4">Email Verificata!</h1>
@@ -271,23 +137,43 @@ export default function EmailVerification() {
           )}
           
           {stato() === "success" ? (
-            <div class="bg-green-100 p-4 rounded-lg">
-              <p>Email di verifica inviata a {email()}!</p>
-              <p class="mt-2">Controlla la tua casella di posta e clicca sul pulsante di verifica.</p>
-              <div class="flex space-x-2 mt-4">
-                <button 
-                  onClick={() => setStato("idle")} 
-                  class="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-                >
-                  Nuova Verifica
-                </button>
-                <button 
-                  onClick={verificaTokenManuale} 
-                  class="flex-1 bg-gray-500 text-white p-2 rounded hover:bg-gray-600"
-                >
-                  Verifica Manuale
-                </button>
+            <div>
+              <div class="bg-green-100 p-4 rounded-lg mb-4">
+                <p>Email con codice di verifica inviata a {email()}!</p>
+                <p class="mt-2">Controlla la tua casella di posta e inserisci il codice ricevuto.</p>
               </div>
+              
+              <form onSubmit={verificaCodice} class="space-y-4">
+                <div>
+                  <label class="block mb-1">Inserisci il codice di verifica</label>
+                  <input
+                    type="text"
+                    value={codiceInserito()}
+                    onInput={(e) => setCodiceInserito(e.target.value)}
+                    class="w-full p-3 border rounded text-center text-lg tracking-widest"
+                    maxLength={6}
+                    placeholder="123456"
+                    required
+                  />
+                </div>
+                
+                <div class="flex space-x-2">
+                  <button
+                    type="submit"
+                    class="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+                  >
+                    Verifica Codice
+                  </button>
+                  
+                  <button 
+                    type="button"
+                    onClick={() => setStato("idle")} 
+                    class="flex-1 bg-gray-500 text-white p-2 rounded hover:bg-gray-600"
+                  >
+                    Cambia Email
+                  </button>
+                </div>
+              </form>
             </div>
           ) : (
             <form onSubmit={inviaEmailVerifica} class="space-y-4">
@@ -318,7 +204,7 @@ export default function EmailVerification() {
                 class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
                 disabled={stato() === "loading"}
               >
-                {stato() === "loading" ? "Invio in corso..." : "Invia Email di Verifica"}
+                {stato() === "loading" ? "Invio in corso..." : "Invia Codice di Verifica"}
               </button>
               
               {stato() === "error" && (
@@ -331,42 +217,6 @@ export default function EmailVerification() {
           <div class="mt-8 p-4 bg-gray-100 rounded-lg">
             <h3 class="font-bold mb-2">Informazioni di Debug:</h3>
             <pre class="text-xs overflow-auto max-h-40">{JSON.stringify(debugInfo(), null, 2)}</pre>
-            
-            <div class="mt-4">
-              <button 
-                onClick={checkUrlForToken}
-                class="bg-purple-500 text-white p-2 rounded hover:bg-purple-600 text-sm"
-              >
-                Ricontrolla Token nell'URL
-              </button>
-              
-              <button 
-                onClick={() => {
-                  // Forza la lettura del token dall'URL
-                  const urlParams = new URLSearchParams(window.location.search);
-                  const tokenFromUrl = urlParams.get("token");
-                  
-                  // Prova anche la lettura dal hash
-                  const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
-                  const hashToken = hashParams.get("token");
-                  
-                  setDebugInfo(prev => ({
-                    ...prev,
-                    forceCheck: {
-                      fullUrl: window.location.href,
-                      search: window.location.search,
-                      hash: window.location.hash,
-                      token: tokenFromUrl,
-                      hashToken: hashToken,
-                      storedToken: localStorage.getItem("verificationToken")
-                    }
-                  }));
-                }}
-                class="ml-2 bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-sm"
-              >
-                Ispeziona URL
-              </button>
-            </div>
           </div>
         </>
       )}

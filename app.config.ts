@@ -10,7 +10,7 @@ export default defineConfig({
   },
   vite: {
     server: {
-      allowedHosts: ['8c31-95-252-211-63.ngrok-free.app'], // Aggiungi l'host specifico per il test
+      allowedHosts: true, // Aggiungi l'host specifico per il test
     },
     plugins: [nodePolyfills()],
     worker: {
