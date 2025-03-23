@@ -12,7 +12,7 @@ export default function EmailVerification() {
   const [debugInfo, setDebugInfo] = createSignal({});
 
   // Invio email con codice di verifica
-  const inviaEmailVerifica = async (e) => {
+  const inviaEmailVerifica = async (e:Event) => {
     e.preventDefault();
     setStato("loading");
     setErrorMessage("");
@@ -36,7 +36,6 @@ export default function EmailVerification() {
         to: [
           {
             email: email(),
-            name: nome()
           }
         ],
         subject: "Il tuo codice di verifica",
@@ -49,7 +48,7 @@ export default function EmailVerification() {
                 font-size: 24px;
                 font-weight: bold;
                 color: #4a4a4a;
-                background-color: #f0f0f0;
+                background-color: #000000;
                 padding: 15px;
                 border-radius: 8px;
                 text-align: center;
@@ -59,8 +58,7 @@ export default function EmailVerification() {
             </style>
           </head>
           <body>
-            <h2>Codice di Verifica Email</h2>
-            <p>Ciao ${nome()},</p>
+            <h2>Pulsix verification code</h2>
             <p>Ecco il tuo codice di verifica:</p>
             
             <div class="code">${codice}</div>
@@ -85,7 +83,7 @@ export default function EmailVerification() {
       }));
       
       setStato("success");
-    } catch (error) {
+    } catch (error:any) {
       console.error("Errore invio email:", error);
       setErrorMessage(`Errore invio email: ${error.response ? error.response.data.message : error.message}`);
       setDebugInfo(prev => ({
@@ -98,7 +96,7 @@ export default function EmailVerification() {
   };
 
   // Funzione per verificare il codice inserito
-  const verificaCodice = (e) => {
+  const verificaCodice = (e:Event) => {
     e.preventDefault();
     
     if (codiceInserito() === codiceVerifica()) {
@@ -178,17 +176,6 @@ export default function EmailVerification() {
           ) : (
             <form onSubmit={inviaEmailVerifica} class="space-y-4">
               <div>
-                <label class="block mb-1">Nome</label>
-                <input
-                  type="text"
-                  value={nome()}
-                  onInput={(e) => setNome(e.target.value)}
-                  class="w-full p-2 border rounded"
-                  required
-                />
-              </div>
-              
-              <div>
                 <label class="block mb-1">Email</label>
                 <input
                   type="email"
@@ -213,11 +200,7 @@ export default function EmailVerification() {
             </form>
           )}
           
-          {/* Informazioni di debug - rimuovere in produzione */}
-          <div class="mt-8 p-4 bg-gray-100 rounded-lg">
-            <h3 class="font-bold mb-2">Informazioni di Debug:</h3>
-            <pre class="text-xs overflow-auto max-h-40">{JSON.stringify(debugInfo(), null, 2)}</pre>
-          </div>
+      
         </>
       )}
     </div>
