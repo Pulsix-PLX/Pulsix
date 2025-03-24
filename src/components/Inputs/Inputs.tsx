@@ -262,14 +262,13 @@ export default function Input(props: InputProps) {
         </Match>
 
         <Match when={props.type === 'email'}>
-          <input
+          <InputField
             name={props.name}
             placeholder={props.placeholder}
             class={props.class}
             style={props.style}
-            type="email"
+            type="text"
             onInput={validateInput}
-            onChange={validateInput}
           />
         </Match>
 

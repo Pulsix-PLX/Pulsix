@@ -21,6 +21,15 @@ export const allInputsValid = createMemo(() => {
   return keys.every((key) => Form[key] === true);
 });
 
+//Metodi utili
+
+// Recuperare un valore
+export const getFormValue = (key: string) => {
+  return FormValues[key];
+};
+
+
+
 // Basic implemention
 /*
  /Da richiamare in ogni file utilizzato per ripulire

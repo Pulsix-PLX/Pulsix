@@ -1,28 +1,25 @@
-import { createSignal } from "solid-js";
-import axios from "axios";
+import { createSignal, Match, Switch } from 'solid-js';
+import axios from 'axios';
+import Input from '~/components/Inputs/Inputs';
+import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
+import { next, setNext } from '../ProgressBar';
+import { allInputsValid, getFormValue } from '~/GlobalStores/FormStore';
+import OTPInput from './componentes/otpInput';
 
-export default function EmailVerification() {
-  const [nome, setNome] = createSignal("");
-  const [email, setEmail] = createSignal("");
-  const [stato, setStato] = createSignal("idle"); // idle, loading, success, error
-  const [codiceVerifica, setCodiceVerifica] = createSignal("");
-  const [codiceInserito, setCodiceInserito] = createSignal("");
+export const [code, setCode] = createSignal('')
+export default function Email() {
+  const [state, setState] = createSignal<'wait' | 'sended' | ''>('wait');
+  const [stateOTP, setStateOTP] = createSignal<'success' | 'error' | ''>('');
+
+  const [codiceInserito, setCodiceInserito] = createSignal('');
   const [isVerified, setIsVerified] = createSignal(false);
-  const [errorMessage, setErrorMessage] = createSignal("");
-  const [debugInfo, setDebugInfo] = createSignal({});
+  const [errorMessage, setErrorMessage] = createSignal('');
 
-  // Invio email con codice di verifica
-  const inviaEmailVerifica = async (e:Event) => {
-    e.preventDefault();
-    setStato("loading");
-    setErrorMessage("");
-    
+  // invio OTP
+  async function sendOTP(){
     try {
       // Genera un codice numerico di 6 cifre
-      const codice = Math.floor(100000 + Math.random() * 900000).toString();
-      setCodiceVerifica(codice);
-      
-      setDebugInfo(prev => ({...prev, codiceGenerato: codice}));
+      setCode(Math.floor(100000 + Math.random() * 900000).toString())
       
       // Utilizza una variabile d'ambiente per l'API key
       const apiKey = import.meta.env.VITE_BREVO_API_KEY;
@@ -30,15 +27,15 @@ export default function EmailVerification() {
       // Invia l'email usando Brevo API
       const response = await axios.post('https://api.brevo.com/v3/smtp/email', {
         sender: {
-          name: "Il Tuo Sistema",
-          email: "pallassinimatteo@gmail.com"
+          name: "Pulsix",
+          email: "pulsixcustomer@outlook.com"
         },
         to: [
           {
-            email: email(),
+            email: getFormValue('email'),
           }
         ],
-        subject: "Il tuo codice di verifica",
+        subject: "Pulsix verification code",
         htmlContent: `
           <!DOCTYPE html>
           <html>
@@ -61,7 +58,7 @@ export default function EmailVerification() {
             <h2>Pulsix verification code</h2>
             <p>Ecco il tuo codice di verifica:</p>
             
-            <div class="code">${codice}</div>
+            <div class="code">${code()}</div>
             
             <p>Inserisci questo codice nella pagina di verifica per completare la registrazione.</p>
             <p>Se non hai richiesto questa verifica, puoi ignorare questa email.</p>
@@ -76,133 +73,43 @@ export default function EmailVerification() {
         }
       });
       
-      setDebugInfo(prev => ({
-        ...prev, 
-        emailInviata: true, 
-        responseStatus: response.status
-      }));
       
-      setStato("success");
+      setStateOTP("success");
     } catch (error:any) {
-      console.error("Errore invio email:", error);
-      setErrorMessage(`Errore invio email: ${error.response ? error.response.data.message : error.message}`);
-      setDebugInfo(prev => ({
-        ...prev, 
-        emailInviata: false, 
-        errorDetails: error.response ? error.response.data : error.message
-      }));
-      setStato("error");
+      console.error("Error sending email:", error);
+      setErrorMessage(`Errore sending email: ${error.response ? error.response.data.message : error.message}`);
+
+      setStateOTP("error");
     }
   };
-
-  // Funzione per verificare il codice inserito
-  const verificaCodice = (e:Event) => {
-    e.preventDefault();
-    
-    if (codiceInserito() === codiceVerifica()) {
-      setIsVerified(true);
-      setCodiceVerifica("");
-      setCodiceInserito("");
-    } else {
-      setErrorMessage("Codice non valido. Controlla e riprova.");
-    }
-  };
-
+  
   return (
-    <div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      {isVerified() ? (
-        <div class="text-center">
-          <h1 class="text-2xl font-bold mb-4">Email Verificata!</h1>
-          <div class="bg-green-100 p-4 rounded-lg mb-4">
-            <p>La tua email è stata verificata con successo!</p>
-            <p class="mt-2">Grazie per aver completato la registrazione.</p>
-          </div>
-          <button 
-            onClick={() => setIsVerified(false)} 
-            class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-          >
-            Torna alla Registrazione
-          </button>
-        </div>
-      ) : (
-        <>
-          <h1 class="text-2xl font-bold mb-6">Verifica Email</h1>
-          
-          {errorMessage() && (
-            <div class="bg-red-100 p-4 rounded-lg mb-4">
-              <p class="text-red-700">{errorMessage()}</p>
-            </div>
-          )}
-          
-          {stato() === "success" ? (
-            <div>
-              <div class="bg-green-100 p-4 rounded-lg mb-4">
-                <p>Email con codice di verifica inviata a {email()}!</p>
-                <p class="mt-2">Controlla la tua casella di posta e inserisci il codice ricevuto.</p>
-              </div>
-              
-              <form onSubmit={verificaCodice} class="space-y-4">
-                <div>
-                  <label class="block mb-1">Inserisci il codice di verifica</label>
-                  <input
-                    type="text"
-                    value={codiceInserito()}
-                    onInput={(e) => setCodiceInserito(e.target.value)}
-                    class="w-full p-3 border rounded text-center text-lg tracking-widest"
-                    maxLength={6}
-                    placeholder="123456"
-                    required
-                  />
-                </div>
-                
-                <div class="flex space-x-2">
-                  <button
-                    type="submit"
-                    class="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-                  >
-                    Verifica Codice
-                  </button>
-                  
-                  <button 
-                    type="button"
-                    onClick={() => setStato("idle")} 
-                    class="flex-1 bg-gray-500 text-white p-2 rounded hover:bg-gray-600"
-                  >
-                    Cambia Email
-                  </button>
-                </div>
-              </form>
-            </div>
-          ) : (
-            <form onSubmit={inviaEmailVerifica} class="space-y-4">
-              <div>
-                <label class="block mb-1">Email</label>
-                <input
-                  type="email"
-                  value={email()}
-                  onInput={(e) => setEmail(e.target.value)}
-                  class="w-full p-2 border rounded"
-                  required
-                />
-              </div>
-              
-              <button
-                type="submit"
-                class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-                disabled={stato() === "loading"}
-              >
-                {stato() === "loading" ? "Invio in corso..." : "Invia Codice di Verifica"}
-              </button>
-              
-              {stato() === "error" && (
-                <p class="text-red-500">Si è verificato un errore. Riprova.</p>
-              )}
-            </form>
-          )}
-          
-      
-        </>
-      )}
-    </div>
+    <>
+      <Switch>
+        <Match when={state() == 'wait'}>
+        <form
+          class={`w-300 mt-100`}
+          style={{ 'justify-items': 'center' }}
+          onSubmit={(e) => e.preventDefault()} // This prevents the form from submitting
+        >
+          <Input type="email" name="email" placeholder="Email" required></Input>
+                    <ButtonSparkle
+                      shadow={10}
+                      text="Send code"
+                      disabled={!allInputsValid()}
+                      class="h-50 mb-30"
+                      onClick={() => {
+                        sendOTP();
+                        setState('sended')
+                      }}
+                    ></ButtonSparkle>
+          </form>
+        </Match>
+        <Match when={state() == 'sended'}>
+
+        <OTPInput code={code()}/>
+        </Match>
+      </Switch>
+    </>
   );
 }

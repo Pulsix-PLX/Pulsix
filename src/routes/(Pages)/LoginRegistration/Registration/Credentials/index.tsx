@@ -38,10 +38,9 @@ export default function Credentials() {
           <ButtonSparkle
             shadow={10}
             text="Next"
-            // disabled={!allInputsValid()}
+            //per testare lo disattivo disabled={!allInputsValid()}
             class="h-50"
             onClick={() => {
-              console.log('click');
               setNext(next() + 1);
             }}
           ></ButtonSparkle>
