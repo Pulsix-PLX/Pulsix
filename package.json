@@ -33,6 +33,7 @@
     "solid-app-router": "^0.4.2",
     "solid-js": "^1.9.5",
     "solid-motionone": "^1.0.3",
+    "solid-styled-components": "^0.28.5",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.8.2",
