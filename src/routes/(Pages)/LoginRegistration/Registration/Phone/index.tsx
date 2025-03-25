@@ -22,12 +22,12 @@ export default function Email() {
 
   async function sendOTP() {
     console.log("sendOTP called. phoneNumber:", fullNumber);
-    try {
+    try {/*
       const appVerifier = window.recaptchaVerifier;
       console.log("Sending OTP with appVerifier:", appVerifier);
       
       const result = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
-      
+      */
     } catch (error: any) {}
   }
 
