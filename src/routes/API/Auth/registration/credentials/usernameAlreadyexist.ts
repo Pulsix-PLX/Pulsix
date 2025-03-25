@@ -12,4 +12,4 @@ export const usernameAlreadyexist = action(async (username) => {
     console.error('Error checking username:', error);
     return `error:${error.message}`; // Ritorna l'errore completo
   }
-}, 'ddsdgf');
+}, 'usernameAlreadyexist');

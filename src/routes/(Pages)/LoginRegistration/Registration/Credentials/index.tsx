@@ -1,13 +1,10 @@
-import { createResource, onMount } from 'solid-js';
+import { onMount } from 'solid-js';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
 import Input from '~/components/Inputs/Inputs';
-import { allInputsValid, SetForm, SetFormValues } from '~/GlobalStores/FormStore';
-import { useAction } from '@solidjs/router';
 import Title from '~/components/Title';
+import { allInputsValid, SetForm, SetFormValues } from '~/GlobalStores/FormStore';
+import { next, setNext } from '../components/ProgressBar';
 import style from './index.module.scss';
-import { api } from '~/Server/Axios';
-import axios from 'axios';
-import { next, setNext } from '../ProgressBar';
 
 export default function Credentials() {
   onMount(async () => {
@@ -22,7 +19,7 @@ export default function Credentials() {
         style={{ 'justify-items': 'center' }}
       >
         <Title title="Credentials" class="-mt-40"></Title>
-        
+
         <form
           class={`w-300 mt-100`}
           style={{ 'justify-items': 'center' }}
@@ -34,7 +31,7 @@ export default function Credentials() {
           <Input name="name" type="text" placeholder="Name" required />
           <Input name="surmane" type="text" placeholder="Surmane" required />
           <Input name="dateOfBirthday" type="date" placeholder="Surmane" required />
-          
+
           <ButtonSparkle
             shadow={10}
             text="Next"

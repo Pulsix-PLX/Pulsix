@@ -1,42 +1,41 @@
-import { createSignal, Match, Switch } from 'solid-js';
 import axios from 'axios';
-import Input from '~/components/Inputs/Inputs';
+import { createSignal, Match, Switch } from 'solid-js';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
-import { next, setNext } from '../ProgressBar';
+import Input from '~/components/Inputs/Inputs';
 import { allInputsValid, getFormValue } from '~/GlobalStores/FormStore';
-import OTPInput from './componentes/otpInput';
+import OTPInput from '../components/inputOtp/otpInput';
 
-export const [code, setCode] = createSignal('')
+export const [code, setCode] = createSignal('');
 export default function Email() {
   const [state, setState] = createSignal<'wait' | 'sended' | ''>('wait');
   const [stateOTP, setStateOTP] = createSignal<'success' | 'error' | ''>('');
 
-  const [codiceInserito, setCodiceInserito] = createSignal('');
-  const [isVerified, setIsVerified] = createSignal(false);
-  const [errorMessage, setErrorMessage] = createSignal('');
+
 
   // invio OTP
-  async function sendOTP(){
+  async function sendOTP() {
     try {
       // Genera un codice numerico di 6 cifre
-      setCode(Math.floor(100000 + Math.random() * 900000).toString())
-      
+      setCode(Math.floor(100000 + Math.random() * 900000).toString());
+
       // Utilizza una variabile d'ambiente per l'API key
       const apiKey = import.meta.env.VITE_BREVO_API_KEY;
-      
+
       // Invia l'email usando Brevo API
-      const response = await axios.post('https://api.brevo.com/v3/smtp/email', {
-        sender: {
-          name: "Pulsix",
-          email: "pulsixcustomer@outlook.com"
-        },
-        to: [
-          {
-            email: getFormValue('email'),
-          }
-        ],
-        subject: "Pulsix verification code",
-        htmlContent: `
+      const response = await axios.post(
+        'https://api.brevo.com/v3/smtp/email',
+        {
+          sender: {
+            name: 'Pulsix',
+            email: 'pulsixcustomer@outlook.com',
+          },
+          to: [
+            {
+              email: getFormValue('email'),
+            },
+          ],
+          subject: 'Pulsix verification code',
+          htmlContent: `
           <!DOCTYPE html>
           <html>
           <head>
@@ -65,49 +64,47 @@ export default function Email() {
             <p>Cordiali saluti,<br>Il tuo team</p>
           </body>
           </html>
-        `
-      }, {
-        headers: {
-          'api-key': apiKey,
-          'Content-Type': 'application/json'
+        `,
+        },
+        {
+          headers: {
+            'api-key': apiKey,
+            'Content-Type': 'application/json',
+          },
         }
-      });
-      
-      
-      setStateOTP("success");
-    } catch (error:any) {
-      console.error("Error sending email:", error);
-      setErrorMessage(`Errore sending email: ${error.response ? error.response.data.message : error.message}`);
+      );
 
-      setStateOTP("error");
+      setStateOTP('success');
+    } catch (error: any) {
+      console.error('Error sending email:', error);
+      setStateOTP('error');
     }
-  };
-  
+  }
+
   return (
     <>
       <Switch>
         <Match when={state() == 'wait'}>
-        <form
-          class={`w-300 mt-100`}
-          style={{ 'justify-items': 'center' }}
-          onSubmit={(e) => e.preventDefault()} // This prevents the form from submitting
-        >
-          <Input type="email" name="email" placeholder="Email" required></Input>
-                    <ButtonSparkle
-                      shadow={10}
-                      text="Send code"
-                      disabled={!allInputsValid()}
-                      class="h-50 mb-30"
-                      onClick={() => {
-                        sendOTP();
-                        setState('sended')
-                      }}
-                    ></ButtonSparkle>
+          <form
+            class={`w-300 mt-100`}
+            style={{ 'justify-items': 'center' }}
+            onSubmit={(e) => e.preventDefault()} // This prevents the form from submitting
+          >
+            <Input type="email" name="email" placeholder="Email" required></Input>
+            <ButtonSparkle
+              shadow={10}
+              text="Send code"
+              disabled={!allInputsValid()}
+              class="h-50 mb-30"
+              onClick={() => {
+                sendOTP();
+                setState('sended');
+              }}
+            ></ButtonSparkle>
           </form>
         </Match>
         <Match when={state() == 'sended'}>
-
-        <OTPInput code={code()}/>
+          <OTPInput code={code()} />
         </Match>
       </Switch>
     </>

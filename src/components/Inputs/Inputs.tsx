@@ -2,12 +2,21 @@ import { createSignal, Match, onMount, Switch, createEffect } from 'solid-js';
 import { Form, SetForm, FormValues, SetFormValues } from '../../GlobalStores/FormStore';
 import InputPassword from './InputPassword';
 import InputField from './Input';
-import { usernameAlreadyexist } from '~/routes/API/Auth/usernameAlreadyexist';
+import { usernameAlreadyexist } from '~/routes/API/Auth/registration/credentials/usernameAlreadyexist';
 import { useAction } from '@solidjs/router';
+import { phoneAlreadyexist } from '~/routes/API/Auth/registration/phone/phoneAlreadyexist';
 
 interface InputProps {
   name: string;
-  type: 'text' | 'password' | 'email' | 'number' | 'date' | 'passwordConfirm' | 'username';
+  type:
+    | 'text'
+    | 'password'
+    | 'email'
+    | 'number'
+    | 'date'
+    | 'passwordConfirm'
+    | 'username'
+    | 'phoneNumber';
   placeholder?: string;
   required?: boolean;
   label?: string;
@@ -17,8 +26,9 @@ interface InputProps {
 }
 
 export default function Input(props: InputProps) {
-
-  const check = useAction(usernameAlreadyexist);
+  //actions
+  const checkUsername = useAction(usernameAlreadyexist);
+  const checkPhone = useAction(phoneAlreadyexist);
   // Stato locale per questo componente
   const [value, setValue] = createSignal('');
   const [loading, setLoading] = createSignal(false);
@@ -153,30 +163,63 @@ export default function Input(props: InputProps) {
         setErrorMessage('');
         break;
 
-        case 'username':
-          try {
-            console.log('Validating username:', inputValue);
-            const response = await check(inputValue);
-            console.log('Username check response:', response);
-        
-            if (response === 'already exist') {
-              SetForm(props.name, false);
-              setErrorMessage('Username già esistente');
-            } else if (response.startsWith('error:')) {
-              SetForm(props.name, false);
-              setErrorMessage(`Errore verifica username: ${response.split(':')[1]}`);
-            } else {
-              SetForm(props.name, true);
-              setErrorMessage('Username avaible');
-            }
-          } catch (error) {
-            console.error('Error in username validation:', error);
-            setLoading(false);
+      case 'username':
+        try {
+          console.log('Validating username:', inputValue);
+          const response = await checkUsername(inputValue);
+          console.log('Username check response:', response);
+
+          if (response === 'already exist') {
             SetForm(props.name, false);
-            setErrorMessage('Errore generico di verifica');
+            setErrorMessage('Username già esistente');
+          } else if (response.startsWith('error:')) {
+            SetForm(props.name, false);
+            setErrorMessage(`Errore verifica username: ${response.split(':')[1]}`);
+          } else {
+            SetForm(props.name, true);
+            setErrorMessage('Username avaible');
           }
-          break;
-          
+        } catch (error) {
+          console.error('Error in username validation:', error);
+          setLoading(false);
+          SetForm(props.name, false);
+          setErrorMessage('Errore generico di verifica');
+        }
+        break;
+
+      case 'phoneNumber':
+        console.log('Validating phoneNumber:', inputValue);
+        const response = await checkPhone(inputValue);
+        console.log('phonNumber check response:', response);
+        // Rimuovi eventuali spazi e trattini
+        const cleanedNumber = inputValue.replace(/[\s-]/g, '');
+
+        // Controllo che siano solo numeri
+        if (!/^\d+$/.test(cleanedNumber)) {
+          SetForm(props.name, false);
+          setErrorMessage('Phone number must contain only digits');
+          return;
+        }
+
+        // Controllo lunghezza (ad esempio tra 7 e 10 cifre dopo il prefisso)
+        if (cleanedNumber.length < 7 || cleanedNumber.length > 10) {
+          SetForm(props.name, false);
+          setErrorMessage('Invalid phone number length');
+          return;
+        }
+
+        // Controllo che non inizi con zeri non significativi
+        if (cleanedNumber.startsWith('0')) {
+          SetForm(props.name, false);
+          setErrorMessage('Phone number should not start with unnecessary zeros');
+          return;
+        }
+
+        // Validazione passata
+        SetForm(props.name, true);
+        setErrorMessage('');
+        break;
+
       case 'email':
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(inputValue)) {
@@ -260,7 +303,16 @@ export default function Input(props: InputProps) {
             onInput={validateInput}
           />
         </Match>
-
+        <Match when={props.type === 'phoneNumber'}>
+          <InputField
+            name={props.name}
+            placeholder={props.placeholder}
+            class={props.class}
+            style={props.style}
+            type="text"
+            onInput={validateInput}
+          />
+        </Match>
         <Match when={props.type === 'email'}>
           <InputField
             name={props.name}

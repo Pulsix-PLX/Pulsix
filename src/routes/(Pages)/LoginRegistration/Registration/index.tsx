@@ -1,12 +1,9 @@
-import { createEffect, onCleanup, onMount } from 'solid-js';
-import { setShowMenu } from '~/components/Menus/Menu';
+import { createSignal, onCleanup, onMount } from 'solid-js';
 import Fade from '~/components/Buttons/Fade';
-import ProgressBar from './ProgressBar';
-import { next } from './ProgressBar';
+import { setShowMenu } from '~/components/Menus/Menu';
+import ProgressBar, { next } from './components/ProgressBar';
 import Credentials from './Credentials';
-import EmailVerification from './Email/vecchia';
 import Email from './Email';
-import { createSignal } from 'solid-js';
 
 //non faccio reload della pagina prima lo chiedo
 const [hasChanges, setHasChanges] = createSignal(true);

@@ -1,7 +1,7 @@
 import { createSignal, For, Show } from 'solid-js';
 import './otpInput.scss';
 
-import { next, setNext } from '../../ProgressBar';
+import { next, setNext } from '../ProgressBar';
 export default function OTPInput({ code }: any) {
   const [otp, setOtp] = createSignal(Array(6).fill(''));
   const [otpResponse, setOtpResponse] = createSignal<string>('');
@@ -31,7 +31,7 @@ export default function OTPInput({ code }: any) {
 
   const handleKeyDown = (index: number, e: KeyboardEvent) => {
     const input = e.target as HTMLInputElement;
-    setOtpResponse('')
+    setOtpResponse('');
     // Handle backspace
     if (e.key === 'Backspace') {
       const newOtp = [...otp()];
@@ -74,8 +74,8 @@ export default function OTPInput({ code }: any) {
       //verifica otp
       if (otpValue == code) {
         setNext(next() + 1);
-      }else{
-        setOtpResponse('wrong code')
+      } else {
+        setOtpResponse('wrong code');
       }
     }
   };
@@ -96,7 +96,17 @@ export default function OTPInput({ code }: any) {
                 onInput={(e) => handleInput(index(), e)}
                 onKeyDown={(e) => handleKeyDown(index(), e)}
                 onPaste={handlePaste}
-                class={index() === 0 ? 'inputLeft' : index() === 5 ? 'inputRight' : index() === 2 ? 'inputRight' : index() === 3 ? 'inputLeft' : ''}
+                class={
+                  index() === 0
+                    ? 'inputLeft'
+                    : index() === 5
+                    ? 'inputRight'
+                    : index() === 2
+                    ? 'inputRight'
+                    : index() === 3
+                    ? 'inputLeft'
+                    : ''
+                }
               />
               {index() === 2 && <span class="text-white text-3xl ml-10 mr-10">&#183;</span>}
             </>
@@ -104,7 +114,7 @@ export default function OTPInput({ code }: any) {
         </For>
       </div>
       <Show when={otpResponse()}>
-        <p class='responseOTP'>{otpResponse()}</p>
+        <p class="responseOTP">{otpResponse()}</p>
       </Show>
     </div>
   );
