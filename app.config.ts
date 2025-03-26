@@ -6,6 +6,7 @@ export default defineConfig({
   server: {
     prerender: {
       routes: ['/', '/LoginRegistration'],
+      
     },
   },
   vite: {

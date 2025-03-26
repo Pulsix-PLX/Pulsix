@@ -1,7 +1,7 @@
 import { useAction } from '@solidjs/router';
 import OTPInput from '../components/inputOtp/otpInput';
 import axios from 'axios';
-import { createResource, createSignal, Match, Switch } from 'solid-js';
+import { createResource, createSignal, Match, onCleanup, onMount, Switch } from 'solid-js';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
 import Input from '~/components/Inputs/Inputs';
 import { allInputsValid, getFormValue } from '~/GlobalStores/FormStore';
@@ -9,6 +9,22 @@ import { phoneAlreadyexist } from '@API/Auth/registration/phone/phoneAlreadyexis
 
 export const [code, setCode] = createSignal('');
 export default function Email() {
+  /*
+  onMount(() => {
+    console.log("Component mounted. Initializing reCAPTCHA...");
+    // Setup reCAPTCHA quando il componente è montato
+    setupRecaptcha();
+    
+  });
+
+  onCleanup(() => {
+    console.log("Component unmounted. Cleaning up reCAPTCHA...");
+    // Pulisce il reCAPTCHA quando il componente viene smontato
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
+      window.recaptchaVerifier = null;
+    }
+  });*/
   const [state, setState] = createSignal<'wait' | 'sended' | ''>('wait');
   const [prefix, setPrefix] = createSignal('+39'); // Prefisso iniziale
   const [phoneNumber, setPhoneNumber] = createSignal('');

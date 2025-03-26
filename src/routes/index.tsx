@@ -15,8 +15,7 @@ export default function Landing() {
     });
   return (
     <>
-     <Title title='Pulsix'></Title>
-
+     <img src='/public/logo.png' class='CM w-150'></img>
       
     </>
   );

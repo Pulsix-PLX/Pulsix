@@ -20,10 +20,13 @@ export default function Menu() {
             overflow: 'visible',
             color: 'currentcolor',
             width: '24px',
-            height: '24px'
+            height: '24px',
           }}
         >
-          <path fill="currentColor" d="M21 20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.489a1 1 0 0 1 .386-.79l8-6.222a1 1 0 0 1 1.228 0l8 6.222a1 1 0 0 1 .386.79v10.51Zm-2-1V9.978l-7-5.445-7 5.445V19h14Z"></path>
+          <path
+            fill="currentColor"
+            d="M21 20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.489a1 1 0 0 1 .386-.79l8-6.222a1 1 0 0 1 1.228 0l8 6.222a1 1 0 0 1 .386.79v10.51Zm-2-1V9.978l-7-5.445-7 5.445V19h14Z"
+          ></path>
         </svg>
       ),
     },
@@ -41,7 +44,7 @@ export default function Menu() {
             overflow: 'visible',
             color: 'currentcolor',
             width: '24px',
-            height: '24px'
+            height: '24px',
           }}
         >
           <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -68,7 +71,7 @@ export default function Menu() {
             overflow: 'none',
             color: 'currentcolor',
             width: '24px',
-            height: '24px'
+            height: '24px',
           }}
         >
           <path
@@ -96,8 +99,6 @@ export default function Menu() {
       href: '/Wallets',
       svg: IconsPath[2].svg,
     },
-
-
   ];
 
   // Funzione per raggruppare le proprietà di hover
@@ -149,11 +150,15 @@ export default function Menu() {
   );
 }
 export const [showMenu, setShowMenu] = createSignal(true);
-export function MenuView(){
+export function MenuView() {
+  const [timeout, setSignalTimeout] = createSignal(false);
+  setTimeout(() => {
+    setSignalTimeout(true);
+  }, 300);
 
-  return(
-    <Show when={showMenu()}>
-      <Menu/>
+  return (
+    <Show when={showMenu() && timeout()}>
+      <Menu />
     </Show>
-  )
+  );
 }
