@@ -1,9 +1,15 @@
 import { Component } from 'solid-js';
 
-const FinancialBackground: Component = () => {
+
+export default function FinancialBackground() {
   return (
+    
+
     <div class="financial-background fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
       {/* Strati di luce soffusa */}
+
+    
+
       <div 
         class="absolute top-[-20%] left-[-20%] right-[-20%] bottom-[-20%] 
                bg-[radial-gradient(ellipse_at_top_left,_hsla(177,100%,46%,0.03)_0%,_transparent_60%)] 
@@ -82,4 +88,3 @@ const FinancialBackground: Component = () => {
   );
 };
 
-export default FinancialBackground;
