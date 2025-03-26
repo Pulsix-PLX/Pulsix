@@ -4,6 +4,7 @@ import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle
 import Input from '~/components/Inputs/Inputs';
 import { allInputsValid, getFormValue } from '~/GlobalStores/FormStore';
 import OTPInput from '../components/inputOtp/otpInput';
+import { next, setNext } from '../components/ProgressBar';
 
 export const [code, setCode] = createSignal('');
 export default function Email() {
@@ -107,6 +108,7 @@ export default function Email() {
           <OTPInput code={code()} />
         </Match>
       </Switch>
+      <button onClick={()=>setNext(next()+1)}>NExt</button>
     </>
   );
 }

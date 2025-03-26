@@ -1,4 +1,4 @@
-import { onCleanup, onMount, Suspense } from 'solid-js';
+import { createSignal, onCleanup, onMount, Show, Suspense } from 'solid-js';
 import { setShowMenu } from '~/components/Menus/Menu';
 import style from './index.module.scss';
 import RiveCanvas from './riv';
@@ -7,9 +7,13 @@ import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle
 
 import { value } from './riv';
 import { A, Navigate, useNavigate } from '@solidjs/router';
-function index() {
+export default function LoginRegistration() {
+ const [renderPage, setRenderPage] = createSignal(false)
   onMount(() => {
     setShowMenu(false);
+    setTimeout(() => {
+      setRenderPage(true);
+    }, 300);
   });
   onCleanup(() => {
     setShowMenu(true);
@@ -17,7 +21,7 @@ function index() {
   const navigate = useNavigate();
   return (
     <>
-    <Suspense fallback={'Caricamento...'}>
+    
       <div class="-mt-[22.5%] ml-[4.5%] absolute">
         <RiveCanvas
           src="/rivs/LoginRegistration.riv"
@@ -26,6 +30,7 @@ function index() {
           onLoad={() => console.log('Animation loaded!')}
         />
       </div>
+      <Show when={renderPage()}>
       <p class="text-7xl bg-black CM -mt-30 -ml-10 pl-60 pr-60 pt-30">Pulsix now for</p>
       <div class="CM mt-[13.1%] -ml-[6%]">
         <Toggle />
@@ -59,9 +64,9 @@ function index() {
           />
         </div>
       </div>
-      </Suspense>
+      </Show>
     </>
   );
 }
 
-export default index;
+

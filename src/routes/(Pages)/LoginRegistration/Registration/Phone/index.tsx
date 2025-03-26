@@ -1,51 +1,25 @@
-import { useAction } from '@solidjs/router';
+
 import OTPInput from '../components/inputOtp/otpInput';
-import axios from 'axios';
-import { createResource, createSignal, Match, onCleanup, onMount, Switch } from 'solid-js';
+
+
+import { createResource, createSignal, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
 import Input from '~/components/Inputs/Inputs';
 import { allInputsValid, getFormValue } from '~/GlobalStores/FormStore';
 import { phoneAlreadyexist } from '@API/Auth/registration/phone/phoneAlreadyexist';
+import { auth, setupRecaptcha, signInWithPhoneNumber } from "../../../../../Server/firebase.config";
+import sendOTP from './sendOtp';
 
 export const [code, setCode] = createSignal('');
-export default function Email() {
-  /*
-  onMount(() => {
-    console.log("Component mounted. Initializing reCAPTCHA...");
-    // Setup reCAPTCHA quando il componente è montato
-    setupRecaptcha();
-    
-  });
+export const [message, setMessage] = createSignal('');
+export const [showAlert, setShowAlert] = createSignal('');
+export const fullNumber = () => `${prefix()}${phoneNumber()}`;
+export const [prefix, setPrefix] = createSignal('+39'); // Prefisso iniziale
+export const [phoneNumber, setPhoneNumber] = createSignal('');
+export const [otp, setOtp] = createSignal();
+export default function Phone() {
 
-  onCleanup(() => {
-    console.log("Component unmounted. Cleaning up reCAPTCHA...");
-    // Pulisce il reCAPTCHA quando il componente viene smontato
-    if (window.recaptchaVerifier) {
-      window.recaptchaVerifier.clear();
-      window.recaptchaVerifier = null;
-    }
-  });*/
   const [state, setState] = createSignal<'wait' | 'sended' | ''>('wait');
-  const [prefix, setPrefix] = createSignal('+39'); // Prefisso iniziale
-  const [phoneNumber, setPhoneNumber] = createSignal('');
-  const fullNumber = () => `${prefix()}${phoneNumber()}`;
-  //action
-
-  const [otp, setOtp] = createSignal('');
-  const [confirmationResult, setConfirmationResult] = createSignal(null);
-  const [message, setMessage] = createSignal('');
-  const [AlertVisible, SetAlertVisible] = createSignal();
-
-  async function sendOTP() {
-    console.log("sendOTP called. phoneNumber:", fullNumber);
-    try {/*
-      const appVerifier = window.recaptchaVerifier;
-      console.log("Sending OTP with appVerifier:", appVerifier);
-      
-      const result = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
-      */
-    } catch (error: any) {}
-  }
 
   return (
     <>
@@ -69,18 +43,22 @@ export default function Email() {
               </select>
               <Input type="phoneNumber" name="phone" placeholder="Phone number" required />
             </div>
+            <Show when={showAlert()}>
+                 <div>{message()}</div>
+            </Show>
             <ButtonSparkle
               shadow={10}
               text="Send code"
-              disabled={!allInputsValid()}
+             // disabled={!allInputsValid()}
               class="h-50 mb-30"
-              onClick={() => {
-                sendOTP();
+              onClick={async () => {
+                await sendOTP();
                 setState('sended');
               }}
             ></ButtonSparkle>
+            <div id="recaptcha-container" class="ml-100 mt-250"></div>
           </form>
-          <div id="recaptcha-container" class="ml-100 mt-250"></div>
+          
         </Match>
         <Match when={state() == 'sended'}>
           <OTPInput code={code()} />
@@ -89,3 +67,4 @@ export default function Email() {
     </>
   );
 }
+

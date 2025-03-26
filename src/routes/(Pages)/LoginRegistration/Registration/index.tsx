@@ -4,6 +4,7 @@ import { setShowMenu } from '~/components/Menus/Menu';
 import ProgressBar, { next } from './components/ProgressBar';
 import Credentials from './Credentials';
 import Email from './Email';
+import Phone from './Phone';
 
 //non faccio reload della pagina prima lo chiedo
 const [hasChanges, setHasChanges] = createSignal(true);
@@ -12,7 +13,7 @@ function ReloadConfirmation() {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (hasChanges()) {
         event.preventDefault();
-        event.returnValue = 'ciaoooo no';
+        event.returnValue = 'reload';
         return 'nada';
       }
     };
@@ -59,6 +60,9 @@ function index() {
       </Fade>
       <Fade in={next() == 1} fadeIn={2000} fadeOut={300} class={'CM mt-140'}>
         <Email />
+      </Fade>
+      <Fade in={next() == 2} fadeIn={2000} fadeOut={300} class={'CM mt-140'}>
+        <Phone/>
       </Fade>
     </>
   );
