@@ -1,0 +1,39 @@
+@use "sass:color";
+
+// Inherit most styles from the original DatePicker
+@use "./DatePicker.module.scss" as original;
+
+// Additional styles specific to DateRangePicker
+.activeCalendar {
+  box-shadow: 0 0 0 2px #{original.$accent-primary};
+  border-radius: original.$border-radius;
+}
+
+.calendarContainer {
+  background: original.$bg-primary;
+  border-radius: original.$border-radius;
+  border: 1px solid original.$border-color;
+  box-shadow: original.$shadow;
+  padding: 16px;
+
+  // Opening animation
+  animation: scaleIn original.$popup-animation forwards;
+  transform-origin: top center;
+  opacity: 0;
+}
+
+// Additional range selection styles
+.cellTrigger {
+  &.inRange {
+    background: color.mix(original.$accent-primary, original.$bg-secondary, 20%);
+    color: original.$text-color;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 680px) {
+  .calendarContainer {
+    flex-direction: column;
+    width: 100%;
+  }
+}

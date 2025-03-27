@@ -1,0 +1,297 @@
+@use "sass:color";
+
+// Color variables for dark theme
+$bg-primary: hsl(171, 33%, 4%);        // Deep dark teal/green background
+$bg-secondary: hsl(0, 0%, 13%);        // Dark gray background
+$accent-primary: hsl(177, 100%, 46%);  // Bright cyan/teal
+$accent-secondary: hsl(170, 100%, 48%); // Slightly different bright teal
+
+// Derive other colors from the base palette
+$primary-color: $accent-primary;
+$primary-hover: $accent-secondary;
+$primary-text: #ffffff;
+
+$border-color: color.mix($bg-secondary, #ffffff, 20%);
+$text-color: #f0f0f0;
+$muted-text: color.scale($text-color, $lightness: -30%);
+
+$today-color: color.mix($bg-secondary, #ffffff, 20%);
+$selected-bg: $accent-primary;
+$selected-text: $bg-primary;
+$hover-bg: color.mix($bg-secondary, #ffffff, 10%);
+$disabled-color: color.scale($text-color, $lightness: -50%);
+
+$shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 
+         0 2px 4px -1px rgba(0, 0, 0, 0.3);
+$border-radius: 6px;
+
+// Animations
+$animation-duration: 0.2s;
+$animation-easing: ease-out;
+$popup-animation: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+// Main container
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background: $bg-primary;
+  color: $text-color;
+
+  &[data-open="true"] {
+    .control {
+      border-color: $accent-primary;
+      box-shadow: 0 0 0 1px $accent-primary;
+    }
+  }
+}
+
+// Input control
+.control {
+  display: flex;
+  align-items: center;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  overflow: hidden;
+  background: $bg-secondary;
+  transition: all $animation-duration $animation-easing;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  outline: none;
+  color: $text-color;
+  background: transparent;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.trigger {
+  padding: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: $muted-text;
+  transition: color $animation-duration $animation-easing;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: $text-color;
+  }
+
+  svg {
+    display: block;
+    fill: currentColor;
+  }
+}
+
+// Calendar with animation
+.calendar {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 300px;
+  max-width: 300px;
+  background: $bg-primary;
+  border-radius: $border-radius;
+  border: 1px solid $border-color;
+  box-shadow: $shadow;
+  padding: 16px;
+  z-index: 1000;
+  box-sizing: border-box;
+  
+  // Opening animation
+  animation: scaleIn $popup-animation forwards;
+  transform-origin: top center;
+  opacity: 0;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// Navigation controls
+.viewControl {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.navButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: $text-color;
+  font-weight: bold;
+  transition: background $animation-duration $animation-easing;
+
+  &:hover {
+    background: $hover-bg;
+    color: $accent-primary;
+  }
+
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.viewTrigger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  color: $text-color;
+  transition: background $animation-duration $animation-easing;
+
+  &:hover {
+    background: $hover-bg;
+    color: $accent-primary;
+  }
+}
+
+// Days table
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.tableHeader {
+  padding: 8px 0;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: $muted-text;
+}
+
+.tableCell {
+  padding: 2px;
+  text-align: center;
+  width: calc(100% / 7);
+}
+
+.cellTrigger {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 32px;
+  max-height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: $text-color;
+  transition: all $animation-duration $animation-easing;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  position: relative;
+
+  &:hover:not(.selected):not(.disabled) {
+    background: $hover-bg;
+    color: $accent-primary;
+  }
+
+  &.selected {
+    background: $accent-primary;
+    color: $bg-primary;
+    font-weight: 600;
+  }
+
+  &.today {
+    color: $accent-primary;
+    font-weight: 600;
+
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: $accent-primary;
+    }
+  }
+
+  &.disabled {
+    color: $muted-text;
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+// Month and year grids
+.monthGrid, .yearGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.monthCell, .yearCell {
+  padding: 8px;
+  border-radius: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: center;
+  transition: all $animation-duration $animation-easing;
+  color: $text-color;
+
+  &:hover {
+    background: $hover-bg;
+    color: $accent-primary;
+  }
+
+  &.selected {
+    background: $accent-primary;
+    color: $bg-primary;
+  }
+}
+
+// Responsive
+@media (max-width: 480px) {
+  .container {
+    max-width: 100%;
+  }
+
+  .calendar {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+  }
+
+  .cellTrigger {
+    max-width: 28px;
+    max-height: 28px;
+    font-size: 0.75rem;
+  }
+}
