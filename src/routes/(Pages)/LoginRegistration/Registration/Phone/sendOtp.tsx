@@ -9,21 +9,14 @@ import { fullNumber, message, setMessage, setOtp, setShowAlert } from ".";
 import { onCleanup, onMount } from "solid-js";
 
 export default async function sendOTP() {
-  onMount(() => {
-    console.log("Component mounted. Initializing reCAPTCHA...");
-    // Setup reCAPTCHA quando il componente è montato
-    setupRecaptcha();
-    
-  });
 
-  onCleanup(() => {
-    console.log("Component unmounted. Cleaning up reCAPTCHA...");
-    // Pulisce il reCAPTCHA quando il componente viene smontato
-    if (window.recaptchaVerifier) {
-      window.recaptchaVerifier.clear();
-      window.recaptchaVerifier = null;
-    }
-  });
+  const phoneNum = fullNumber();
+  
+  // Basic validation
+  if (!phoneNum || phoneNum.length < 10) {
+    setMessage("Invalid phone number");
+    return;
+  }
     console.log("sendOTP called. phoneNumber:", fullNumber());
     try {
       const appVerifier = window.recaptchaVerifier;

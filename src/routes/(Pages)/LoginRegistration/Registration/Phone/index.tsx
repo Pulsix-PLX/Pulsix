@@ -20,7 +20,21 @@ export const [otp, setOtp] = createSignal();
 export default function Phone() {
 
   const [state, setState] = createSignal<'wait' | 'sended' | ''>('wait');
+  onMount(() => {
+    console.log("Component mounted. Initializing reCAPTCHA...");
+    // Setup reCAPTCHA quando il componente è montato
+    setupRecaptcha();
+    
+  });
 
+  onCleanup(() => {
+    console.log("Component unmounted. Cleaning up reCAPTCHA...");
+    // Pulisce il reCAPTCHA quando il componente viene smontato
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
+      window.recaptchaVerifier = null;
+    }
+  });
   return (
     <>
       <Switch>
