@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { createSignal, Match, Switch } from 'solid-js';
+import { createSignal, Match, onMount, Switch } from 'solid-js';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
 import Input from '~/components/Inputs/Inputs';
 import { allInputsValid, getFormValue } from '~/GlobalStores/FormStore';
@@ -10,11 +10,11 @@ export const [code, setCode] = createSignal('');
 export default function Email() {
   const [state, setState] = createSignal<'wait' | 'sended' | ''>('wait');
   const [stateOTP, setStateOTP] = createSignal<'success' | 'error' | ''>('');
-
-
+"use client";
 
   // invio OTP
   async function sendOTP() {
+
     try {
       // Genera un codice numerico di 6 cifre
       setCode(Math.floor(100000 + Math.random() * 900000).toString());
@@ -91,7 +91,7 @@ export default function Email() {
             style={{ 'justify-items': 'center' }}
             onSubmit={(e) => e.preventDefault()} // This prevents the form from submitting
           >
-            <Input type="email" name="email" placeholder="Email" required></Input>
+            <Input type="email" name="email" placeholder="Email" mountOn={next()==1? true : false} required></Input>
             <ButtonSparkle
               shadow={10}
               text="Send code"
@@ -108,7 +108,6 @@ export default function Email() {
           <OTPInput code={code()} />
         </Match>
       </Switch>
-      <button onClick={()=>setNext(next()+1)}>NExt</button>
     </>
   );
 }

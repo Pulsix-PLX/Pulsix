@@ -9,14 +9,14 @@ import { allInputsValid, getFormValue } from '~/GlobalStores/FormStore';
 import { phoneAlreadyexist } from '@API/Auth/registration/phone/phoneAlreadyexist';
 import { auth, setupRecaptcha, signInWithPhoneNumber } from "../../../../../Server/firebase.config";
 import sendOTP from './sendOtp';
-
+import { next } from '../components/ProgressBar';
 export const [code, setCode] = createSignal('');
 export const [message, setMessage] = createSignal('');
 export const [showAlert, setShowAlert] = createSignal('');
-export const fullNumber = () => `${prefix()}${phoneNumber()}`;
+export const fullNumber = () => `${prefix()}${getFormValue('phone')}`;
 export const [prefix, setPrefix] = createSignal('+39'); // Prefisso iniziale
 export const [phoneNumber, setPhoneNumber] = createSignal('');
-export const [otp, setOtp] = createSignal();
+export const [otpVerify, setOtp] = createSignal(null);
 export default function Phone() {
 
   const [state, setState] = createSignal<'wait' | 'sended' | ''>('wait');
@@ -55,7 +55,7 @@ export default function Phone() {
                 <option value="+44">+44 (UK)</option>
                 {/* Aggiungi altri prefissi se necessario */}
               </select>
-              <Input type="phoneNumber" name="phone" placeholder="Phone number" required />
+              <Input type="phoneNumber" name="phone" placeholder="Phone number" mountOn={next()==1? true : false} required />
             </div>
             <Show when={showAlert()}>
                  <div>{message()}</div>
@@ -75,7 +75,7 @@ export default function Phone() {
           
         </Match>
         <Match when={state() == 'sended'}>
-          <OTPInput code={code()} />
+          <OTPInput code={code()} otp={otpVerify()} createUser={true} />
         </Match>
       </Switch>
     </>

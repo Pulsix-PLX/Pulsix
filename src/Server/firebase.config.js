@@ -18,10 +18,10 @@ const firebaseConfig = {
   apiKey: "AIzaSyAoiPbMYiKNnK6y_HqsYMLpvs2JiXaxPhw",
   authDomain: "finance-tracker-pallassini.firebaseapp.com",
   projectId: "finance-tracker-pallassini",
-  storageBucket: "finance-tracker-pallassini.appspot.com", // Corretto storageBucket
+  storageBucket: "finance-tracker-pallassini.firebasestorage.app",
   messagingSenderId: "106835699922",
-  appId: "1:106835699922:web:d67d86b900903c9c64650b",
-  measurementId: "G-Z653J35PK5",
+  appId: "1:106835699922:web:8655c7560a7d526c64650b",
+  measurementId: "G-EKY43CN6SB"
 };
 
 // Inizializza Firebase

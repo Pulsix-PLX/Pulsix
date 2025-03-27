@@ -6,24 +6,22 @@ declare global {
   }
 }
 import { fullNumber, message, setMessage, setOtp, setShowAlert } from ".";
-import { onCleanup, onMount } from "solid-js";
-
+import { createSignal, onCleanup, onMount } from "solid-js";
+import { SetFormValues } from "~/GlobalStores/FormStore";
+export const [confirmationResult, setConfirmationResult] = createSignal();
 export default async function sendOTP() {
 
   const phoneNum = fullNumber();
-  
-  // Basic validation
-  if (!phoneNum || phoneNum.length < 10) {
-    setMessage("Invalid phone number");
-    return;
-  }
+  //salvo il numberPhone nello store
+    SetFormValues('phoneNumber', phoneNum);
+
     console.log("sendOTP called. phoneNumber:", fullNumber());
     try {
       const appVerifier = window.recaptchaVerifier;
       console.log("Sending OTP with appVerifier:", appVerifier);
       
       const result = await signInWithPhoneNumber(auth, fullNumber(), appVerifier);
-      setOtp(result)
+      setConfirmationResult(result);
     } catch (error: any) {
       console.error("Error sending OTP:", error);
       if(error.message == "Firebase: Error (auth/too-many-requests)."){

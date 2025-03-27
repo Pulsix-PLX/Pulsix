@@ -2,14 +2,16 @@ import { onMount } from 'solid-js';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
 import Input from '~/components/Inputs/Inputs';
 import Title from '~/components/Title';
-import { allInputsValid, SetForm, SetFormValues } from '~/GlobalStores/FormStore';
+import { allInputsValid, Form, FormValues, getFormValue, removeFormField, resetAllFormData, SetForm, SetFormValues } from '~/GlobalStores/FormStore';
 import { next, setNext } from '../components/ProgressBar';
 import style from './index.module.scss';
 
 export default function Credentials() {
-  onMount(async () => {
+  onMount(() => {
+
     SetForm({});
     SetFormValues({});
+    console.log(Form, FormValues, getFormValue('phone'))
   });
 
   return (
@@ -29,13 +31,13 @@ export default function Credentials() {
           <Input name="password" type="password" placeholder="Password" required />
           <Input name="passwordConfirm" type="passwordConfirm" placeholder="Confirm" required />
           <Input name="name" type="text" placeholder="Name" required />
-          <Input name="surmane" type="text" placeholder="Surmane" required />
+          <Input name="surname" type="text" placeholder="Surmane" required />
           <Input name="dateOfBirthday" type="date" placeholder="Surmane" required />
 
           <ButtonSparkle
             shadow={10}
             text="Next"
-            //per testare lo disattivo disabled={!allInputsValid()}
+            disabled={!allInputsValid()}
             class="h-50"
             onClick={() => {
               setNext(next() + 1);

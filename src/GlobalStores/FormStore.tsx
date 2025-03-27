@@ -1,5 +1,5 @@
 import { createMemo } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, produce } from "solid-js/store";
 
 interface FormState {
   [key: string]: any;
@@ -12,22 +12,45 @@ interface FormValuesState {
 export const [Form, SetForm] = createStore<FormState>({});
 export const [FormValues, SetFormValues] = createStore<FormValuesState>({});
 
-// Verifica se tutti gli input sono validi
+// Remove a specific field from the Form store
+export const removeFormField = (key: string) => {
+  SetForm(
+    produce((draft) => {
+      delete draft[key];
+    })
+  );
+};
+// Completely reset the Form store
+export const resetForm = () => {
+  SetForm(produce(() => ({})));
+};
+
+// Completely reset the FormValues store
+export const resetFormValues = () => {
+  SetFormValues(produce(() => ({})));
+};
+
+// Reset both stores completely
+export const resetAllFormData = () => {
+  resetForm();
+  resetFormValues();
+};
+
+// Check if all inputs are valid
 export const allInputsValid = createMemo(() => {
   const keys = Object.keys(Form);
   if (keys.length === 0) return false;
   
-  // Verifica che tutti i campi siano true
+  // Check that all fields are true
   return keys.every((key) => Form[key] === true);
 });
 
-//Metodi utili
+// Utility methods
 
-// Recuperare un valore
+// Retrieve a value
 export const getFormValue = (key: string) => {
   return FormValues[key];
 };
-
 
 
 // Basic implemention

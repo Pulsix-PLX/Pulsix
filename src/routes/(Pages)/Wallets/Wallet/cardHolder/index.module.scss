@@ -1,12 +1,11 @@
 
-
-.backCardHolder{
-position: relative;
-height: 25rem;
+/* Aggiornamento del modulo SCSS */
+.backCardHolder {
+  position: relative;
+  width: 100%;
 }
-.frontCardHolder{
-  height: 12rem;
+
+.frontCardHolder {
   position: absolute;
-  margin-top: -11.5rem;
-  width: 20rem;
+  width: 100%;
 }

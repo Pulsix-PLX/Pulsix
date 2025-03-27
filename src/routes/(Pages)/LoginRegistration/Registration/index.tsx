@@ -5,6 +5,7 @@ import ProgressBar, { next } from './components/ProgressBar';
 import Credentials from './Credentials';
 import Email from './Email';
 import Phone from './Phone';
+import { resetAllFormData } from '~/GlobalStores/FormStore';
 
 //non faccio reload della pagina prima lo chiedo
 const [hasChanges, setHasChanges] = createSignal(true);

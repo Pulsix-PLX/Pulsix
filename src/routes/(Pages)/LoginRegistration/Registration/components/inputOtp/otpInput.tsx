@@ -2,13 +2,22 @@ import { createSignal, For, Show } from 'solid-js';
 import './otpInput.scss';
 
 import { next, setNext } from '../ProgressBar';
-export default function OTPInput({ code }: any) {
+import { useAction, useNavigate } from '@solidjs/router';
+import { createUser } from '~/routes/API/Auth/registration/createUser';
+import { otpVerify } from '../../Phone';
+//otp con cui verificare il code inserito
+import { confirmationResult } from '../../Phone/sendOtp';
+import { getFormValue } from '~/GlobalStores/FormStore';
+
+export default function OTPInput(props: any) {
   const [otp, setOtp] = createSignal(Array(6).fill(''));
   const [otpResponse, setOtpResponse] = createSignal<string>('');
   const inputRefs: HTMLInputElement[] = [];
+  const create=useAction(createUser);
   const handleInput = (index: number, e: InputEvent) => {
     const input = e.target as HTMLInputElement;
     const value = input.value;
+    
 
     // Validate input (only numbers)
     const isValidInput = /[0-9]/g.test(value);
@@ -69,11 +78,35 @@ export default function OTPInput({ code }: any) {
     }
   };
 
-  const submit = (otpValue: string) => {
+  const submit = async (otpValue: string) => {
+    if(props.createUser){
+
+    try {
+
+      await (confirmationResult() as { confirm: (otp: string) => Promise<void> }).confirm(otpValue);
+      console.log("OTP verified successfully.");
+      //inserisco l'user
+      await create({
+        username: getFormValue('username'),
+        passwordConfirm: getFormValue('passwordConfirm'),
+        name: getFormValue('name'),
+        surname: getFormValue('surname'),
+        dateOfBirthday: getFormValue('dateOfBirthday'),
+        email: getFormValue('email'),
+        phone: getFormValue('phone')
+      });
+   // navigate('/wallets');
+    
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+    }
+  };
+
     if (otpValue.length === otp().length) {
       //verifica otp
-      if (otpValue == code) {
+      if (otpValue == props.code) {
         setNext(next() + 1);
+       
       } else {
         setOtpResponse('wrong code');
       }

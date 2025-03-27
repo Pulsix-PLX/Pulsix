@@ -1,23 +1,26 @@
 import style from './Card.module.scss';
 
-interface props {
+interface CardProps {
   color: string;
   wallet: string;
   balance: number;
-  position:any
+  position: number;
 }
 
-export default function Card(props: props) {
+export default function Card(props: CardProps) {
   return (
-  <div 
-    class={`absolute ${style.card}`} 
-    style={{ 
-      'background-color': props.color,
-      top: `${(props.position)}rem`, // Use top instead of margin-top
-      'z-index': -props.position
-    }}
-  >
-    <p class="text-black">{props.wallet}</p>
-  </div>
-  )
+    <div
+      class={`absolute w-full h-full border-borderRadius-md ${style.card}`}
+      style={{
+        'background-color': props.color,
+        top: `${props.position}%`,
+        'z-index':- props.position
+      }}
+    >
+      <div class="flex flex-col justify-between h-full p-4">
+        <p class="text-black font-bold">{props.wallet}</p>
+        <p class="text-black text-right text-xl font-semibold">€{props.balance.toLocaleString()}</p>
+      </div>
+    </div>
+  );
 }

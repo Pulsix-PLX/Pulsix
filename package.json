@@ -20,6 +20,7 @@
     "@suid/types": "^0.7.1",
     "@suid/vite-plugin": "^0.3.1",
     "axios": "^1.8.3",
+    "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dat.gui": "^0.7.9",
@@ -47,6 +48,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.14",
+    "@types/bcryptjs": "^3.0.0",
     "@types/dat.gui": "^0.7.13",
     "@types/pg": "^8.11.11",
     "autoprefixer": "^10.4.16",
