@@ -31,11 +31,11 @@
     ),
     hsl(0 calc(var(--active) * 0%) calc((var(--active) * 0%) + 12%));
   background: var(--bg);
-  font-size: 2rem;
+  font-size: 1vw;
   font-weight: 500;
   border: 0;
   cursor: pointer;
-  padding: 0.9em 1.3em;
+  padding: 0.9vw 1.3vw;
   display: flex;
   align-items: center;
   gap: 0.25em;

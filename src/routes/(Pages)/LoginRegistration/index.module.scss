@@ -9,15 +9,16 @@
 }
 
 .titles{
-  font-size: 42px;
+  font-size: clamp(20px,3vw,55px);
   color:hsl(0, 0%, 71%);
   &:hover{
     color: hsl(0, 0%, 45%);
     transition: all 1s ;
   }
 }
+
 .paragraf{
-  font-size: 22px;
+  font-size: clamp(10px,1.5vw,55px);
   color:hsl(0, 0%, 71%);
   &:hover{
     color: hsl(0, 0%, 45%);
