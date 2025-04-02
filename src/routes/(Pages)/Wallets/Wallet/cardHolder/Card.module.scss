@@ -1,7 +1,7 @@
 .card{
 border-radius: 20px;
 &:hover{
-  transform: scale(1.05); // Slightly enlarge on hover
-
+  transform: translateY(-1.8vw); // Slightly enlarge on hover
+  transition: 0.3s ease-in-out;
 }
 }

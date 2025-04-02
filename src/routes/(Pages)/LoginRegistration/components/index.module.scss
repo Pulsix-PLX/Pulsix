@@ -20,9 +20,11 @@
 }
 .text{
   color: hsla(0, 0%, 89%, 0.432);
+  font-size: 0.6vw;
 }
 
 .activeText{
+  margin-top: -0.3vw;
   color: hsl(0, 0%, 90%);
-  transform: scale(1.1);
+  font-size: 0.8vw;
 }

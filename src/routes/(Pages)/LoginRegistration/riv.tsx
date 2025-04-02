@@ -1,5 +1,5 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
-
+import './riv.scss'
 export const [value, setValue] = createSignal<boolean>(true);
 export default function RiveCanvas(props: any) {
   const [canvas, setCanvas] = createSignal<any>(null);
@@ -7,6 +7,7 @@ export default function RiveCanvas(props: any) {
   let toggleInput: any = null; // Memorizza l'input della State Machine
 
   onMount(async () => {
+    
     if (!canvas()) return;
 
     try {
@@ -55,7 +56,8 @@ export default function RiveCanvas(props: any) {
       onClick={handleClick}
       width={props.width || 2000}
       height={props.height || 2000}
-      style={{ width: '96%', height: '96%', ...props.style }}
+      class='riv'
+     // style={{ width: '90vw', height: '90vh', ...props.style }}
     />
   );
 }

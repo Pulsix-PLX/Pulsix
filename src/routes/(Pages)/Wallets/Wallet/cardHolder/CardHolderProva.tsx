@@ -14,12 +14,22 @@ export default function CardHolderProva() {
       wallet: 'revolut',
       balance: 1000,
     },
+    {
+      color: '#BB0033', // Bright orange-red
+      wallet: 'revolut',
+      balance: 1000,
+    },
+    {
+      color: '#AA0000', // Bright orange-red
+      wallet: 'revolut',
+      balance: 1000,
+    },
   ];
 
   return (
     <>
-     {/* Cards */}
-     <For each={cards}>
+      {/* Cards */}
+      <For each={cards}>
         {(card, index) => (
           <Card
             color={card.color}
@@ -32,15 +42,18 @@ export default function CardHolderProva() {
       {/* Back */}
       <img
         src="/public/img/wallets/backCardHolder.png"
-        class={` w-[40vh] ${style.backCardHolder}`}
+        class={` w-[19.7vw] h-[20vw] ${style.backCardHolder}`}
         style={{
-          height: `${cards.length * 4.5+15}vh`,
-          "z-index":-10
+          height: `${cards.length * 4.5 + 18}vh`,
+          'margin-top': `-${cards.length * 4.5}vh`,
+          'z-index': -10,
         }}
       />
       {/* Front*/}
-      <img src="/public/img/wallets/frontCardHolder.png" class="w-[40vh] relative -mt-82" />
+      <img src="/public/img/wallets/frontCardHolder.png" class="w-[19.7vw] relative -mt-82" />
 
+      {/* Balance totale */}
+       <p class='-mt-[3vw] ml-[2vw] z-50 absolute'>${cards.reduce((sum, card) => sum + card.balance, 0)}</p>
       {/* Cuciture
   <svg
 

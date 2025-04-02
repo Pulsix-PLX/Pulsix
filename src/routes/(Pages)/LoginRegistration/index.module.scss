@@ -8,6 +8,16 @@
   animation: hiddenButton 1s forwards;
 }
 
+.title{
+  font-size: 3vw;
+  top:-2vmin;
+  padding-left: 4vw;
+  padding-right: 4vw;
+  padding-bottom: 1vw;
+  padding-top: 1vw;
+  background-color: black;
+}
+
 .titles{
   font-size: clamp(20px,3vw,55px);
   color:hsl(0, 0%, 71%);
