@@ -17,7 +17,8 @@ interface InputProps {
     | 'date'
     | 'passwordConfirm'
     | 'username'
-    | 'phoneNumber';
+    | 'phoneNumber'
+    | 'usernameLogin';
   placeholder?: string;
   required?: boolean;
   label?: string;
@@ -168,6 +169,7 @@ export default function Input(props: InputProps) {
         break;
 
       case 'username':
+      case 'usernameLogin':
         try {
           console.log('Validating username:', inputValue);
           const response = await checkUsername(inputValue);
@@ -175,13 +177,21 @@ export default function Input(props: InputProps) {
 
           if (response === 'already exist') {
             SetForm(props.name, false);
-            setErrorMessage('Username già esistente');
+            if(props.type=='username'){
+            setErrorMessage('Username already exist');
+            }else{
+              setErrorMessage('');
+            }
           } else if (response.startsWith('error:')) {
             SetForm(props.name, false);
             setErrorMessage(`Errore verifica username: ${response.split(':')[1]}`);
           } else {
             SetForm(props.name, true);
+            if(props.type=='username'){
             setErrorMessage('Username avaible');
+            }else{
+            setErrorMessage('Username not found');
+            }
           }
         } catch (error) {
           console.error('Error in username validation:', error);
@@ -308,7 +318,7 @@ export default function Input(props: InputProps) {
           />
         </Match>
 
-        <Match when={props.type === 'username'}>
+        <Match when={props.type === 'username' || props.type === 'usernameLogin'}>
           <InputField
             name={props.name}
             placeholder={props.placeholder}

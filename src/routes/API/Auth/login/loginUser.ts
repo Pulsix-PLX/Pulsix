@@ -1,58 +1,54 @@
-import { action } from '@solidjs/router';
-import { setAuth } from '~/GlobalStores/AuthStore';
-import { db } from '~/Server/db.server';
+import { action } from '@solidjs/router'; // o @solidjs/start/server
+// Importa l'helper di Vinxi
+import { useSession } from "vinxi/http";
+import { db } from '~/Server/db.server'; // Ancora necessario per verificare le credenziali
 import * as bcrypt from 'bcryptjs';
-import { getFormValue } from '~/GlobalStores/FormStore';
+
+type AuthSessionData = {
+  userId?: string;
+  username?: string;
+};
 
 export const loginUser = action(async (data) => {
-  "use server";
+    'use server';
+    const { password, username } = data;
 
-  const {password,username}= data
- console.log(username, password)
-  try {
-    // Recupera l'utente dal database
-    const userResult = await db.query(
-      'SELECT id, username, password FROM users WHERE username = $1',
-      [username]
-    );
+    // 1. Verifica le credenziali utente (come prima)
+    try {
+        const userResult = await db.query<{ id: string; username: string; password: string }>(
+            'SELECT id, username, password FROM users WHERE username = $1', [username]
+        );
+        if (userResult.rows.length === 0) {
+            return { success: false, message: 'Credenziali non valide' };
+        }
+        const user = userResult.rows[0];
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
-    // Verifica se l'utente esiste
-    if (userResult.rows.length === 0) {
-      console.log('user not found')
-      return {
-        success: false,
-        message: 'Utente non trovato'
-      };
+        if (isPasswordCorrect) {
+            // 2. Autenticazione riuscita -> Usa useSession per salvare i dati nel cookie criptato
+            const session = await useSession<AuthSessionData>({
+                password: process.env.SESSION_SECRET!, // Assicurati che sia caricata!
+                name: "auth_session", // Scegli un nome per il cookie di sessione
+            });
+
+            await session.update({
+                userId: user.id,
+                username: user.username
+            });
+
+            console.log(`Sessione (cookie criptato) aggiornata per utente ${user.username}`);
+            return { success: true };
+
+        } else {
+            return { success: false, message: 'Credenziali non valide' };
+        }
+    } catch (error: any) {
+        console.error('Errore durante il login:', error);
+        // Gestisci anche potenziali errori da useSession o db.query
+         if (!process.env.SESSION_SECRET) {
+            console.error("SESSION_SECRET non è impostata!");
+            return { success: false, message: 'Errore di configurazione server.'}
+        }
+        return { success: false, message: 'Errore durante il processo di login' };
     }
-
-    // Prendi l'utente dal risultato
-    const user = userResult.rows[0];
-
-    // Confronta la password inserita con quella hashata
-    const isPasswordCorrect = await bcrypt.compare(
-      password, 
-      user.password
-    );
-
-    // Se la password è corretta
-    if (isPasswordCorrect) {
-      console.log('authenticate')
-      return {
-        success: true,
-        userId: user.id,
-        username: user.username
-      };
-    } else {
-      return {
-        success: false,
-        message: 'Password non corretta'
-      };
-    }
-  } catch (error: any) {
-    console.error('Errore durante il login:', error);
-    return {
-      success: false,
-      message: 'Errore durante il login'
-    };
-  }
 }, 'loginUser');
