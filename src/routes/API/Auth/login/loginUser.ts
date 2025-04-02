@@ -4,12 +4,11 @@ import { db } from '~/Server/db.server';
 import * as bcrypt from 'bcryptjs';
 import { getFormValue } from '~/GlobalStores/FormStore';
 
-export const loginUser = action(async () => {
+export const loginUser = action(async (data) => {
   "use server";
 
-  const username = getFormValue('username');
-  const rawPassword = getFormValue('password');
-
+  const {password,username}= data
+ console.log(username, password)
   try {
     // Recupera l'utente dal database
     const userResult = await db.query(
@@ -19,6 +18,7 @@ export const loginUser = action(async () => {
 
     // Verifica se l'utente esiste
     if (userResult.rows.length === 0) {
+      console.log('user not found')
       return {
         success: false,
         message: 'Utente non trovato'
@@ -30,16 +30,13 @@ export const loginUser = action(async () => {
 
     // Confronta la password inserita con quella hashata
     const isPasswordCorrect = await bcrypt.compare(
-      rawPassword, 
+      password, 
       user.password
     );
 
     // Se la password è corretta
     if (isPasswordCorrect) {
-      // Imposta l'autenticazione
-      setAuth('userId', user.id);
-      setAuth('username', user.username);
-
+      console.log('authenticate')
       return {
         success: true,
         userId: user.id,
@@ -51,7 +48,6 @@ export const loginUser = action(async () => {
         message: 'Password non corretta'
       };
     }
-
   } catch (error: any) {
     console.error('Errore durante il login:', error);
     return {

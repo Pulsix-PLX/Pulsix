@@ -4,11 +4,13 @@ import CanvasAnimation from "./UI/Waves";
 import { setShowMenu } from "~/components/Menus/Menu";
 import Title from "~/components/Title";
 import './index.scss'
+import { getAuth } from "~/GlobalStores/AuthStore";
 
 
 export default function Landing() {
     onMount(() => {
       setShowMenu(false);
+        console.log(getAuth('userId'), getAuth('username'))
     });
     onCleanup(() => {
       setShowMenu(true);
