@@ -5,14 +5,14 @@ import { setShowMenu } from "~/components/Menus/Menu";
 import Title from "~/components/Title";
 import './index.scss'
 import { useSession } from "vinxi/http";
-import { getCurrentUser } from "~/Server/auth.server";
+import { getUser } from "~/Server/auth.server";
 
 
 
 export default function Landing() {
     onMount(async() => {
       setShowMenu(false);
-      console.log(await getCurrentUser())
+      console.log(await getUser())
     });
     onCleanup(() => {
       setShowMenu(true);

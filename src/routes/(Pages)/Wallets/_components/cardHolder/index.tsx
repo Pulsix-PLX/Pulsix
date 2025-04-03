@@ -2,7 +2,7 @@ import { For } from 'solid-js';
 import Card from '../Card/Card';
 import style from './index.module.scss';
 
-export default function CardHolderProva() {
+export default function CardContainer() {
   const cards = [
     {
       color: '#FF5733', // Bright orange-red
