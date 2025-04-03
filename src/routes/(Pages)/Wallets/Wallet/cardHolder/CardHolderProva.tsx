@@ -12,7 +12,7 @@ export default function CardHolderProva() {
     {
       color: '#AA5733', // Bright orange-red
       wallet: 'revolut',
-      balance: 1000,
+      balance: 2000,
     },
     {
       color: '#BB0033', // Bright orange-red
@@ -22,7 +22,7 @@ export default function CardHolderProva() {
     {
       color: '#AA0000', // Bright orange-red
       wallet: 'revolut',
-      balance: 1000,
+      balance: 100,
     },
   ];
 
