@@ -11,7 +11,7 @@ interface CardProps {
 export default function Card(props: CardProps) {
   return (
     <div
-      class={`absolute w-[18.7vw] h-[10vw] ml-[1vh] ${style.card}`}
+      class={`absolute w-[18.7vw] h-[10vw] ml-[0.5vw] ${style.card}`}
       style={{
         'background-color': props.color,
         'margin-top': `-${props.position * 2+2}%`,
@@ -19,8 +19,8 @@ export default function Card(props: CardProps) {
       }}
     >
       <div class="flex flex-col h-full">
-        <p class="text-white font-bold ml-[15vw]">{props.wallet}</p>
-        <p class="text-white ml-[15vw]">${props.balance}</p>
+        <p class={` ml-[15vw] ${style.name}`}>{props.wallet}</p>
+        <p class={` ml-[15vw] ${style.balance}`}>${props.balance}</p>
       </div>
     </div>
   );

@@ -322,7 +322,7 @@ if (secondaryColor.startsWith('rgb(') && !secondaryColor.includes('rgba')) {
   
   return (
     <div 
-    class={`CM ${props.class}`}
+    class={`CM -mt-40 ${props.class}`}
       style={{
         display: "flex",
         overflow: "hidden",
@@ -342,7 +342,7 @@ if (secondaryColor.startsWith('rgb(') && !secondaryColor.includes('rgba')) {
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           style={{
-            "font-size": "30px", 
+            "font-size": "1.5vw", 
             padding: "0 10px",
             position: "relative",
             "letter-spacing": "1px",

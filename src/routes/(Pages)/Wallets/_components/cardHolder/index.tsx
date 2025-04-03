@@ -1,6 +1,6 @@
-import { createSignal, For } from 'solid-js';
+import { For } from 'solid-js';
+import Card from '../Card/Card';
 import style from './index.module.scss';
-import Card from './Card';
 
 export default function CardHolderProva() {
   const cards = [
@@ -9,25 +9,13 @@ export default function CardHolderProva() {
       wallet: 'revolut',
       balance: 1000,
     },
-    {
-      color: '#AA5733', // Bright orange-red
-      wallet: 'revolut',
-      balance: 2000,
-    },
-    {
-      color: '#BB0033', // Bright orange-red
-      wallet: 'revolut',
-      balance: 1000,
-    },
-    {
-      color: '#AA0000', // Bright orange-red
-      wallet: 'revolut',
-      balance: 100,
-    },
+
+
   ];
 
   return (
     <>
+    <div class='w-[40vw]'>
       {/* Cards */}
       <For each={cards}>
         {(card, index) => (
@@ -44,16 +32,18 @@ export default function CardHolderProva() {
         src="/public/img/wallets/backCardHolder.png"
         class={` w-[19.7vw] h-[20vw] ${style.backCardHolder}`}
         style={{
-          height: `${cards.length * 4.5 + 18}vh`,
-          'margin-top': `-${cards.length * 4.5}vh`,
+          height: `${cards.length * 2 +11 }vw`,
+          'margin-top': `-${cards.length * 2 +2.5}vw`,
           'z-index': -10,
         }}
       />
       {/* Front*/}
-      <img src="/public/img/wallets/frontCardHolder.png" class="w-[19.7vw] relative -mt-82" />
+      <img src="/public/img/wallets/frontCardHolder.png" class="w-[19.7vw] " />
 
       {/* Balance totale */}
-       <p class='-mt-[3vw] ml-[2vw] z-50 absolute'>${cards.reduce((sum, card) => sum + card.balance, 0)}</p>
+      <p class="-mt-[3vw] ml-[2vw] z-50 absolute text-[1.5vw]">
+        ${cards.reduce((sum, card) => sum + card.balance, 0)}
+      </p>
       {/* Cuciture
   <svg
 
@@ -79,6 +69,7 @@ export default function CardHolderProva() {
     />
   </svg>
 */}
+</div>
     </>
   );
 }
