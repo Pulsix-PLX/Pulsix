@@ -2,6 +2,7 @@ import { db } from '~/Server/db.server'; // Importa tipi e db client
 import { wallet } from '~/Server/types/wallet';
 
 export async function getWallets(userId: number): Promise<wallet[]> {
+    "use server";
     console.log(`[Server Function:fetchWalletsForUserId] Fetching per userId: ${userId}`);
     if (isNaN(userId)) {
         // È buona norma validare l'input anche qui
@@ -17,6 +18,6 @@ export async function getWallets(userId: number): Promise<wallet[]> {
     } catch (error: any) {
         console.error("[Server Function:fetchWalletsForUserId] Errore DB:", error);
         // Rilancia l'errore per farlo gestire da chi chiama (createResource o l'action)
-        throw new Error("Errore server durante il recupero dei wallet.");
+        throw new Error("Errore recupero wallets.");
     }
 }

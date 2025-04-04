@@ -2,22 +2,28 @@ import { For } from 'solid-js';
 import Card from '../Card/Card';
 import style from './index.module.scss';
 
-export default function CardContainer() {
-  const cards = [
+interface datas {
+data?:any[];
+}
+export interface card {
+  color: string;
+  wallet: string;
+  balance: number;
+}
+export default function CardContainer(props:datas) {
+  const cards:card[] = [
     {
       color: '#FF5733', // Bright orange-red
       wallet: 'revolut',
       balance: 1000,
     },
-
-
   ];
-
+console.log(props.data?.length);
   return (
     <>
     <div class='w-[40vw]'>
       {/* Cards */}
-      <For each={cards}>
+      <For each={props.data || cards}>
         {(card, index) => (
           <Card
             color={card.color}
@@ -32,8 +38,8 @@ export default function CardContainer() {
         src="/public/img/wallets/backCardHolder.png"
         class={` w-[19.7vw] h-[20vw] ${style.backCardHolder}`}
         style={{
-          height: `${cards.length * 2 +11 }vw`,
-          'margin-top': `-${cards.length * 2 +2.5}vw`,
+          height: `${ props.data?.length  * 2 +11 }vw`,
+          'margin-top': `-${props.data?.length  * 2 +2.5}vw`,
           'z-index': -10,
         }}
       />
