@@ -1,5 +1,6 @@
 .card{
 border-radius: 20px;
+border: solid 2px hsl(0, 0%, 11%);
 &:hover{
   transform: translateY(-1.8vw); // Slightly enlarge on hover
   transition: 0.3s ease-in-out;

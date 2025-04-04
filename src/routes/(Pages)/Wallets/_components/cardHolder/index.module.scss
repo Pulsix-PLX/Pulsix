@@ -2,9 +2,14 @@
 /* Aggiornamento del modulo SCSS */
 .backCardHolder {
   position: absolute;
+  width: clamp(10rem,17.7vw,35rem);
+
 }
 
 .frontCardHolder {
   position: absolute;
   width: 100%;
+
 }
+
+

@@ -10,5 +10,5 @@ export interface wallet {
   date_of_add:any;
   category_id:string;
   container_id: number | null;
-
+  color: any;
 }
