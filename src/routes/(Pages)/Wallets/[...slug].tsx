@@ -110,7 +110,7 @@ export default function Container() {
       <Switch>
         {/* Usa !data.loading invece di data() per mostrare la griglia anche se vuota */}
         <Match when={!data.loading && !data.error}>
-          <div class={`ml-[13vw] mt-[30vw] grid grid-cols-3 gap-x-0 gap-y-300`}>
+          <div class={`ml-[13vw] mt-[20vw] grid grid-cols-3 gap-x-0 gap-y-300`}>
             {/* Containers -> Itera su displayData (solo livello N) */}
             <For each={displayData()}>
               {(wallet: wallet, i) => (

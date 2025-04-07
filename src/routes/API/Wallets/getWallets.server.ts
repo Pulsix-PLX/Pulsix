@@ -33,7 +33,7 @@ export async function getWallets(userId: number): Promise<wallet[]> {
  */
 
 
-// Assumendo che la funzione si chiami così basandoci sui log
+/// Get all the wallets/containers in a container and the wallets/containers of the sub containers
 export async function getWalletsContainer(userId: number, containerId: number | null): Promise<wallet[]> {
     "use server";
 
@@ -115,3 +115,17 @@ export async function getWalletsContainer(userId: number, containerId: number | 
         throw new Error(`Errore DB durante recupero enhanced wallets per container ${containerId}.`);
     }
 }
+
+//WITH RECURSIVE ContainerHierarchy AS (
+    SELECT id, balance, container_id
+    FROM public.wallets
+    WHERE container_id = 14
+  
+    UNION ALL
+  
+    SELECT w.id, w.balance, w.container_id
+    FROM public.wallets w
+    JOIN ContainerHierarchy ch ON w.container_id = ch.id
+  )
+  SELECT SUM(balance) AS total_balance
+  FROM ContainerHierarchy;

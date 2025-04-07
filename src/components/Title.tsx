@@ -322,7 +322,7 @@ if (secondaryColor.startsWith('rgb(') && !secondaryColor.includes('rgba')) {
   
   return (
     <div 
-    class={`CM -mt-40 ${props.class}`}
+    class={`CM -mt-32 ${props.class}`}
       style={{
         display: "flex",
         overflow: "hidden",
