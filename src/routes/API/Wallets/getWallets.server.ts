@@ -1,25 +1,26 @@
+import { walletid } from '~/routes/(Pages)/Wallets';
 import { db } from '~/Server/db.server'; // Importa tipi e db client
 import { wallet } from '~/Server/types/wallet';
 
 export async function getWallets(userId: number): Promise<wallet[]> {
-    "use server";
-    console.log(`[Server Function:fetchWalletsForUserId] Fetching per userId: ${userId}`);
-    if (isNaN(userId)) {
-        // È buona norma validare l'input anche qui
-        throw new Error("User ID non valido fornito a fetchWalletsForUserId.");
-    }
-    try {
-        // La stessa logica di query di prima
-        const result = await db.query<wallet>(
-            'SELECT * FROM wallets WHERE user_id = $1 ORDER BY wallet_name',
-            [userId]
-        );
-        return result.rows ?? []; // Restituisce le righe o un array vuoto
-    } catch (error: any) {
-        console.error("[Server Function:fetchWalletsForUserId] Errore DB:", error);
-        // Rilancia l'errore per farlo gestire da chi chiama (createResource o l'action)
-        throw new Error("Errore recupero wallets.");
-    }
+  'use server';
+  console.log(`[Server Function:fetchWalletsForUserId] Fetching per userId: ${userId}`);
+  if (isNaN(userId)) {
+    // È buona norma validare l'input anche qui
+    throw new Error('User ID non valido fornito a fetchWalletsForUserId.');
+  }
+  try {
+    // La stessa logica di query di prima
+    const result = await db.query<wallet>(
+      'SELECT * FROM wallets WHERE user_id = $1 ORDER BY wallet_name',
+      [userId]
+    );
+    return result.rows ?? []; // Restituisce le righe o un array vuoto
+  } catch (error: any) {
+    console.error('[Server Function:fetchWalletsForUserId] Errore DB:', error);
+    // Rilancia l'errore per farlo gestire da chi chiama (createResource o l'action)
+    throw new Error('Errore recupero wallets.');
+  }
 }
 
 /**
@@ -32,29 +33,33 @@ export async function getWallets(userId: number): Promise<wallet[]> {
  * @returns Una Promise che risolve in un array di oggetti wallet.
  */
 
-
 /// Get all the wallets/containers in a container and the wallets/containers of the sub containers
-export async function getWalletsContainer(userId: number, containerId: number | null): Promise<wallet[]> {
-    "use server";
+export async function getWalletsContainer(
+  userId: number,
+  containerId: number | null
+): Promise<wallet[]> {
+  'use server';
 
-    console.log(`[Server Function:getWalletsContainerEnhanced] Fetching per userId: ${userId}, containerId: ${containerId}`);
+  console.log(
+    `[Server Function:getWalletsContainerEnhanced] Fetching per userId: ${userId}, containerId: ${containerId}`
+  );
 
-    // Validazione input
-    if (isNaN(userId)) {
-        console.error("[Server Function:getWalletsContainerEnhanced] User ID non valido fornito.");
-        throw new Error("User ID non valido fornito.");
-    }
-    if (containerId !== null && typeof containerId !== 'number') {
-         console.error("[Server Function:getWalletsContainerEnhanced] Container ID non valido fornito.");
-         throw new Error("Container ID non valido fornito.");
-    }
+  // Validazione input
+  if (isNaN(userId)) {
+    console.error('[Server Function:getWalletsContainerEnhanced] User ID non valido fornito.');
+    throw new Error('User ID non valido fornito.');
+  }
+  if (containerId !== null && typeof containerId !== 'number') {
+    console.error('[Server Function:getWalletsContainerEnhanced] Container ID non valido fornito.');
+    throw new Error('Container ID non valido fornito.');
+  }
 
-    // Determina se stiamo cercando gli elementi root
-    const isRootLevel = containerId === null;
+  // Determina se stiamo cercando gli elementi root
+  const isRootLevel = containerId === null;
 
-    try {
-        // --- Usa una CTE per combinare i risultati PRIMA di ordinare ---
-        const queryText = `
+  try {
+    // --- Usa una CTE per combinare i risultati PRIMA di ordinare ---
+    const queryText = `
             WITH CombinedWallets AS (
                 -- Selezione 1: Figli diretti (Livello N)
                 -- Se isRootLevel è true, seleziona quelli con container_id IS NULL
@@ -80,7 +85,9 @@ export async function getWalletsContainer(userId: number, containerId: number | 
                     wallets wn ON w_n_plus_1.container_id = wn.id -- Il genitore del nipote è il figlio diretto
                 WHERE
                     wn.user_id = $1 -- Il genitore (wn) appartiene all'utente
-                    AND ${isRootLevel ? 'wn.container_id IS NULL' : 'wn.container_id = $2'} -- Il genitore (wn) è al Livello N corretto
+                    AND ${
+                      isRootLevel ? 'wn.container_id IS NULL' : 'wn.container_id = $2'
+                    } -- Il genitore (wn) è al Livello N corretto
                     AND wn.type = 'container' -- Il genitore (wn) deve essere un container
                     AND w_n_plus_1.user_id = $1 -- Anche il nipote (w_n_plus_1) appartiene all'utente (sicurezza/consistenza)
             )
@@ -93,39 +100,69 @@ export async function getWalletsContainer(userId: number, containerId: number | 
                 wallet_name;               -- Infine, ordina per nome
         `;
 
-        // Prepara i parametri: solo [userId] se root, [userId, containerId] altrimenti
-        const queryParams = isRootLevel ? [userId] : [userId, containerId];
+    // Prepara i parametri: solo [userId] se root, [userId, containerId] altrimenti
+    const queryParams = isRootLevel ? [userId] : [userId, containerId];
 
-        // Log per debugging
-        console.log(`[Server Function:getWalletsContainerEnhanced] Query: ${queryText.replace(/\s+/g, ' ')}`); // Query pulita per leggibilità
-        console.log(`[Server Function:getWalletsContainerEnhanced] Params: ${JSON.stringify(queryParams)}`);
+    // Log per debugging
+    console.log(
+      `[Server Function:getWalletsContainerEnhanced] Query: ${queryText.replace(/\s+/g, ' ')}`
+    ); // Query pulita per leggibilità
+    console.log(
+      `[Server Function:getWalletsContainerEnhanced] Params: ${JSON.stringify(queryParams)}`
+    );
 
+    // Esegui la query
+    const result = await db.query<wallet>(queryText, queryParams);
 
-        // Esegui la query
-        const result = await db.query<wallet>(queryText, queryParams);
-
-        return result.rows ?? [];
-
-    } catch (error: any) {
-        console.error("[Server Function:getWalletsContainerEnhanced] Errore DB:", error);
-        if (error.code) {
-           console.error(`DB Error Code: ${error.code}`); // Logga il codice errore specifico
-        }
-        // Rilancia un errore più specifico o generico
-        throw new Error(`Errore DB durante recupero enhanced wallets per container ${containerId}.`);
+    return result.rows ?? [];
+  } catch (error: any) {
+    console.error('[Server Function:getWalletsContainerEnhanced] Errore DB:', error);
+    if (error.code) {
+      console.error(`DB Error Code: ${error.code}`); // Logga il codice errore specifico
     }
+    // Rilancia un errore più specifico o generico
+    throw new Error(`Errore DB durante recupero enhanced wallets per container ${containerId}.`);
+  }
 }
 
-//WITH RECURSIVE ContainerHierarchy AS (
-    SELECT id, balance, container_id
-    FROM public.wallets
-    WHERE container_id = 14
-  
-    UNION ALL
-  
-    SELECT w.id, w.balance, w.container_id
-    FROM public.wallets w
-    JOIN ContainerHierarchy ch ON w.container_id = ch.id
-  )
-  SELECT SUM(balance) AS total_balance
-  FROM ContainerHierarchy;
+type TotalBalanceResult = {
+  total_balance: number | null; // Può essere null se SUM non trova righe
+};
+
+export async function getWalletsSub(walletid: number): Promise<TotalBalanceResult[]> {
+  'use server'; // Nota: 'use server' va all'inizio del file o della funzione esportata
+
+  try {
+    // La query restituisce una riga con SUM(balance) AS total_balance
+    const result = await db.query<TotalBalanceResult>( // Usa il tipo corretto qui
+      'WITH RECURSIVE ContainerHierarchy AS (SELECT id, balance, container_id FROM public.wallets WHERE container_id = $1 UNION ALL SELECT w.id, w.balance, w.container_id FROM public.wallets w JOIN ContainerHierarchy ch ON w.container_id = ch.id) SELECT SUM(balance) AS total_balance FROM ContainerHierarchy;',
+      [walletid]
+    );
+    // Restituisce le righe (dovrebbe essere 0 o 1 riga) o un array vuoto
+    return result.rows ?? [];
+  } catch (error: any) {
+    console.error('[Server Function:getWalletsSub] Errore DB:', error);
+    // Rilancia l'errore per farlo gestire da chi chiama
+    throw new Error('Errore recupero somma wallets.');
+  }
+}
+
+export async function getWalletName(walletid: number | null) {
+  'use server'; // Nota: 'use server' va all'inizio del file o della funzione esportata
+
+  try {
+    // La query restituisce una riga con SUM(balance) AS total_balance
+    const result = await db.query(
+      // Usa il tipo corretto qui
+      'SELECT wallet_name, type FROM wallets WHERE id = $1;',
+      [walletid]
+    );
+    // Restituisce le righe (dovrebbe essere 0 o 1 riga) o un array vuoto
+    return result.rows ?? [];
+  } catch (error: any) {
+    console.error('[Server Function:getWalletsSub] Errore DB:', error);
+    // Rilancia l'errore per farlo gestire da chi chiama
+    throw new Error('Errore recupero somma wallets.');
+  }
+}
+

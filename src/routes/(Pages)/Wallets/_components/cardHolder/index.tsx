@@ -1,11 +1,13 @@
-import { For } from 'solid-js';
+import { createResource, For } from 'solid-js';
 import Card from './Card/Card';
 import style from './index.module.scss';
+import { getWalletsSub } from '~/routes/API/Wallets/getWallets.server';
 
 interface datas {
   name: string;
   id: number;
   data: any[];
+  currency: string;
 }
 export interface card {
   color: any;
@@ -20,68 +22,54 @@ export default function CardContainer(props: datas) {
       balance: 1000,
     },
   ];
+
+    const [data, { mutate, refetch }] = createResource(
+      props.id, // Source Signal
+      getWalletsSub // Fetcher Function
+    );
   return (
     <>
-  
-        {/* Cards */}
-        <For each={props.data || cards}>
-          {(card, index) => {
-            console.log(`Rendering card at index ${index()}:`, card.color);
-            return (
-              <Card
-          color={card.color}
-          wallet={card.wallet}
-          balance={card.balance}
-          position={index()} // Smaller increment to create overlap
-              />
-            );
-          }}
-        </For>
-        {/* Back */}
-        <img
-          src="/public/img/wallets/backCardHolder.png"
-          class={` ${style.backCardHolder}`}
-          style={{
-            height: `${props.data?.length * 2 + 11}vw`,
-            'margin-top': `-${props.data?.length * 2 + 2.5}vw`,
-            'z-index': -10,
-          }}
-        />
+      {/* Cards */}
+      <For each={props.data || cards}>
+        {(card, index) => {
+          console.log(`Rendering card at index ${index()}:`, card.color);
+          return (
+            <Card
+              color={card.color}
+              wallet={card.wallet}
+              balance={card.balance}
+              position={index()} // Smaller increment to create overlap
+            />
+          );
+        }}
+      </For>
+      {/* Back */}
+      <img
+        src="/public/img/wallets/backCardHolder.png"
+        class={` ${style.backCardHolder}`}
+        style={{
+          height: `${props.data?.length * 2 + 11}vw`,
+          'margin-top': `-${props.data?.length * 2 + 2.5}vw`,
+          'z-index': -10,
+        }}
+      />
 
-   {/* Contenitore Relativo per Immagine Frontale e Testi */}
-   <div class="relative w-[17.7vw] inline-block"> {/* Aggiunto inline-block per rispettare la larghezza */}
-        {/* Front Image */}
+      {/* Contenitore Relativo per Immagine Frontale e Testi */}
+      <div class="relative w-[17.7vw] inline-block">
         <img
           src="/img/wallets/frontCardHolder.png" // Rimosso /public/
           class="block w-full" /* block previene spazio extra sotto l'img, w-full la adatta al div */
         />
-
         {/* Nome del Wallet (Centrato Orizzontalmente) */}
         <p class="absolute bottom-[3.8vw] left-1/2 transform -translate-x-1/2 z-10 text-[1.2vw] text-center whitespace-nowrap w-[90%] overflow-hidden text-ellipsis">
-          {/*
-            - absolute: posiziona rispetto al div relativo
-            - bottom-[3.8vw]: Distanza dal fondo (aggiusta questo valore!)
-            - left-1/2: Sposta l'inizio del testo al 50% del contenitore
-            - transform -translate-x-1/2: Tira indietro il testo del 50% della SUA larghezza per centrarlo
-            - z-10: Assicura sia sopra l'immagine frontale
-            - text-center: Centra il testo se dovesse andare a capo (improbabile con nowrap)
-            - whitespace-nowrap: Evita che il testo vada a capo
-            - w-[90%]: Limita la larghezza per evitare che esca se troppo lungo
-            - overflow-hidden text-ellipsis: Mostra "..." se il testo è troppo lungo per w-[90%]
-          */}
           {props.name}
         </p>
-
         {/* Bilancio Totale (Centrato Orizzontalmente sotto il nome) */}
         <p class="absolute bottom-[0.5vw] left-1/4 transform -translate-x-1/2 z-10 text-[1.5vw] text-center whitespace-nowrap">
-          {/*
-            - Stessa tecnica di centraggio del nome
-            - bottom-[1.5vw]: Distanza dal fondo (più in basso del nome, aggiusta!)
-          */}
-         $ {props.data.reduce((sum, card) => sum + card.balance, 0)}
+           {data()?.[0]?.total_balance ?? 0}{props.currency}
         </p>
       </div>
-        {/* Cuciture
+      {/* Cuciture
   <svg
 
     viewBox="0 0 290 240"
@@ -106,7 +94,6 @@ export default function CardContainer(props: datas) {
     />
   </svg>
 */}
-     
     </>
   );
 }

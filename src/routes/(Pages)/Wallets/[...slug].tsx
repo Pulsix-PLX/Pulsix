@@ -1,82 +1,150 @@
-import { createResource, createSignal, For, Match, onMount, Switch, Show, createMemo } from 'solid-js'; // Aggiunto Show e createMemo
+import { A, useLocation, useParams } from '@solidjs/router'; 
+import {
+  createMemo,
+  createResource,
+  createSignal, 
+  For,
+  Match,
+  onMount,
+  Show,
+  Switch,
+} from 'solid-js';
 import Title from '~/components/Title';
-import { getWallets, getWalletsContainer } from '~/routes/API/Wallets/getWallets.server';
-import { getUser, getUserId } from '~/Server/auth.server';
-import type { wallet } from '~/Server/types/wallet'; // Importa il tipo
-import Card from './_components/cardHolder/Card/Card';
+import { getWalletName, getWalletsContainer, getWalletsSub } from '~/routes/API/Wallets/getWallets.server';
+import { getUserId } from '~/Server/auth.server'; 
+import type { wallet } from '~/Server/types/wallet';
+import { setWalletId } from '.'; 
+import Card from './_components/Card';
 import CardContainer, { card } from './_components/cardHolder';
-import Wallet from './_components/Wallet';
-import { A, useLocation, useParams } from '@solidjs/router';
-import { setWalletId, walletid } from '.';
+import Wallet from './Wallet';
+
+// Tipo per l'input del fetcher 
+type ResourceSourceInput = {
+  userId: number; // Garantito not-null quando il fetcher parte
+  containerId: number | null;
+};
+type WalletNameInfo = {
+  wallet_name: string;
+  type: 'container' | 'wallet'; 
+};
+type CombinedItemInfo = {
+  name: string | null;
+  type: 'container' | 'wallet' | null; 
+  content: wallet[] | null; 
+};
 
 export default function Container() {
-  const [userId, setUserId] = createSignal<number | null>(null);
+  const [userId, setUserId] = createSignal<number | null>(null); 
 
-  /// --- recupero l'ID utente immediatamente --- ///
+  // --- Recupero userId
   onMount(async () => {
-    const id = await getUserId();
-    setUserId(id);
-  });
-  const params = useParams();
-
-  // --- Memo per calcolare l'ID del container corrente dallo slug ---
-  // Questo ci serve per filtrare i dati da visualizzare
-  const currentContainerId = createMemo<number | null>(() => {
-    const fullSlug = params.slug ?? "";
-    const segments = fullSlug.split('/');
-    // Prendiamo l'ultimo segmento NON VUOTO (gestisce trailing slash)
-    const lastValidSegment = segments.filter(s => s !== '').pop();
-    const segmentAsInteger = parseInt(lastValidSegment || "", 10); // Usa "" se non c'è ultimo segmento valido
-    const id = !isNaN(segmentAsInteger) ? segmentAsInteger : null;
-    console.log("Memo [currentContainerId]: Calculated from slug:", fullSlug, "->", id);
-    return id;
-  }, null); // Valore iniziale null
-
-  /// --- Recupero wallets in base allo slug (ottiene Livello N + Livello N+1 wallets) ---
-  const [data, { mutate, refetch }] = createResource(
-    // La source dipende ancora da userId e params.slug per triggerare il fetch
-    () => ({
-      userId: userId(),
-      slug: params.slug
-    }),
-    // Il fetcher chiama la funzione server aggiornata
-    async ({ userId, slug }) => {
-      if (!userId) {
-        console.log("Fetcher: User ID non disponibile, skip fetch.");
-        return undefined;
+    try {
+      const id = await getUserId();
+      if (id === undefined || id === null) {
+        console.warn('[onMount] getUserId ha restituito null/undefined.');
+        setUserId(null);
+      } else {
+        setUserId(id);
       }
-       // Ricalcoliamo l'ID qui specificamente per il fetch, usando la stessa logica del memo
-       const fullSlug = slug ?? "";
-       const segments = fullSlug.split('/');
-       const lastValidSegment = segments.filter(s => s !== '').pop();
-       const segmentAsInteger = parseInt(lastValidSegment || "", 10);
-       const containerIdForFetch = !isNaN(segmentAsInteger) ? segmentAsInteger : null;
-       console.log(`Workspaceer: Calling getWalletsContainer for User ID: ${userId}, Container ID: ${containerIdForFetch}`);
+    } catch (error) {
+      console.error('[onMount] Errore durante recupero userId:', error);
+      setUserId(null);
+    }
+  });
 
-      // Chiama la funzione fetcher API aggiornata (che restituisce N e N+1)
-      return getWalletsContainer(userId, containerIdForFetch);
+  // --- Calculate CurrentContainerId from slug
+  const params = useParams();
+  const currentContainerId = createMemo<number | null>(() => {
+    const fullSlug = params.slug ?? '';
+    const segments = fullSlug.split('/');
+    const lastValidSegment = segments.filter((s) => s !== '').pop();
+    const segmentAsInteger = parseInt(lastValidSegment || '', 10);
+    const id = !isNaN(segmentAsInteger) ? segmentAsInteger : null;
+    return id;
+  }, null);
+
+  // --- unique resource for name, type, content
+
+  const [combinedData] = createResource(
+    // Source: userId e currentContainerId
+    (): ResourceSourceInput | null | false => {
+      const uId = userId();
+      const cId = currentContainerId();
+      if (uId !== null && uId !== undefined) {
+        return { userId: uId, containerId: cId };
+      } else {
+        return null;
+      }
+    },
+
+    // Fetcher
+    async (sourceInput: ResourceSourceInput): Promise<CombinedItemInfo | undefined> => {
+
+      const { userId, containerId: itemId } = sourceInput; 
+
+      try {
+        let itemName: string | null = null;
+        let itemType: 'container' | 'wallet' | null = null;
+        let itemContent: wallet[] | null = null;
+
+        if (itemId === null) {
+          // Case Root unused
+          itemName = 'My Wallets';
+          itemType = 'container';
+          console.log('[Fetcher Updated] Caso ROOT, recupero contenuto...');
+          itemContent = (await getWalletsContainer(userId, null)) ?? [];
+        } else {
+          // Case Item: get name and type
+          const nameTypeResult: WalletNameInfo[] = await getWalletName(itemId); //return name and type
+
+          if (nameTypeResult && nameTypeResult.length > 0) {
+            const itemInfo = nameTypeResult[0];
+            itemName = itemInfo.wallet_name;
+            itemType = itemInfo.type; // <-- Ecco il tipo!
+
+            // Get only if it is a container
+            if (itemType === 'container') {
+              itemContent = (await getWalletsContainer(userId, itemId)) ?? [];
+            } else {
+              console.log(`[Fetcher Updated] È ${itemType}, non recupero contenuto.`);
+            }
+          } else {
+            console.warn(`[Fetcher Updated] Item non trovato per ID: ${itemId}`);
+            itemName = 'Elemento Non Trovato';
+          }
+        }
+
+        const result: CombinedItemInfo = { name: itemName, type: itemType, content: itemContent };
+        return result;
+      } catch (error) {
+        console.error('[Fetcher Updated] Errore:', error);
+        throw error;
+      }
     }
   );
 
-  /// --- Funzione getCards (invariata) ---
-  ///      Filtra l'array completo `data()` per trovare i figli di un container specifico
+  // --- Funzioni Ausiliarie (getCards, displayData, createWalletPath) ---
+
+  //Get cards for cardHolder
   function getCards(parentId: number): card[] {
-    // console.log(`getCards: called for parentId ${parentId}`);
-    const allData = data();
-    if (!allData) return [];
-    const filteredCards = allData
-      .filter((wallet: wallet) => wallet.container_id == parentId && wallet.type == 'wallet') // Assicurati sia un wallet!
-      .map((wallet: wallet): card => ({ // Usa map per trasformare
-        color: wallet.color,
-        wallet: wallet.wallet_name,
-        balance: wallet.balance,
-      }));
-    // console.log(`getCards: found ${filteredCards.length} cards for parentId ${parentId}`);
+    const allDataContent = combinedData()?.content;
+    if (!allDataContent) return [];
+    const filteredCards = allDataContent
+      .filter((w) => w.container_id === parentId && w.type === 'wallet')
+      .map((w): card => ({ color: w.color, wallet: w.wallet_name, balance: w.balance }));
     return filteredCards;
   }
 
+  //filter for only the wallets/containers that are in the current container
+  const displayData = createMemo(() => {
+    const allFetchedContent = combinedData()?.content;
+    const targetLevelId = currentContainerId();
+    if (!allFetchedContent) return [];
+    const filtered = allFetchedContent.filter((w) => w.container_id === targetLevelId);
+    return filtered;
+  });
 
-  /// --- Funzione createWalletPath (invariata) ---
+  //path creation
   const createWalletPath = (currentPath: string, walletId: number | string): string => {
     const basePath = currentPath.endsWith('/') ? currentPath.slice(0, -1) : currentPath;
     return `${basePath}/${walletId}`;
@@ -85,60 +153,82 @@ export default function Container() {
   const location = useLocation();
   const currentPathname = location.pathname;
 
-  // --- Memo per Filtrare i Dati da Visualizzare nella Griglia Principale ---
-  //    Questo memo prende l'array completo `data()` e restituisce solo
-  //    gli elementi il cui `container_id` corrisponde al `currentContainerId` calcolato dallo slug.
-  const displayData = createMemo(() => {
-    const allFetchedData = data(); // Dati combinati (N e N+1)
-    const targetLevelId = currentContainerId(); // ID del livello N (o null per root)
-
-    if (!allFetchedData) {
-        console.log("Memo [displayData]: No fetched data available.");
-        return [];
-    }
-     console.log(`Memo [displayData]: Filtering for targetLevelId: ${targetLevelId}`);
-    // Filtra per tenere solo gli elementi del livello N
-    const filtered = allFetchedData.filter(wallet => wallet.container_id === targetLevelId);
-    console.log(`Memo [displayData]: Found ${filtered.length} items for current level.`);
-    return filtered;
-  });
+      // Get total balance for the current container
+      const [data, { mutate, refetch }] = createResource(
+        ()=>currentContainerId(), // get containerId
+        getWalletsSub // Fetcher Function
+      );
 
   return (
     <>
-      <Show when={data.loading}><div>Caricamento...</div></Show>
-      <Show when={data.error}><div>Errore nel caricamento: {data.error?.message}</div></Show>
-      <Switch>
-        {/* Usa !data.loading invece di data() per mostrare la griglia anche se vuota */}
-        <Match when={!data.loading && !data.error}>
-          <div class={`ml-[13vw] mt-[20vw] grid grid-cols-3 gap-x-0 gap-y-300`}>
-            {/* Containers -> Itera su displayData (solo livello N) */}
-            <For each={displayData()}>
-              {(wallet: wallet, i) => (
-                <Switch>
-                  <Match when={wallet.type == 'container'}>
-                    <A class="z-30" href={createWalletPath(currentPathname, wallet.id)} onclick={() => {/*...*/ }}>
-                      {/* getCards continua a usare l'array completo data() per trovare i figli N+1 */}
-                      <CardContainer data={getCards(wallet.id)} id={wallet.id} name={wallet.wallet_name}></CardContainer>
+      <Show when={combinedData.state === 'ready'} fallback={<Title title={'Loading title...'} />}>
+        <Title title={combinedData()?.name ?? 'Wallet'} />
+      </Show>
+      {/* Error */}
+      <Show when={combinedData.error}>
+        <div class="text-red-500 ml-[13vw] mt-2">
+          Error loading data: {combinedData.error.message}
+        </div>
+      </Show>
+
+      {/* Loading */}
+      <Show when={combinedData.loading || combinedData.state === 'unresolved'}>
+        <div class="ml-[13vw] mt-5">Loading...</div>
+      </Show>
+
+       {/* Container */}
+      <Show when={combinedData()?.type === 'container'}>
+       {/* Total */}
+        <p class="CM mt-100">$ {data()?.[0]?.total_balance ?? 0}</p>
+        <Switch>
+          {/* Data avaible */}
+          <Match when={combinedData.state === 'ready' && combinedData()}>
+            <div class={`ml-[13vw] mt-[20vw] grid grid-cols-3 gap-x-0 gap-y-300`}>
+              {/* Containers */}
+              <For each={displayData().filter((item) => item.type === 'container')}>
+                {(container: wallet) => (
+                  <A
+                    class="z-30 block"
+                    href={createWalletPath(currentPathname, container.id)}
+                    onclick={() => setWalletId(container.id)}
+                  >
+                    {' '}
+                    <CardContainer
+                      data={getCards(container.id)}
+                      id={container.id}
+                      name={container.wallet_name}
+                      currency={container.currency}
+                    />{' '}
+                  </A>
+                )}
+              </For>
+              {/* Cards */}
+              <For each={displayData().filter((item) => item.type === 'wallet')}>
+                {(wallet: wallet) => (
+                  <div class="mb-50 mt-50 z-50 px-2">
+                    <A
+                      class="z-30 block"
+                      href={createWalletPath(currentPathname, wallet.id)}
+                      onclick={() => setWalletId(wallet.id)}
+                    >
+                      <Card name={wallet.wallet_name} balance={wallet.balance}/>
                     </A>
-                  </Match>
-                </Switch>
-              )}
-            </For>
-            {/* Wallets -> Itera su displayData (solo livello N) */}
-            <For each={displayData()}>
-              {(wallet: wallet, i) => (
-                <Switch>
-                  <Match when={wallet.type == 'wallet'}>
-                    <div class="mb-50 mt-50 z-50">
-                      <Wallet name={wallet.wallet_name}></Wallet>
-                    </div>
-                  </Match>
-                </Switch>
-              )}
-            </For>
-          </div>
-        </Match>
-      </Switch>
+                  </div>
+                )}
+              </For>
+            </div>
+            {/* Container empty */}
+            <Show when={displayData().length === 0 && combinedData.state === 'ready'}>
+              <div class="CM mt-400 text-gray-500">Nothing in this container</div>
+            </Show>
+          </Match>
+        </Switch>
+      </Show>
+      
+      {/* Wallet */}
+      <Show when={combinedData()?.type === 'wallet'}>
+        <Wallet></Wallet>
+      </Show>
     </>
   );
 }
