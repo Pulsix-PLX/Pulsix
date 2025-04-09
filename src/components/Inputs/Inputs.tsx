@@ -18,13 +18,15 @@ interface InputProps {
     | 'passwordConfirm'
     | 'username'
     | 'phoneNumber'
-    | 'usernameLogin';
+    | 'usernameLogin'
+    | 'color';
   placeholder?: string;
   required?: boolean;
   label?: string;
   class?: string;
   style?: string;
   mountOn?:boolean;
+  defaultValue?: string;
   ValidationSchema?: (value: any) => boolean;
 }
 export  const [value, setValue] = createSignal('');
@@ -39,6 +41,7 @@ export default function Input(props: InputProps) {
   const [touched, setTouched] = createSignal<boolean>(false);
 
   onMount(() => {
+
     // Se il campo è richiesto, inizializzalo come non valido (false)
     // Se non è richiesto, inizializzalo come valido (true)
     if (props.required) {
@@ -304,6 +307,7 @@ export default function Input(props: InputProps) {
             style={props.style}
             type="password"
             onInput={validateInput}
+            initialValue={props.defaultValue}
           />
         </Match>
 
@@ -337,6 +341,7 @@ export default function Input(props: InputProps) {
             style={props.style}
             type="text"
             onInput={validateInput}
+            initialValue={props.defaultValue}
           />
         </Match>
         <Match when={props.type === 'phoneNumber'}>
@@ -357,6 +362,7 @@ export default function Input(props: InputProps) {
             style={props.style}
             type="text"
             onInput={validateInput}
+            initialValue={value()}
           />
         </Match>
 
@@ -383,6 +389,18 @@ export default function Input(props: InputProps) {
             onChange={validateInput}
           />
         </Match>
+        <Match when={props.type === 'color'}>
+          <input
+            name={props.name}
+            placeholder={props.placeholder}
+            class={props.class}
+            style={props.style}
+            type="color"
+            onInput={validateInput}
+            value={props.defaultValue}
+          />
+        </Match>
+      
       </Switch>
 
       {/* Mostra il messaggio di errore solo se il campo è stato toccato.*/}

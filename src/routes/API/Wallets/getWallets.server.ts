@@ -103,14 +103,6 @@ export async function getWalletsContainer(
     // Prepara i parametri: solo [userId] se root, [userId, containerId] altrimenti
     const queryParams = isRootLevel ? [userId] : [userId, containerId];
 
-    // Log per debugging
-    console.log(
-      `[Server Function:getWalletsContainerEnhanced] Query: ${queryText.replace(/\s+/g, ' ')}`
-    ); // Query pulita per leggibilità
-    console.log(
-      `[Server Function:getWalletsContainerEnhanced] Params: ${JSON.stringify(queryParams)}`
-    );
-
     // Esegui la query
     const result = await db.query<wallet>(queryText, queryParams);
 

@@ -1,17 +1,24 @@
 // Card.tsx
+
+import { A } from '@solidjs/router';
 import style from './Card.module.scss';
+import SetWallet from '../../SetWallet';
 
 interface CardProps {
   color: string;
   wallet: string;
   balance: number;
   position: number;
+  currency:string
+  id:number;
 }
 
 export default function Card(props: CardProps) {
 
   return (
-    <div
+    <>
+    <A
+    href={`/wallets/${props.id}`}
     class={`absolute w-[16.7vw] h-[10vw] ml-[0.5vw] ${style.card} flex justify-end items-start pr-[1vw]`} // 
     style={{
       'background-color': `${props.color}`,
@@ -21,12 +28,11 @@ export default function Card(props: CardProps) {
     }}
   >
 
-    <div class="flex flex-col max-w-full">
-      {/* Allinea il testo a destra e permetti a parole lunghe di andare a capo */}
+    <div class="">
       <p class={` ${style.name} text-${props.color=='white'?'black':'white'} text-right break-words`}>{props.wallet}</p>
-      {/* Allinea anche il saldo a destra */}
-      <p class={` ${style.balance} text-right`}>${props.balance}</p>
+      <p class={` ${style.balance} text-right`}>{props.balance}{props.currency=='USD'?'$':props.currency=='EUR'? '€': props.currency}</p>
     </div>
-  </div>
+  </A>
+  </>
   );
 }

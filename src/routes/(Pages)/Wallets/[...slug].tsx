@@ -1,8 +1,8 @@
-import { A, useLocation, useParams } from '@solidjs/router'; 
+import { A, useLocation, useParams } from '@solidjs/router';
 import {
   createMemo,
   createResource,
-  createSignal, 
+  createSignal,
   For,
   Match,
   onMount,
@@ -10,31 +10,40 @@ import {
   Switch,
 } from 'solid-js';
 import Title from '~/components/Title';
-import { getWalletName, getWalletsContainer, getWalletsSub } from '~/routes/API/Wallets/getWallets.server';
-import { getUserId } from '~/Server/auth.server'; 
+import {
+  getWalletName,
+  getWalletsContainer,
+  getWalletsSub,
+} from '~/routes/API/Wallets/getWallets.server';
+import { getUserId } from '~/Server/auth.server';
 import type { wallet } from '~/Server/types/wallet';
-import { setWalletId } from '.'; 
+import { setWalletId } from '.';
 import Card from './_components/Card';
-import CardContainer, { card } from './_components/cardHolder';
+import CardContainer, { card, edit } from './_components/cardHolder';
 import Wallet from './Wallet';
+import {
+  calculateConvertedTotal,
+  ConvertedTotalResult,
+} from '~/routes/API/exchangeRates/exchangeRates';
+import SetWallet from './_components/SetWallet';
 
-// Tipo per l'input del fetcher 
+// Tipo per l'input del fetcher
 type ResourceSourceInput = {
   userId: number; // Garantito not-null quando il fetcher parte
   containerId: number | null;
 };
 type WalletNameInfo = {
   wallet_name: string;
-  type: 'container' | 'wallet'; 
+  type: 'container' | 'wallet';
 };
 type CombinedItemInfo = {
   name: string | null;
-  type: 'container' | 'wallet' | null; 
-  content: wallet[] | null; 
+  type: 'container' | 'wallet' | null;
+  content: wallet[] | null;
 };
 
 export default function Container() {
-  const [userId, setUserId] = createSignal<number | null>(null); 
+  const [userId, setUserId] = createSignal<number | null>(null);
 
   // --- Recupero userId
   onMount(async () => {
@@ -66,10 +75,11 @@ export default function Container() {
   // --- unique resource for name, type, content
 
   const [combinedData] = createResource(
-    // Source: userId e currentContainerId
+    // Source: userId e currentContainerId e edit()
     (): ResourceSourceInput | null | false => {
       const uId = userId();
       const cId = currentContainerId();
+      const a = edit();
       if (uId !== null && uId !== undefined) {
         return { userId: uId, containerId: cId };
       } else {
@@ -79,8 +89,7 @@ export default function Container() {
 
     // Fetcher
     async (sourceInput: ResourceSourceInput): Promise<CombinedItemInfo | undefined> => {
-
-      const { userId, containerId: itemId } = sourceInput; 
+      const { userId, containerId: itemId } = sourceInput;
 
       try {
         let itemName: string | null = null;
@@ -131,7 +140,15 @@ export default function Container() {
     if (!allDataContent) return [];
     const filteredCards = allDataContent
       .filter((w) => w.container_id === parentId && w.type === 'wallet')
-      .map((w): card => ({ color: w.color, wallet: w.wallet_name, balance: w.balance }));
+      .map(
+        (w): card => ({
+          color: w.color,
+          wallet: w.wallet_name,
+          balance: w.balance,
+          currency: w.currency,
+          id: w.id,
+        })
+      );
     return filteredCards;
   }
 
@@ -153,66 +170,102 @@ export default function Container() {
   const location = useLocation();
   const currentPathname = location.pathname;
 
-      // Get total balance for the current container
-      const [data, { mutate, refetch }] = createResource(
-        ()=>currentContainerId(), // get containerId
-        getWalletsSub // Fetcher Function
-      );
+  /// --- Converted total current container ---
+
+  // Base currency for conversion
+  const TARGET_DISPLAY_CURRENCY = 'USD';
+
+  const [convertedTotalData] = createResource(
+    () => ({
+      containerId: currentContainerId(),
+      targetCurrency: TARGET_DISPLAY_CURRENCY,
+    }),
+
+    async (sourceData): Promise<ConvertedTotalResult | null> => {
+      const { containerId, targetCurrency } = sourceData;
+
+      try {
+        const userId = await getUserId();
+        if (userId === null) {
+          throw new Error('Utente non autenticato per calcolo totale.');
+        }
+
+        const result = await calculateConvertedTotal(containerId, targetCurrency, userId);
+        return result;
+      } catch (error) {
+        console.error(
+          `[ConvertedTotalResource] Error fetching/calculating total for container ${containerId}:`,
+          error
+        );
+        throw error;
+      }
+    }
+  );
 
   return (
     <>
       <Show when={combinedData.state === 'ready'} fallback={<Title title={'Loading title...'} />}>
         <Title title={combinedData()?.name ?? 'Wallet'} />
       </Show>
-      {/* Error */}
+      {/* Error data */}
       <Show when={combinedData.error}>
         <div class="text-red-500 ml-[13vw] mt-2">
           Error loading data: {combinedData.error.message}
         </div>
       </Show>
 
-      {/* Loading */}
+      {/* Loading data */}
       <Show when={combinedData.loading || combinedData.state === 'unresolved'}>
         <div class="ml-[13vw] mt-5">Loading...</div>
       </Show>
 
-       {/* Container */}
+      {/* Container */}
       <Show when={combinedData()?.type === 'container'}>
-       {/* Total */}
-        <p class="CM mt-100">$ {data()?.[0]?.total_balance ?? 0}</p>
+        {/* Total */}
+        <p class="CM mt-100">
+          {(convertedTotalData()?.total_balance ?? 0).toLocaleString('it-IT', {
+            style: 'currency',
+            currency: convertedTotalData()?.currency_code ?? TARGET_DISPLAY_CURRENCY,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </p>
         <Switch>
           {/* Data avaible */}
-          <Match when={combinedData.state === 'ready' && combinedData()}>
+          <Match when={combinedData.state === 'ready' && combinedData() && edit()==null}>
             <div class={`ml-[13vw] mt-[20vw] grid grid-cols-3 gap-x-0 gap-y-300`}>
               {/* Containers */}
               <For each={displayData().filter((item) => item.type === 'container')}>
                 {(container: wallet) => (
-                  <A
-                    class="z-30 block"
+                  <CardContainer
+                    data={getCards(container.id)}
+                    id={container.id}
+                    name={container.wallet_name}
+                    currency={container.currency}
                     href={createWalletPath(currentPathname, container.id)}
-                    onclick={() => setWalletId(container.id)}
-                  >
-                    {' '}
-                    <CardContainer
-                      data={getCards(container.id)}
-                      id={container.id}
-                      name={container.wallet_name}
-                      currency={container.currency}
-                    />{' '}
-                  </A>
+                    onclick={() => {
+                      setWalletId(container.id);
+                    }}
+                  />
                 )}
               </For>
               {/* Cards */}
               <For each={displayData().filter((item) => item.type === 'wallet')}>
                 {(wallet: wallet) => (
                   <div class="mb-50 mt-50 z-50 px-2">
-                    <A
-                      class="z-30 block"
-                      href={createWalletPath(currentPathname, wallet.id)}
-                      onclick={() => setWalletId(wallet.id)}
-                    >
-                      <Card name={wallet.wallet_name} balance={wallet.balance}/>
-                    </A>
+
+                      <Card
+                        name={wallet.wallet_name}
+                        balance={wallet.balance}
+                        currency={wallet.currency}
+                        nation={wallet.nation}
+                        category={wallet.category_id}
+                        color={wallet.color}
+                        href={createWalletPath(currentPathname, wallet.id)}
+                        onClick={() =>setWalletId(wallet.id)}
+                        id={wallet.id}
+                      />
+                    
                   </div>
                 )}
               </For>
@@ -222,9 +275,12 @@ export default function Container() {
               <div class="CM mt-400 text-gray-500">Nothing in this container</div>
             </Show>
           </Match>
+          <Match when={edit()}>
+            <SetWallet/>
+          </Match>
         </Switch>
       </Show>
-      
+
       {/* Wallet */}
       <Show when={combinedData()?.type === 'wallet'}>
         <Wallet></Wallet>

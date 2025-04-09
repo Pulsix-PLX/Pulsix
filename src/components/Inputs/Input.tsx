@@ -3,7 +3,7 @@ import './Input.css'
 
 interface InputProps {
   name: string;
-  type: 'text' | 'password' | 'email' | 'number' | 'date';
+  type: 'text' | 'password' | 'email' | 'number' | 'date' | 'color';
   placeholder?: string;
   required?: boolean;
   label?: string;
