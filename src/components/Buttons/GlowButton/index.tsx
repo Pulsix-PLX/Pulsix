@@ -2,7 +2,7 @@
 import { createSignal } from 'solid-js';
 import RiveCanvas from './riv';
 
-export default function Index() {
+export default function GlowButton() {
   const [isSelectedC, setIsSelectedC] = createSignal('');
 
   const handleStateChange = (newValue) => {

@@ -6,9 +6,9 @@ export interface wallet {
   nation:string;
   currency:string;
   description:string;
-  user_id:string;
+  user_id:number;
   date_of_add:any;
-  category_id:string;
+  category_id:number;
   container_id: number | null;
   color: any;
 }

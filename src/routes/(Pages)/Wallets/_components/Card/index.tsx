@@ -12,7 +12,7 @@ interface WalletProps {
   balance: number | null | undefined; // Saldo (ASSUMIAMO SIA IN EUR)
   currency: string | null | undefined; // Valuta ORIGINALE/TARGET in cui visualizzare
   nation: string | null | undefined; // Nazione (non usata qui, ma utile per il futuro)
-  category: string | null | undefined; // Categoria (non usata qui, ma utile per il futuro)
+  category: number | null | undefined; // Categoria (non usata qui, ma utile per il futuro)
   href: string; // Percorso per il link (non usato qui, ma utile per il futuro)
   onClick: () => void; // Funzione da eseguire al click (non usata qui, ma utile per il futuro)
   color?: string;

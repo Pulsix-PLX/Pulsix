@@ -1,0 +1,21 @@
+.buttonDelete{
+  background-color: hsla(0, 100%, 53%, 0.065);
+  &:hover{
+    background-color: hsla(0, 100%, 38%, 0.746);
+    box-shadow: 0 0 10px hsla(0, 100%, 38%, 0.746);
+    transition: all 0.5s;
+  }
+}
+
+.text{
+  color: hsla(0, 0%, 93%, 0.841);
+}
+.paragraf{
+  color: hsla(0, 0%, 75%, 0.616);
+}
+.textDelete{
+  color: hsla(155, 100%, 50%, 0.922);
+}
+.textCancel{
+  color: hsl(0, 100%, 54%);
+}

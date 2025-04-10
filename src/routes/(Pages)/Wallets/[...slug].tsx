@@ -232,7 +232,7 @@ export default function Container() {
         </p>
         <Switch>
           {/* Data avaible */}
-          <Match when={combinedData.state === 'ready' && combinedData() && edit()==null}>
+          <Match when={combinedData.state === 'ready' && combinedData() && edit() == null}>
             <div class={`ml-[13vw] mt-[20vw] grid grid-cols-3 gap-x-0 gap-y-300`}>
               {/* Containers */}
               <For each={displayData().filter((item) => item.type === 'container')}>
@@ -253,19 +253,17 @@ export default function Container() {
               <For each={displayData().filter((item) => item.type === 'wallet')}>
                 {(wallet: wallet) => (
                   <div class="mb-50 mt-50 z-50 px-2">
-
-                      <Card
-                        name={wallet.wallet_name}
-                        balance={wallet.balance}
-                        currency={wallet.currency}
-                        nation={wallet.nation}
-                        category={wallet.category_id}
-                        color={wallet.color}
-                        href={createWalletPath(currentPathname, wallet.id)}
-                        onClick={() =>setWalletId(wallet.id)}
-                        id={wallet.id}
-                      />
-                    
+                    <Card
+                      name={wallet.wallet_name}
+                      balance={wallet.balance}
+                      currency={wallet.currency}
+                      nation={wallet.nation}
+                      category={wallet.category_id}
+                      color={wallet.color}
+                      href={createWalletPath(currentPathname, wallet.id)}
+                      onClick={() => setWalletId(wallet.id)}
+                      id={wallet.id}
+                    />
                   </div>
                 )}
               </For>
@@ -276,14 +274,27 @@ export default function Container() {
             </Show>
           </Match>
           <Match when={edit()}>
-            <SetWallet/>
+            <SetWallet />
           </Match>
         </Switch>
       </Show>
 
       {/* Wallet */}
       <Show when={combinedData()?.type === 'wallet'}>
-        <Wallet></Wallet>
+        <Wallet
+          id={combinedData()?.content?.[0]?.id ?? 0}
+          wallet_name={combinedData()?.content?.[0]?.wallet_name ?? 'null'}
+          currency={combinedData()?.content?.[0]?.currency ?? 'null'}
+          category_id={combinedData()?.content?.[0]?.category_id ?? 0}
+          nation={combinedData()?.content?.[0]?.nation ?? 'null'}
+          balance={combinedData()?.content?.[0]?.balance ?? 0}
+          type={combinedData()?.content?.[0]?.type ?? 'wallet'}
+          description={combinedData()?.content?.[0]?.description ?? ''}
+          user_id={combinedData()?.content?.[0]?.user_id ?? 0}
+          date_of_add={combinedData()?.content?.[0]?.date_of_add ?? new Date().toISOString()}
+          container_id={combinedData()?.content?.[0]?.container_id ?? 0}
+          color={combinedData()?.content?.[0]?.color ?? 'null'}
+        ></Wallet>
       </Show>
     </>
   );

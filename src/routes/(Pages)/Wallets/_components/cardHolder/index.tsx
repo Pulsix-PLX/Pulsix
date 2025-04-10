@@ -28,7 +28,7 @@ export interface card {
   id: number;
 }
 // get id for edit wallet/container if it is pressed
-export const [edit, setEdit] = createSignal<number | null>(null);
+export const [edit, setEdit] = createSignal<number | null>(null); 
 export default function CardContainer(props: CardContainerProps) {
 
   const [hover, setHover] = createSignal<boolean>(false);
