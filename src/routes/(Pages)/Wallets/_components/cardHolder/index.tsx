@@ -4,7 +4,7 @@ import style from './index.module.scss';
 
 import {
   calculateConvertedTotal,
-  ConvertedTotalResult,
+
 } from '~/routes/API/exchangeRates/exchangeRates';
 import { getUserId } from '~/Server/auth.server';
 import SetWallet from '../SetWallet';
@@ -36,14 +36,14 @@ export default function CardContainer(props: CardContainerProps) {
 
   ///--- Total balance converted ---
   // base currency
-  const TARGET_DISPLAY_CURRENCY = 'USD';
+  const TARGET_DISPLAY_CURRENCY = 'EUR';
 
   const [convertedTotalData] = createResource(
     () => ({
       containerId: props.id,
       targetCurrency: TARGET_DISPLAY_CURRENCY,
     }),
-    async (sourceData): Promise<ConvertedTotalResult | null> => {
+    async (sourceData) => {
       const { containerId, targetCurrency } = sourceData;
       try {
         const userId = await getUserId();
@@ -160,10 +160,10 @@ export default function CardContainer(props: CardContainerProps) {
                   {(convertedTotalData()?.total_balance ?? 0).toLocaleString('it-IT', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                  })}
+                  })} {' '}
                   {convertedTotalData()?.currency_code == 'USD'
                     ? '$'
-                    : convertedTotalData()?.currency_code == 'USD'
+                    : convertedTotalData()?.currency_code == 'EUR'
                     ? '€'
                     : TARGET_DISPLAY_CURRENCY}
                   {/* Icona/Tooltip per eventuali Avvisi (es. tassi mancanti) */}

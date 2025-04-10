@@ -19,8 +19,10 @@ interface WalletProps {
 }
 
 export default function Wallet(props: WalletProps) {
+  //------- Logica per convertire il balance da EUR alla valuta del wallet, inutile in questo contesto
   // --- Resource per ottenere il Saldo Riconvertito nella sua Valuta Originale ---
   // Calcola: SaldoInEUR * Tasso(EUR -> ValutaOriginale)
+  /*
   const [balanceInOriginalCurrencyResource] = createResource(
     // 1. Source: dipende dal saldo (in EUR) e dalla valuta originale/target
     () => ({
@@ -117,7 +119,7 @@ export default function Wallet(props: WalletProps) {
       return `${amount?.toFixed(2)} ${props.currency ?? ''}`; // Fallback
     }
   });
-
+*/
   const [hover, setHover] = createSignal<boolean>(false);
 
   const handleLinkClick = (event:Event) => {
@@ -175,7 +177,7 @@ export default function Wallet(props: WalletProps) {
            
             <CardItem as="p" translateZ={40} class="text-white text-[1vw] text-center">
               {/* Mostra il saldo riconvertito nella sua valuta originale */}
-              {formattedOriginalCurrencyBalance()}
+              {props.balance}
               {props.currency == 'USD' ? '$' : props.currency == 'EUR' ? '€' : props.currency}
             </CardItem>
           </CardBody>

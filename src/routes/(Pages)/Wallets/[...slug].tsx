@@ -172,12 +172,13 @@ export default function Container() {
   /// --- Converted total current container ---
 
   // Base currency for conversion
-  const TARGET_DISPLAY_CURRENCY = 'USD';
+  const TARGET_DISPLAY_CURRENCY = 'EUR';
 
   const [convertedTotalData] = createResource(
     () => ({
       containerId: currentContainerId(),
       targetCurrency: TARGET_DISPLAY_CURRENCY,
+      edit: edit(),
     }),
 
     async (sourceData) => {

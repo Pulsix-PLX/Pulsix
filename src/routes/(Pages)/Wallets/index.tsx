@@ -8,7 +8,6 @@ import Card from './_components/Card';
 import CardContainer, { card, edit } from './_components/cardHolder';
 import {
   calculateConvertedTotal,
-  ConvertedTotalResult,
   getConversionRate,
 } from '~/routes/API/exchangeRates/exchangeRates';
 import { ThreeDCardDemo } from '~/components/3dImageRotation/prova';
@@ -58,7 +57,7 @@ export default function Wallets() {
   /// --- Converted total current container ---
 
   // Base currency for conversion
-  const TARGET_DISPLAY_CURRENCY = 'USD';
+  const TARGET_DISPLAY_CURRENCY = 'EUR';
 
   const [Total] = createResource(
     () => ({
@@ -66,7 +65,7 @@ export default function Wallets() {
       targetCurrency: TARGET_DISPLAY_CURRENCY,
     }),
 
-    async (sourceData): Promise<ConvertedTotalResult | null> => {
+    async (sourceData) => {
       const { containerId, targetCurrency } = sourceData;
 
       try {

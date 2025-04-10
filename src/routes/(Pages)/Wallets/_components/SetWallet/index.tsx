@@ -10,14 +10,14 @@ import {
   Switch,
 } from 'solid-js';
 import Input from '~/components/Inputs/Inputs';
-import { getWallet } from '~/routes/API/Wallets/Wallet/getWallet';
+import { getWallet } from '~/routes/API/Wallets/getWallet';
 import { edit, setEdit } from '../cardHolder';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
-import { setWallet } from '~/routes/API/Wallets/Wallet/setWallet';
+import { setWallet } from '~/routes/API/Wallets/setWallet';
 import '@thednp/solid-color-picker/style.css';
 import GlowButton from '~/components/Buttons/GlowButton';
 import style from './index.module.scss';
-import deleteWallet from '~/routes/API/Wallets/Wallet/deleteWallet';
+import deleteWallet from '~/routes/API/Wallets/deleteWallet';
 const LazyDefaultColorPicker = lazy(() =>
   import('@thednp/solid-color-picker').then((module) => ({ default: module.DefaultColorPicker }))
 );
