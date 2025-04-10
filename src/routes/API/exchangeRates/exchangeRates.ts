@@ -104,57 +104,7 @@ async function fetchLatestECBRates() {
 }
 
 
-// --- Handler per la rotta API GET mper il cronjob ---
-export async function GET(event: APIEvent) {
-    try {
-
-        const latestRates = await fetchLatestECBRates();
-
-        return latestRates;
-
-    } catch (error: any) {
-        console.error('Errore API /api/exchange-rates:', error.response ? error.response.data : error.message);
-
-        const errorMessage = 'Errore nel recupero dei dati dalla BCE';
-        return new Response(JSON.stringify({ error: errorMessage, details: error.message }), { // Includi più dettagli se utile (ma attento in prod)
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-        });
-    }
-}
-
-export async function updateExchangeRatesInDB() {
-  'use server';
-  console.log("Inizio aggiornamento tassi di cambio nel DB...");
-  try {
-      const latestRates = await fetchLatestECBRates();
-
-      if (!latestRates || latestRates.length === 0) {
-          console.log("Nessun tasso ricevuto dalla BCE, nessun aggiornamento del DB.");
-          return;
-      }
-
-      console.log(`Aggiornamento/Inserimento di ${latestRates.length} tassi...`);
-      for (const rate of latestRates) {
-          await db.query(
-             `INSERT INTO exchange_rates (currency_code, currency_name, rate, observation_date, updated_at)
-              VALUES ($1, $2, $3, $4, NOW())
-              ON CONFLICT (currency_code) DO UPDATE SET
-                currency_name = EXCLUDED.currency_name,
-                rate = EXCLUDED.rate,
-                observation_date = EXCLUDED.observation_date,
-                updated_at = NOW();`,
-             [rate.currency, rate.currencyName, rate.value, rate.date]
-          );
-
-      }
-      console.log("Aggiornamento tassi di cambio nel DB completato.");
-
-  } catch (error) {
-      console.error("Errore durante l'aggiornamento dei tassi nel DB:", error);
-
-  }
-}
+//utility per il recupero del tasso di cambio
 
 // Restituisce il tasso (number) o null se non trovato/errore non gestito
 export async function getExchangeRate(currencyCode: string): Promise<number | null> {
@@ -188,6 +138,8 @@ export async function getExchangeRate(currencyCode: string): Promise<number | nu
     }
   }
 
+
+  // utility per calcolare il totale
 
   /**
  * Calcola il tasso di cambio tra due valute (From -> To)
@@ -265,21 +217,9 @@ export async function getConversionRate(fromCurrencyCode: string, toCurrencyCode
 
 
 
+// dato un containerId e una currency converte tutti i balance dei figli ricorsivamente nella currency desiderata
+// utilizzato nello slug.
 
- // TIPO CORRETTO per la riga letta dal DB (usa 'currency')
-type WalletInfoForTotal = {
-    id: number;
-    balance: number; // Non nullo per via della clausola WHERE nel SQL
-    currency: string; // Non nullo per via della clausola WHERE nel SQL. Corrisponde a DDL.
-  };
-  
-  // Tipo per il risultato finale (invariato)
-  export type ConvertedTotalResult = {
-    total_balance: number;
-    currency_code: string; // Valuta TARGET
-    warnings?: string[];
-  };
-  
   /**
    * Calcola il saldo totale di tutti i wallet all'interno di una gerarchia di container,
    * convertendo ogni saldo in una valuta target specificata.
@@ -288,104 +228,176 @@ type WalletInfoForTotal = {
    * @param userId ID dell'utente proprietario dei wallet.
    * @returns Promise<ConvertedTotalResult> Oggetto con saldo totale e valuta, o lancia un errore.
    */
-  export async function calculateConvertedTotal(
-    containerId: number | null,
-    targetCurrencyCode: string,
-    userId: number
-  ): Promise<ConvertedTotalResult> {
-    'use server';
-  
-    const targetCode = targetCurrencyCode.toUpperCase();
-    console.log(`[calculateConvertedTotal] Inizio per container ${containerId ?? 'ROOT'} -> ${targetCode}, user ${userId}`);
-    let totalInTargetCurrency = 0;
-    const warnings: string[] = [];
-  
-    try {
+  // Interfacce per i tipi di ritorno e i dati interni
+interface ConvertedTotalResult {
+  total_balance: number;
+  currency_code: string;
+  warnings?: string[];
+}
+
+interface WalletInfoForTotal {
+  id: number;
+  balance: number;
+  currency: string; // Es. 'USD', 'EUR'
+}
+
+/**
+* Calcola la somma totale dei bilanci dei SOLI WALLET validi (non eliminati,
+* con saldo e valuta non nulli) contenuti ricorsivamente in un container
+* (o a livello root), escludendo rami sotto container eliminati,
+* e converte il totale nella valuta target specificata.
+*
+* @param containerId L'ID del container da cui iniziare, o null per il livello root.
+* @param targetCurrencyCode Il codice della valuta target (es. 'EUR').
+* @param userId L'ID dell'utente.
+* @returns Una Promise che risolve in un oggetto ConvertedTotalResult.
+*/
+export async function calculateConvertedTotal(
+  containerId: number | null,
+  targetCurrencyCode: string,
+  userId: number
+): Promise<ConvertedTotalResult> {
+  'use server';
+  const functionName = '[Server Function:calculateConvertedTotalWithDeleteCheck]';
+
+  // --- Validazione e Normalizzazione Input ---
+  if (isNaN(userId) || userId <= 0) {
+      console.error(`${functionName} User ID non valido: ${userId}`);
+      throw new Error('User ID non valido.');
+  }
+  if (containerId !== null && (typeof containerId !== 'number' || isNaN(containerId) || containerId <= 0)) {
+      console.error(`${functionName} Container ID non valido: ${containerId}`);
+      throw new Error('Container ID non valido.');
+  }
+  if (typeof targetCurrencyCode !== 'string' || targetCurrencyCode.trim().length < 3) { // Controllo base sulla lunghezza
+      console.error(`${functionName} Codice valuta target non valido: ${targetCurrencyCode}`);
+      throw new Error('Codice valuta target non valido.');
+  }
+  const targetCode = targetCurrencyCode.toUpperCase(); // Normalizza in maiuscolo
+  console.log(`${functionName} Inizio per container ${containerId ?? 'ROOT'} -> ${targetCode}, user ${userId}`);
+  // --- Fine Validazione ---
+
+  let totalInTargetCurrency = 0;
+  const warnings: string[] = [];
+
+  try {
+      // --- Query SQL con CTE e filtri date_of_delete ---
       const sql = `
-        WITH RECURSIVE WalletHierarchy AS (
-          -- Membro ancora: usa 'currency'
-          SELECT id, balance, currency, type, container_id
-          FROM public.wallets
-          WHERE user_id = $1 AND ${containerId === null ? 'container_id IS NULL' : 'container_id = $2'}
-  
-          UNION ALL
-  
-          -- Membro ricorsivo: usa 'currency'
-          SELECT w.id, w.balance, w.currency, w.type, w.container_id
-          FROM public.wallets w
-          JOIN WalletHierarchy wh ON w.container_id = wh.id
-          WHERE w.user_id = $1
-        )
-        -- Seleziona: usa 'currency' e filtra per 'currency' non nullo
-        SELECT id, balance, currency
-        FROM WalletHierarchy
-        WHERE type = 'wallet' AND balance IS NOT NULL AND currency IS NOT NULL;`; // Filtra 'currency IS NOT NULL'
-  
+          WITH RECURSIVE WalletHierarchy AS (
+              -- Anchor Member: Seleziona i figli diretti del container (o root)
+              -- che NON sono stati eliminati.
+              SELECT id, balance, currency, type, container_id
+              FROM public.wallets
+              WHERE user_id = $1
+                AND ${containerId === null ? 'container_id IS NULL' : 'container_id = $2'}
+                AND date_of_delete IS NULL -- <<< Esclude figli diretti eliminati
+
+              UNION ALL
+
+              -- Recursive Member: Seleziona i figli (w) degli elementi trovati (wh)
+              -- assicurandosi che i figli (w) NON siano stati eliminati.
+              SELECT w.id, w.balance, w.currency, w.type, w.container_id
+              FROM public.wallets w
+              JOIN WalletHierarchy wh ON w.container_id = wh.id -- Join con passo precedente
+              WHERE w.user_id = $1 -- Verifica opzionale ma sicura
+                AND w.date_of_delete IS NULL -- <<< Esclude elementi ricorsivi eliminati
+                -- Non serve controllare wh.date_of_delete qui, è già filtrato prima
+          )
+          -- Seleziona i dettagli necessari SOLO dai WALLET validi trovati nella gerarchia
+          SELECT id, balance, currency
+          FROM WalletHierarchy
+          WHERE type = 'wallet'           -- Considera solo i wallet
+            AND balance IS NOT NULL     -- Ignora wallet con saldo nullo
+            AND currency IS NOT NULL;     -- Ignora wallet con valuta nulla
+      `;
+
+      // Prepara i parametri per la query
       const params = containerId === null ? [userId] : [userId, containerId];
-      // Usa il tipo corretto WalletInfoForTotal
+      console.log(`${functionName} Query: ${sql.replace(/\s+/g, ' ').trim()}, Params: ${JSON.stringify(params)}`);
+
+      // Esegui la query per ottenere la lista dei wallet validi e attivi
       const walletResult = await db.query<WalletInfoForTotal>(sql, params);
-      const walletsInHierarchy = walletResult.rows;
-  
-      console.log(`[calculateConvertedTotal] Trovati ${walletsInHierarchy.length} wallet nella gerarchia con saldo e valuta.`);
-  
+      const walletsInHierarchy = walletResult.rows ?? []; // Default a array vuoto
+
+      console.log(`${functionName} Trovati ${walletsInHierarchy.length} wallet validi (non eliminati, con saldo e valuta) nella gerarchia.`);
+
+      // Se non ci sono wallet, il totale è 0
       if (walletsInHierarchy.length === 0) {
-        return { total_balance: 0, currency_code: targetCode };
+          return { total_balance: 0, currency_code: targetCode };
       }
-  
-      // 2. Ottimizzazione tassi - Usa 'currency'
+
+      // --- Logica di Conversione (Invariata) ---
+
+      // 2. Ottieni valute uniche (esclusa la target)
       const uniqueCurrenciesToConvert = [
           ...new Set(
-              // Usa w.currency
               walletsInHierarchy.map(w => w.currency.toUpperCase())
                                 .filter(code => code !== targetCode)
           )
       ];
-  
-      // 3. Recupera tassi (logica invariata)
+
+      // 3. Recupera tassi di cambio
       const rateMap = new Map<string, number | null>();
-       if (uniqueCurrenciesToConvert.length > 0) {
-           console.log(`[calculateConvertedTotal] Recupero tassi per: ${uniqueCurrenciesToConvert.join(', ')} -> ${targetCode}`);
-           const ratePromises = uniqueCurrenciesToConvert.map(fromCode => getConversionRate(fromCode, targetCode));
-           const rates = await Promise.all(ratePromises);
-           uniqueCurrenciesToConvert.forEach((fromCode, index) => {
-               const rate = rates[index];
-               rateMap.set(fromCode, rate);
-               if (rate === null) {
-                  const warningMsg = `Tasso di cambio non trovato per ${fromCode} -> ${targetCode}. I saldi in ${fromCode} verranno ignorati.`;
+      if (uniqueCurrenciesToConvert.length > 0) {
+          console.log(`${functionName} Recupero tassi per: ${uniqueCurrenciesToConvert.join(', ')} -> ${targetCode}`);
+          const ratePromises = uniqueCurrenciesToConvert.map(fromCode =>
+              getConversionRate(fromCode, targetCode).catch(err => { // Gestisce errori per singolo tasso
+                  console.error(`${functionName} Errore recupero tasso per ${fromCode}:`, err);
+                  return null; // Tratta l'errore come tasso non trovato
+              })
+          );
+          const rateResults = await Promise.all(ratePromises); // Attende tutti i recuperi (o errori gestiti)
+
+          uniqueCurrenciesToConvert.forEach((fromCode, index) => {
+              const rate = rateResults[index];
+              rateMap.set(fromCode, rate);
+              if (rate === null) {
+                  const warningMsg = `Tasso di cambio non trovato o errore per ${fromCode} -> ${targetCode}. I saldi in ${fromCode} verranno ignorati.`;
                   warnings.push(warningMsg);
-                  console.warn(`[calculateConvertedTotal] ${warningMsg}`);
-               }
-           });
-       }
-       rateMap.set(targetCode, 1);
-  
-      // 4. Itera, converti e somma - Usa 'currency'
-      for (const wallet of walletsInHierarchy) {
-        const balance = wallet.balance;
-        const fromCode = wallet.currency.toUpperCase(); // Usa wallet.currency
-  
-        const conversionRate = rateMap.get(fromCode);
-  
-        if (conversionRate !== null && conversionRate !== undefined) {
-          totalInTargetCurrency += balance * conversionRate;
-        } else {
-          // Warning già aggiunto durante il fetch dei tassi
-          console.warn(`[calculateConvertedTotal] Salto wallet ${wallet.id} (${balance} ${fromCode}) per tasso mancante.`);
-        }
+                  console.warn(`${functionName} ${warningMsg}`);
+              }
+          });
       }
-  
-      console.log(`[calculateConvertedTotal] Calcolo completato. Totale in ${targetCode}: ${totalInTargetCurrency}`);
+      rateMap.set(targetCode, 1); // Tasso 1 per la valuta target stessa
+
+      // 4. Itera, converti e somma
+      for (const wallet of walletsInHierarchy) {
+          const balance = wallet.balance;
+          // La query SQL ha già filtrato currency non nulle, ma ricontrolliamo per sicurezza
+          if (!wallet.currency) continue;
+          const fromCode = wallet.currency.toUpperCase();
+          const conversionRate = rateMap.get(fromCode);
+
+          // Somma solo se il tasso è valido e non è la valuta target (già sommata implicitamente con tasso 1)
+          if (typeof conversionRate === 'number' && !isNaN(conversionRate)) {
+               // Arrotonda per evitare problemi di precisione floating point (opzionale ma consigliato)
+               totalInTargetCurrency += Math.round((balance * conversionRate) * 100) / 100;
+          } else {
+               // Warning già emesso prima se il tasso è null, log aggiuntivo per debug
+               if (fromCode !== targetCode) {
+                  console.warn(`${functionName} Salto wallet ${wallet.id} (${balance} ${fromCode}) per tasso mancante/non valido.`);
+               }
+          }
+      }
+      // Arrotonda anche il risultato finale a 2 decimali
+      totalInTargetCurrency = Math.round(totalInTargetCurrency * 100) / 100;
+
+      console.log(`${functionName} Calcolo completato. Totale in ${targetCode}: ${totalInTargetCurrency}`);
       return {
-         total_balance: totalInTargetCurrency,
-         currency_code: targetCode, // Restituisce la valuta target
-         warnings: warnings.length > 0 ? warnings : undefined
+          total_balance: totalInTargetCurrency,
+          currency_code: targetCode,
+          warnings: warnings.length > 0 ? warnings : undefined // Includi warnings solo se presenti
       };
-  
-    } catch (error) {
-      console.error(`[calculateConvertedTotal] Errore critico per container ${containerId ?? 'ROOT'} in ${targetCode}, user ${userId}:`, error);
-       throw new Error(`Errore nel calcolo del totale convertito per container ${containerId ?? 'ROOT'}. Dettagli: ${error instanceof Error ? error.message : String(error)}`);
-    }
+
+  } catch (error) {
+      console.error(`${functionName} Errore critico per container ${containerId ?? 'ROOT'} in ${targetCode}, user ${userId}:`, error);
+       if (error instanceof Error && 'code' in error) { // Log codice DB se presente
+          console.error(`DB Error Code: ${error.code}`);
+       }
+      // Rilancia un errore gestibile
+      throw new Error(`Errore nel calcolo del totale convertito per container ${containerId ?? 'ROOT'}.`);
   }
+}
 
 
 

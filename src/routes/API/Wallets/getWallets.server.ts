@@ -33,37 +33,35 @@ export async function getWallets(userId: number): Promise<wallet[]> {
  * @returns Una Promise che risolve in un array di oggetti wallet.
  */
 
-/// Get all the wallets/containers in a container and the wallets/containers of the sub containers
 export async function getWalletsContainer(
-  userId: number,
-  containerId: number | null
+    userId: number,
+    containerId: number | null
 ): Promise<wallet[]> {
-  'use server';
+    'use server';
+    const functionName = '[Server Function:getWalletsContainerEnhancedWithDeleteCheck]';
 
-  console.log(
-    `[Server Function:getWalletsContainerEnhanced] Fetching per userId: ${userId}, containerId: ${containerId}`
-  );
+    console.log(
+        `${functionName} Fetching per userId: ${userId}, containerId: ${containerId}`
+    );
 
-  // Validazione input
-  if (isNaN(userId)) {
-    console.error('[Server Function:getWalletsContainerEnhanced] User ID non valido fornito.');
-    throw new Error('User ID non valido fornito.');
-  }
-  if (containerId !== null && typeof containerId !== 'number') {
-    console.error('[Server Function:getWalletsContainerEnhanced] Container ID non valido fornito.');
-    throw new Error('Container ID non valido fornito.');
-  }
+    // --- Validazione Input (Inclusa verifica NaN per containerId) ---
+    if (isNaN(userId)) {
+        console.error(`${functionName} User ID non valido fornito.`);
+        throw new Error('User ID non valido fornito.');
+    }
+    if (containerId !== null && (typeof containerId !== 'number' || isNaN(containerId))) {
+        console.error(`${functionName} Container ID non valido fornito (Type: ${typeof containerId}, Value: ${containerId}).`);
+        throw new Error('Container ID non valido fornito.');
+    }
+    // --- Fine Validazione ---
 
-  // Determina se stiamo cercando gli elementi root
-  const isRootLevel = containerId === null;
+    const isRootLevel = containerId === null;
 
-  try {
-    // --- Usa una CTE per combinare i risultati PRIMA di ordinare ---
-    const queryText = `
+    try {
+        // Query SQL con CTE e filtri per date_of_delete
+        const queryText = `
             WITH CombinedWallets AS (
-                -- Selezione 1: Figli diretti (Livello N)
-                -- Se isRootLevel è true, seleziona quelli con container_id IS NULL
-                -- Altrimenti, seleziona quelli con container_id = $2
+                -- Selezione 1: Figli diretti (Livello N) - Devono essere NON eliminati
                 SELECT
                     wn.*
                 FROM
@@ -71,72 +69,144 @@ export async function getWalletsContainer(
                 WHERE
                     wn.user_id = $1
                     AND ${isRootLevel ? 'wn.container_id IS NULL' : 'wn.container_id = $2'}
+                    AND wn.date_of_delete IS NULL  -- <<< Aggiunto: Esclude elementi eliminati al Livello N
 
                 UNION ALL
 
                 -- Selezione 2: Figli dei Sotto-Container (Livello N+1)
-                -- Seleziona i wallet (w_n_plus_1) il cui genitore (wn) è un CONTAINER
-                -- e quel genitore (wn) è un figlio diretto del containerId richiesto (o è root se isRootLevel)
+                -- Devono essere NON eliminati E il loro genitore container (Livello N) NON deve essere eliminato
                 SELECT
                     w_n_plus_1.*
                 FROM
                     wallets w_n_plus_1
                 JOIN
-                    wallets wn ON w_n_plus_1.container_id = wn.id -- Il genitore del nipote è il figlio diretto
+                    wallets wn ON w_n_plus_1.container_id = wn.id -- Join con il genitore (Livello N)
                 WHERE
-                    wn.user_id = $1 -- Il genitore (wn) appartiene all'utente
-                    AND ${
-                      isRootLevel ? 'wn.container_id IS NULL' : 'wn.container_id = $2'
-                    } -- Il genitore (wn) è al Livello N corretto
-                    AND wn.type = 'container' -- Il genitore (wn) deve essere un container
-                    AND w_n_plus_1.user_id = $1 -- Anche il nipote (w_n_plus_1) appartiene all'utente (sicurezza/consistenza)
+                    wn.user_id = $1                                   -- Genitore appartiene all'utente
+                    AND ${ isRootLevel ? 'wn.container_id IS NULL' : 'wn.container_id = $2' } -- Genitore è al Livello N corretto
+                    AND wn.type = 'container'                       -- Genitore è un container
+                    AND wn.date_of_delete IS NULL                   -- <<< Aggiunto: Genitore NON deve essere eliminato
+                    AND w_n_plus_1.user_id = $1                     -- Nipote appartiene all'utente
+                    AND w_n_plus_1.date_of_delete IS NULL           -- <<< Aggiunto: Nipote NON deve essere eliminato
+                    -- Potresti aggiungere qui "AND w_n_plus_1.type = 'wallet'" se vuoi SOLO i wallet al livello N+1
             )
-            -- Ora seleziona dalla CTE e applica l'ORDER BY
+            -- Seleziona tutto dalla CTE e ordina
             SELECT *
             FROM CombinedWallets
             ORDER BY
-                COALESCE(container_id, -1), -- Ordina gli elementi root (NULL) per primi
-                type DESC,                 -- Ordina i 'container' prima dei 'wallet'? (dipende da cosa vuoi)
-                wallet_name;               -- Infine, ordina per nome
+                COALESCE(container_id, -1), -- Raggruppa per genitore (root prima)
+                type DESC,                  -- Container prima di wallet all'interno del gruppo
+                wallet_name;                -- Ordine alfabetico per nome
         `;
 
-    // Prepara i parametri: solo [userId] se root, [userId, containerId] altrimenti
-    const queryParams = isRootLevel ? [userId] : [userId, containerId];
+        // Prepara i parametri (uguali a prima, dipendono solo da isRootLevel)
+        const queryParams = isRootLevel ? [userId] : [userId, containerId];
 
-    // Esegui la query
-    const result = await db.query<wallet>(queryText, queryParams);
+        console.log(`${functionName} Query: ${queryText.replace(/\s+/g, ' ').trim()}, Params: ${JSON.stringify(queryParams)}`);
 
-    return result.rows ?? [];
-  } catch (error: any) {
-    console.error('[Server Function:getWalletsContainerEnhanced] Errore DB:', error);
-    if (error.code) {
-      console.error(`DB Error Code: ${error.code}`); // Logga il codice errore specifico
+        // Esegui la query
+        const result = await db.query<wallet>(queryText, queryParams);
+
+        return result.rows ?? [];
+
+    } catch (error: any) {
+        console.error(`${functionName} Errore DB:`, error);
+        if (error.code) { // Logga codice errore specifico se disponibile
+            console.error(`DB Error Code: ${error.code}, Message: ${error.message}`);
+        }
+        throw new Error(`Errore DB durante recupero enhanced wallets (con check delete) per container ${containerId}.`);
     }
-    // Rilancia un errore più specifico o generico
-    throw new Error(`Errore DB durante recupero enhanced wallets per container ${containerId}.`);
-  }
 }
 
-type TotalBalanceResult = {
-  total_balance: number | null; // Può essere null se SUM non trova righe
-};
 
-export async function getWalletsSub(walletid: number): Promise<TotalBalanceResult[]> {
-  'use server'; // Nota: 'use server' va all'inizio del file o della funzione esportata
+// Tipo per il risultato della query SQL (anche se poi restituiamo solo il numero)
+interface TotalBalanceQueryResult {
+    total_balance: number; // O string a seconda del driver/DB
+}
 
-  try {
-    // La query restituisce una riga con SUM(balance) AS total_balance
-    const result = await db.query<TotalBalanceResult>( // Usa il tipo corretto qui
-      'WITH RECURSIVE ContainerHierarchy AS (SELECT id, balance, container_id FROM public.wallets WHERE container_id = $1 UNION ALL SELECT w.id, w.balance, w.container_id FROM public.wallets w JOIN ContainerHierarchy ch ON w.container_id = ch.id) SELECT SUM(balance) AS total_balance FROM ContainerHierarchy;',
-      [walletid]
-    );
-    // Restituisce le righe (dovrebbe essere 0 o 1 riga) o un array vuoto
-    return result.rows ?? [];
-  } catch (error: any) {
-    console.error('[Server Function:getWalletsSub] Errore DB:', error);
-    // Rilancia l'errore per farlo gestire da chi chiama
-    throw new Error('Errore recupero somma wallets.');
-  }
+/**
+ * Calcola la somma ricorsiva dei bilanci dei SOLI WALLET contenuti
+ * in un container e nei suoi sotto-container, escludendo elementi
+ * (wallet o container) marcati come eliminati.
+ *
+ * @param containerStartId L'ID del container da cui iniziare la somma ricorsiva.
+ * @returns Una Promise che risolve in un numero (la somma totale dei wallet validi).
+ */
+// Rinominata per chiarezza e cambiato tipo di ritorno
+export async function getRecursiveWalletBalance(containerStartId: number): Promise<number> {
+    'use server';
+    const functionName = '[Server Function:getRecursiveWalletBalance]'; // Per i log
+
+    console.log(`${functionName} Calcolo somma per container ID: ${containerStartId}`);
+
+    // --- Validazione Input ---
+    if (typeof containerStartId !== 'number' || isNaN(containerStartId) || containerStartId <= 0) {
+        console.error(`${functionName} ID container non valido fornito: ${containerStartId}`);
+        throw new Error('ID container di partenza non valido.');
+    }
+    // --- Fine Validazione ---
+
+    try {
+        // Query SQL con CTE ricorsiva e filtri per date_of_delete
+        const queryText = `
+            WITH RECURSIVE ContainerHierarchy AS (
+                -- Anchor Member: Seleziona i figli diretti del container iniziale ($1)
+                -- che NON sono stati eliminati. Include anche il tipo per filtrare dopo.
+                SELECT
+                    id, balance, container_id, type -- Includi 'type'
+                FROM
+                    public.wallets
+                WHERE
+                    container_id = $1
+                    AND date_of_delete IS NULL -- <<< Filtro: Esclude figli diretti eliminati
+
+                UNION ALL
+
+                -- Recursive Member: Seleziona i figli (w) degli elementi già trovati (ch)
+                -- assicurandosi che i figli (w) NON siano stati eliminati.
+                -- La ricorsione si ferma automaticamente se un container 'ch' era eliminato
+                -- perché non sarebbe stato selezionato nel passo precedente.
+                SELECT
+                    w.id, w.balance, w.container_id, w.type -- Includi 'type'
+                FROM
+                    public.wallets w
+                JOIN
+                    ContainerHierarchy ch ON w.container_id = ch.id -- Join con il risultato precedente
+                WHERE
+                    w.date_of_delete IS NULL -- <<< Filtro: Esclude nipoti (o livelli inferiori) eliminati
+            )
+            -- Seleziona la somma dei bilanci dalla gerarchia risultante,
+            -- MA SOLO per gli elementi che sono di tipo 'wallet'.
+            -- Usa COALESCE per restituire 0 se non ci sono wallet o SUM è NULL.
+            SELECT COALESCE(SUM(balance), 0) AS total_balance
+            FROM ContainerHierarchy
+            WHERE type = 'wallet'; -- <<< Filtro: Somma solo i bilanci dei WALLET effettivi
+        `;
+
+        // I parametri della query sono solo [containerStartId] per $1
+        const queryParams = [containerStartId];
+
+        console.log(`${functionName} Query: ${queryText.replace(/\s+/g, ' ').trim()}, Params: ${JSON.stringify(queryParams)}`);
+
+        // Esegui la query
+        const result = await db.query<TotalBalanceQueryResult>(queryText, queryParams);
+
+        // La query restituisce sempre una riga a causa di SUM() e COALESCE.
+        // Estrai il valore 'total_balance'. Usa '?? 0' per sicurezza extra.
+        const totalBalance = result.rows?.[0]?.total_balance ?? 0;
+
+        console.log(`${functionName} Somma calcolata: ${totalBalance} per container ID: ${containerStartId}`);
+
+        // Restituisci direttamente il numero calcolato
+        return totalBalance;
+
+    } catch (error: any) {
+        console.error(`${functionName} Errore DB durante calcolo somma ricorsiva per ${containerStartId}:`, error);
+        if (error.code) {
+            console.error(`DB Error Code: ${error.code}, Message: ${error.message}`);
+        }
+        throw new Error(`Errore recupero somma wallets per container ${containerStartId}.`);
+    }
 }
 
 export async function getWalletName(walletid: number | null) {
@@ -157,4 +227,3 @@ export async function getWalletName(walletid: number | null) {
     throw new Error('Errore recupero somma wallets.');
   }
 }
-

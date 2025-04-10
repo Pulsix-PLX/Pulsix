@@ -13,10 +13,11 @@ import Input from '~/components/Inputs/Inputs';
 import { getWallet } from '~/routes/API/Wallets/Wallet/getWallet';
 import { edit, setEdit } from '../cardHolder';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
-import { setWallet } from '~/routes/API/Wallets/setWallet';
+import { setWallet } from '~/routes/API/Wallets/Wallet/setWallet';
 import '@thednp/solid-color-picker/style.css';
 import GlowButton from '~/components/Buttons/GlowButton';
 import style from './index.module.scss';
+import deleteWallet from '~/routes/API/Wallets/Wallet/deleteWallet';
 const LazyDefaultColorPicker = lazy(() =>
   import('@thednp/solid-color-picker').then((module) => ({ default: module.DefaultColorPicker }))
 );
@@ -28,7 +29,6 @@ export default function SetWallet() {
   const [color, setColor] = createSignal(); // State for color
   const [confirmDelete, setConfirmDelete] = createSignal<boolean>(false); // State for color
   const [hoverDelete, setHoverDelete] = createSignal<'cancel' | 'confirm' | null>(null); // State for color
-
 
   return (
     <>
@@ -67,8 +67,8 @@ export default function SetWallet() {
                 class="ml-[auto] mr-[auto]"
                 onClick={() => setTimeout(() => setEdit(null), 500)}
               ></ButtonSparkle>
-                            {/* Delete */}
-                            <button
+              {/* Delete */}
+              <button
                 type="button"
                 class={` text-white font-bold py-2 px-4 rounded ml-[auto] mr-[auto] mt-[1vw] ${style.buttonDelete}`}
                 style={{
@@ -83,7 +83,6 @@ export default function SetWallet() {
               >
                 Delete
               </button>
-           
             </form>
           </Match>
           {/* Wallet */}
@@ -170,6 +169,7 @@ export default function SetWallet() {
             </form>
           </Match>
         </Switch>
+        {/* Conbfirm delete */}
         <Show when={confirmDelete()}>
           <div class="absolute top-0 left-0 w-full h-full bg-black opacity-80 z-40"></div>
           <div
@@ -177,30 +177,53 @@ export default function SetWallet() {
             style={{
               'background-color': '#151515',
               'border-radius': '40px',
-              border: `3px solid ${color()||'#ffffffff'}`,
+              border: `3px solid ${color() || '#ffffffff'}`,
             }}
           >
             <p class={`${style.text} text-[1.4vw] font-bold text-center`}>
               Are you sure to delete this wallet?
             </p>
-            <p class={`${hoverDelete()=='cancel'?style.textCancel:hoverDelete()=='confirm'?style.textDelete:style.paragraf} text-[1vw] font-bold text-center mt-[2vw]`}>
+            <p
+              class={`${
+                hoverDelete() == 'cancel'
+                  ? style.textCancel
+                  : hoverDelete() == 'confirm'
+                  ? style.textDelete
+                  : style.paragraf
+              } text-[1vw] font-bold text-center mt-[2vw]`}
+            >
               It will be in the trash
             </p>
-            <p class={`${hoverDelete()=='cancel'?style.textCancel:hoverDelete()=='confirm'?style.textDelete:style.paragraf} text-[1vw] font-bold text-center mt-[0.5vw]`}>
+            <p
+              class={`${
+                hoverDelete() == 'cancel'
+                  ? style.textCancel
+                  : hoverDelete() == 'confirm'
+                  ? style.textDelete
+                  : style.paragraf
+              } text-[1vw] font-bold text-center mt-[0.5vw]`}
+            >
               you can restore it in 30 days
             </p>
             <div class="flex flex-row justify-center items-center gap-34 mt-[3vw]">
-              
-              <ButtonSparkle text="Cancel" onClick={() => setConfirmDelete(false)} shadowColor={'hsl(0, 100%, 54%)'} onMouseEnter={()=>setHoverDelete('cancel')} onMouseLeave={()=>setHoverDelete(null)} shadow={10}/>
               <ButtonSparkle
-              shadowColor={'hsla(155, 100%, 50%, 0.922)'}
+                text="Cancel"
+                onClick={() => setConfirmDelete(false)}
+                shadowColor={'hsl(0, 100%, 54%)'}
+                onMouseEnter={() => setHoverDelete('cancel')}
+                onMouseLeave={() => setHoverDelete(null)}
+                shadow={10}
+              />
+              <ButtonSparkle
+                shadowColor={'hsla(155, 100%, 50%, 0.922)'}
                 text="Delete"
                 shadow={10}
-                onClick={() => {
+                onClick={async () => {
+                  await deleteWallet(wallet()?.id, wallet()?.type);
                   setTimeout(() => setEdit(null), 500);
-                }
-              }
-              onMouseEnter={()=>setHoverDelete('confirm')} onMouseLeave={()=>setHoverDelete(null)}
+                }}
+                onMouseEnter={() => setHoverDelete('confirm')}
+                onMouseLeave={() => setHoverDelete(null)}
               />
             </div>
           </div>

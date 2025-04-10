@@ -13,7 +13,6 @@ import Title from '~/components/Title';
 import {
   getWalletName,
   getWalletsContainer,
-  getWalletsSub,
 } from '~/routes/API/Wallets/getWallets.server';
 import { getUserId } from '~/Server/auth.server';
 import type { wallet } from '~/Server/types/wallet';
@@ -23,7 +22,7 @@ import CardContainer, { card, edit } from './_components/cardHolder';
 import Wallet from './Wallet';
 import {
   calculateConvertedTotal,
-  ConvertedTotalResult,
+
 } from '~/routes/API/exchangeRates/exchangeRates';
 import SetWallet from './_components/SetWallet';
 
@@ -181,7 +180,7 @@ export default function Container() {
       targetCurrency: TARGET_DISPLAY_CURRENCY,
     }),
 
-    async (sourceData): Promise<ConvertedTotalResult | null> => {
+    async (sourceData) => {
       const { containerId, targetCurrency } = sourceData;
 
       try {
