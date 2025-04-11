@@ -2,10 +2,10 @@
 import OTPInput from '../components/inputOtp/otpInput';
 
 
-import { createResource, createSignal, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { createMemo, createResource, createSignal, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
 import Input from '~/components/Inputs/Inputs';
-import { allInputsValid, getFormValue } from '~/GlobalStores/FormStore';
+import { allInputsValid, getFormValue, SetForm } from '~/GlobalStores/FormStore';
 import { phoneAlreadyexist } from '@API/Auth/registration/phone/phoneAlreadyexist';
 import { auth, setupRecaptcha, signInWithPhoneNumber } from "../../../../../Server/firebase.config";
 import sendOTP from './sendOtp';
@@ -20,11 +20,18 @@ export const [otpVerify, setOtp] = createSignal(null);
 export default function Phone() {
 
   const [state, setState] = createSignal<'wait' | 'sended' | ''>('wait');
+
+    createMemo(() => {
+      if(next() == 2){
+      SetForm('phone', false);
+      }
+    })
+    
   onMount(() => {
     console.log("Component mounted. Initializing reCAPTCHA...");
     // Setup reCAPTCHA quando il componente è montato
     setupRecaptcha();
-    
+
   });
 
   onCleanup(() => {
@@ -63,7 +70,7 @@ export default function Phone() {
             <ButtonSparkle
               shadow={10}
               text="Send code"
-             // disabled={!allInputsValid()}
+             disabled={!allInputsValid()}
               class="h-50 mb-30"
               onClick={async () => {
                 await sendOTP();

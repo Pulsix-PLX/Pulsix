@@ -8,10 +8,8 @@ import style from './index.module.scss';
 
 export default function Credentials() {
   onMount(() => {
-
     SetForm({});
     SetFormValues({});
-    console.log(Form, FormValues, getFormValue('phone'))
   });
 
   return (

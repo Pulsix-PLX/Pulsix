@@ -21,7 +21,11 @@
 --PrimaryLight: rgb(34, 34, 34); 
 --PrimaryDark: rgb(29, 29, 29); 
 
---Secondary: rgb(0, 255, 200);
+--S:0, 255, 200;
+--Secondary: rgb(var(--S));
+--SecondaryOpacity80: rgba(var(--S), 0.8);
+--SecondaryOpacity60: rgba(var(--S), 0.6);
+--SecondaryOpacity40: rgba(var(--S), 0.4);
 
 /* Text */
 --TextPrimary: #ffffff; 

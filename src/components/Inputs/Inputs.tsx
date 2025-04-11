@@ -178,10 +178,11 @@ export default function Input(props: InputProps) {
           const response = await checkUsername(inputValue);
           console.log('Username check response:', response);
 
-          if (response === 'already exist') {
+          if (response === 'already exist' ) {
+            if(props.type == 'username'){
             SetForm(props.name, false);
             if(props.type=='username'){
-            setErrorMessage('Username already exist');
+            setErrorMessage('Username already exist');}
             }else{
               setErrorMessage('');
             }
@@ -205,69 +206,77 @@ export default function Input(props: InputProps) {
         break;
 
       case 'phoneNumber':
+         // Rimuovi eventuali spazi e trattini
+         const cleanedNumber = inputValue.replace(/[\s-]/g, '');
+
+         // Controllo che siano solo numeri
+         if (!/^\d+$/.test(cleanedNumber)) {
+           SetForm(props.name, false);
+           setErrorMessage('Phone number must contain only digits');
+           return;
+         }
+ 
+         // Controllo lunghezza (ad esempio tra 7 e 10 cifre dopo il prefisso)
+         if (cleanedNumber.length < 7 || cleanedNumber.length > 10) {
+           SetForm(props.name, false);
+           setErrorMessage('Invalid phone number length');
+           return;
+         }
+ 
+         // Controllo che non inizi con zeri non significativi
+         if (cleanedNumber.startsWith('0')) {
+           SetForm(props.name, false);
+           setErrorMessage('Phone number should not start with unnecessary zeros');
+           return;
+         }
+
         const response = await checkPhone(inputValue);
          ////   Controllo che non ci siano gia numeri registrati come quello inserito /////
          if (response === 'already exist') {
            SetForm(props.name, false);
            setErrorMessage('Phone number already associated to another account');
+           return;
          } else if (response.startsWith('error:')) {
            SetForm(props.name, false);
            setErrorMessage(`Errore verifica phone: ${response.split(':')[1]}`);
+           return;
          } else {
            SetForm(props.name, true);
            setErrorMessage('');
          }
 
-        // Rimuovi eventuali spazi e trattini
-        const cleanedNumber = inputValue.replace(/[\s-]/g, '');
-
-        // Controllo che siano solo numeri
-        if (!/^\d+$/.test(cleanedNumber)) {
-          SetForm(props.name, false);
-          setErrorMessage('Phone number must contain only digits');
-          return;
-        }
-
-        // Controllo lunghezza (ad esempio tra 7 e 10 cifre dopo il prefisso)
-        if (cleanedNumber.length < 7 || cleanedNumber.length > 10) {
-          SetForm(props.name, false);
-          setErrorMessage('Invalid phone number length');
-          return;
-        }
-
-        // Controllo che non inizi con zeri non significativi
-        if (cleanedNumber.startsWith('0')) {
-          SetForm(props.name, false);
-          setErrorMessage('Phone number should not start with unnecessary zeros');
-          return;
-        }
+       
         // Validazione passata
         SetForm(props.name, true);
         setErrorMessage('');
         break;
 
       case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(inputValue)) {
+          SetForm(props.name, false);
+          setErrorMessage('Inserisci un indirizzo email valido');
+          return;
+        } else {
+          setErrorMessage('');
+        }
         const res = await checkEmail(inputValue);
         ////   Controllo che non ci siano gia numeri registrati come quello inserito /////
+        console.log(res)
         if (res === 'already exist') {
+         
           SetForm(props.name, false);
           setErrorMessage('Email already associated to another account');
+          return;
         } else if (res.startsWith('error:')) {
           SetForm(props.name, false);
           setErrorMessage(`Errore verifica phone: ${res.split(':')[1]}`);
+          return;
         } else {
           SetForm(props.name, true);
           setErrorMessage('');
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(inputValue)) {
-          SetForm(props.name, false);
-          setErrorMessage('Inserisci un indirizzo email valido');
-        } else {
-          SetForm(props.name, true);
-          setErrorMessage('');
-        }
         break;
 
       case 'number':

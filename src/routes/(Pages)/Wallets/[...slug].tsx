@@ -10,21 +10,16 @@ import {
   Switch,
 } from 'solid-js';
 import Title from '~/components/Title';
-import {
-  getWalletName,
-  getWalletsContainer,
-} from '~/routes/API/Wallets/getWallets.server';
+import { getWalletName, getWalletsContainer } from '~/routes/API/Wallets/getWallets.server';
 import { getUserId } from '~/Server/auth.server';
 import type { wallet } from '~/Server/types/wallet';
 import { setWalletId } from '.';
 import Card from './_components/Card';
 import CardContainer, { card, edit } from './_components/cardHolder';
 import Wallet from './Wallet';
-import {
-  calculateConvertedTotal,
-
-} from '~/routes/API/exchangeRates/exchangeRates';
+import { calculateConvertedTotal } from '~/routes/API/exchangeRates/exchangeRates';
 import SetWallet from './_components/SetWallet';
+import { getWallet } from '~/routes/API/Wallets/getWallet';
 
 // Tipo per l'input del fetcher
 type ResourceSourceInput = {
@@ -39,6 +34,7 @@ type CombinedItemInfo = {
   name: string | null;
   type: 'container' | 'wallet' | null;
   content: wallet[] | null;
+  wallet?: any;
 };
 
 export default function Container() {
@@ -93,8 +89,8 @@ export default function Container() {
       try {
         let itemName: string | null = null;
         let itemType: 'container' | 'wallet' | null = null;
-        let itemContent: wallet[] | null = null;
-
+        let itemContent: wallet[] | null  = null;
+        let wallet: any = null; // Initialize wallet as null
         if (itemId === null) {
           // Case Root unused
           itemName = 'My Wallets';
@@ -116,13 +112,19 @@ export default function Container() {
             } else {
               console.log(`[Fetcher Updated] È ${itemType}, non recupero contenuto.`);
             }
+            // Get only if it is a wallet
+            if (itemType === 'wallet') {
+              wallet = (await getWallet(itemId)) ?? [];
+            } else {
+              console.log(`[Fetcher Updated] È ${itemType}, non recupero contenuto.`);
+            }
           } else {
             console.warn(`[Fetcher Updated] Item non trovato per ID: ${itemId}`);
             itemName = 'Elemento Non Trovato';
           }
         }
 
-        const result: CombinedItemInfo = { name: itemName, type: itemType, content: itemContent };
+        const result: CombinedItemInfo = { name: itemName, type: itemType, content: itemContent, wallet:wallet };
         return result;
       } catch (error) {
         console.error('[Fetcher Updated] Errore:', error);
@@ -282,18 +284,18 @@ export default function Container() {
       {/* Wallet */}
       <Show when={combinedData()?.type === 'wallet'}>
         <Wallet
-          id={combinedData()?.content?.[0]?.id ?? 0}
-          wallet_name={combinedData()?.content?.[0]?.wallet_name ?? 'null'}
-          currency={combinedData()?.content?.[0]?.currency ?? 'null'}
-          category_id={combinedData()?.content?.[0]?.category_id ?? 0}
-          nation={combinedData()?.content?.[0]?.nation ?? 'null'}
-          balance={combinedData()?.content?.[0]?.balance ?? 0}
-          type={combinedData()?.content?.[0]?.type ?? 'wallet'}
-          description={combinedData()?.content?.[0]?.description ?? ''}
-          user_id={combinedData()?.content?.[0]?.user_id ?? 0}
-          date_of_add={combinedData()?.content?.[0]?.date_of_add ?? new Date().toISOString()}
-          container_id={combinedData()?.content?.[0]?.container_id ?? 0}
-          color={combinedData()?.content?.[0]?.color ?? 'null'}
+          id={combinedData()?.wallet?.id}
+          wallet_name={combinedData()?.wallet?.wallet_name ?? 'null'}
+          currency={combinedData()?.wallet?.currency ?? 'null'}
+          category_id={combinedData()?.wallet?.category_id ?? 0}
+          nation={combinedData()?.wallet?.nation ?? 'null'}
+          balance={combinedData()?.wallet?.balance ?? 0}
+          type={combinedData()?.wallet?.type ?? 'wallet'}
+          description={combinedData()?.wallet?.description ?? ''}
+          user_id={combinedData()?.wallet?.user_id ?? 0}
+          date_of_add={new Date()}
+          container_id={combinedData()?.wallet?.container_id ?? 0}
+          color={combinedData()?.wallet?.color ?? 'null'}
         ></Wallet>
       </Show>
     </>

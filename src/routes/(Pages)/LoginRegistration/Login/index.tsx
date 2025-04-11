@@ -9,6 +9,18 @@ import { createSignal } from 'solid-js';
 import { useAction, useNavigate } from '@solidjs/router';
 
 export default function Login() {
+  onMount(() => {
+    setShowMenu(false);
+    SetForm({});
+    SetFormValues({});
+    console.log(getFormValue('username'));
+    console.log(getFormValue('password'));
+
+  });
+  onCleanup(() => {
+    setShowMenu(true);
+  });
+
   const [error, setError] = createSignal('');
   const loginAction = useAction(loginUser);
   const navigate= useNavigate();
@@ -29,12 +41,12 @@ export default function Login() {
 
   return (
     <>
-      <p class="ml-[auto] mr-[auto]">Login</p>
-      {error() && <p class="text-red-500">{error()}</p>} {/* Messaggio di errore se il login fallisce */}
+
+      {error() && <p class="text-red-500">{'Wrong credentials'}</p>} {/* Messaggio di errore se il login fallisce */}
       <form class="CM" method="post" onSubmit={handleSubmit}>
         <Input type="usernameLogin" name="username" placeholder="Username" required />
         <Input type="password" name="password" placeholder="Password" required />
-        <ButtonSparkle text="Login" class="ml-[auto] mr-[auto]" />
+        <ButtonSparkle text="Login" class="ml-[auto] mr-[auto]"disabled={!allInputsValid()} />
       </form>
     </>
   );

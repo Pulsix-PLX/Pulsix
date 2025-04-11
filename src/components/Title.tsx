@@ -8,7 +8,7 @@ export default function EmbeddedGlowTitle(props) {
         return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
     }
     // Ottieni il valore di --Secondary
-let secondaryColor = getCSSVariableValue('--Secondary') || "rgba(0, 255, 200, 80)";
+let secondaryColor = getCSSVariableValue('--Secondary');
 if (secondaryColor.startsWith('rgb(') && !secondaryColor.includes('rgba')) {
     secondaryColor = secondaryColor.replace('rgb(', 'rgba(').replace(')', ', 0.8)');
 }

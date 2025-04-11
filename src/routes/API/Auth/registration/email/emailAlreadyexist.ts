@@ -6,7 +6,7 @@ export const emailAlreadyexist = action(async (email) => {
   try {
     console.log(email)
     const result = await db.query('SELECT email FROM users WHERE email=$1', [email]);
-    console.log(result.rows)
+    console.log(result.rows.length > 0 ? 'already exist' : 'available')
     return result.rows.length > 0 ? 'already exist' : 'available';
   } catch (error:any) {
     console.error('Error checking email:', error);

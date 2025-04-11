@@ -1,9 +1,6 @@
 import { createSignal, onMount, Show } from 'solid-js';
 import Fade from '~/components/Buttons/Fade';
-
-// Data table
-export const [Data, SetData] = createSignal<any[]>([]); // Data table
-
+import './index.scss'
 // Controllo delle righe
 export const [HoveredRow, SetHoveredRow] = createSignal<number | null>(null);
 export const [ActiveRow, SetActiveRow] = createSignal<number | null>(null);
@@ -14,7 +11,7 @@ interface Props {
 }
 
 export default function TableWallet(props: Props) {
-  const [Type, SetType] = createSignal<boolean | undefined>(undefined); // Usa undefined per "tutti"
+  const [Type, SetType] = createSignal<string | undefined>('Income'); // Usa undefined per "tutti"
   const [DateFrom, setDateFrom] = createSignal<Date | undefined>(undefined); // Inizializza a null
   const [DateTo, setDateTo] = createSignal<Date | undefined>(undefined); // <<< Inizializza a null
   const [category, setCategory] = createSignal<string | undefined>(undefined); // Usa undefined per "tutti"
@@ -22,11 +19,10 @@ export default function TableWallet(props: Props) {
   return (
     <>
       <Show when={props.transactions}>
-        <div class="ContainerMiddle TableWrapper mt-150">
+        <div class="TableWrapper">
           <table class="Table">
             <thead>
               <tr>
-                <th>ID</th>
                 <th>Cause</th>
                 <th>Amount</th>
                 <th>Category</th>
@@ -35,17 +31,17 @@ export default function TableWallet(props: Props) {
             </thead>
             <tbody>
               {/* Se non ci sono ancora transazioni */}
-              {!Data().length ? (
+              {!props.transactions.length ? (
                 <tr
                   class="text-white text-xl"
-                  style={{ 'font-family': 'serif', 'justify-content': 'center' }}
+                  style={{ 'justify-content': 'center' }}
                 >
                   <td colSpan={5}>There isn't anything, add a transaction!</td>
                 </tr>
               ) : null}
               {props.transactions
                 // Incomes / Expenses
-                .filter((t: any) => (Type() ? t.Type == Type() : true))
+                .filter((t: any) => (Type() ? t.type == Type() : true))
                 // Date filters
                 .filter((t: any) =>
                   DateFrom() && DateTo()
@@ -60,46 +56,37 @@ export default function TableWallet(props: Props) {
                 .filter((t: any) => (category() ? t.CategoryName === category() : true))
                 .map((Transaction: any, index: number) => (
                   // Animazione caricamento graduale
-                  <Fade
-                    in={true}
-                    fadeInDuration={1000 + index * 300} 
-                    fadeOutDuration={1000} 
-                    fadeInEasing="ease-out" 
-                    fadeOutEasing="cubic-bezier(0.4, 0.0, 0.2, 1)"
-                  >
+
                     <tr
                       class={
-                        HoveredRow() === Transaction.Id
+                        HoveredRow() === Transaction.id
                           ? 'Hover'
-                          : ActiveRow() === Transaction.Id
+                          : ActiveRow() === Transaction.id
                           ? 'Active'
                           : ''
                       }
-                      onMouseEnter={() => SetHoveredRow(Transaction.Id)}
+                      onMouseEnter={() => SetHoveredRow(Transaction.id)}
                       onMouseLeave={() => SetHoveredRow(null)}
                       onClick={() =>
-                        ActiveRow() !== Transaction.Id
-                          ? SetActiveRow(Transaction.Id)
+                        ActiveRow() !== Transaction.id
+                          ? SetActiveRow(Transaction.id)
                           : SetActiveRow(null)
                       }
                     >
-                      <td>
-                        <button>{Transaction.Id}</button>
-                      </td>
                       <td class="text-black">
-                        <button>{Transaction.Cause}</button>
+                        <button>{Transaction.cause}</button>
                       </td>
                       <td class="text-black text-right">
-                        <button>{Transaction.Amount}</button>
+                        <button>{Transaction.amount}</button>
                       </td>
                       <td>
-                        <button>{Transaction.CategoryName}</button>
+                        <button>{Transaction.category_id}</button>
                       </td>
                       <td class="text-black">
-                        <button>{new Date(Transaction.Date).toISOString().split('T')[0]}</button>
+                        <button>{Transaction.date?new Date(Transaction.date).toISOString().split('T')[0]:''}</button>
                       </td>
                     </tr>
-                  </Fade>
+            
                 ))}
             </tbody>
           </table>

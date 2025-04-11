@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { createSignal, Match, onMount, Switch } from 'solid-js';
+import { createMemo, createSignal, Match, onMount, Switch } from 'solid-js';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
 import Input from '~/components/Inputs/Inputs';
-import { allInputsValid, getFormValue } from '~/GlobalStores/FormStore';
+import { allInputsValid, getFormValue, SetForm } from '~/GlobalStores/FormStore';
 import OTPInput from '../components/inputOtp/otpInput';
 import { next, setNext } from '../components/ProgressBar';
 
@@ -11,7 +11,11 @@ export default function Email() {
   const [state, setState] = createSignal<'wait' | 'sended' | ''>('wait');
   const [stateOTP, setStateOTP] = createSignal<'success' | 'error' | ''>('');
 "use client";
-
+  createMemo(() => {
+    if(next() == 1){
+    SetForm('email', false);
+    }
+  })
   // invio OTP
   async function sendOTP() {
 

@@ -1,0 +1,61 @@
+
+/* Wrapper per arrotondare i bordi della tabella */
+.TableWrapper {
+  width: 800px;
+  border-radius: 15px; /* Applica il border-radius all'intera tabella */
+  overflow: hidden; /* Nasconde i bordi fuori dall'area stondati */
+  border: 2px solid var(--Secondary); /* Bordo esterno per effetto stondato */
+}
+
+/* Stili tabella */
+.Table {
+  width: 100%;
+  border-collapse: collapse; /* Unisce i bordi */
+}
+
+/* Stili per intestazione */
+.Table thead tr th {
+  color: rgb(17, 17, 17);
+  background-color: var(--SecondaryOpacity80);
+  padding: 10px;
+
+}
+
+/* Stili per le righe */
+.Table tbody tr {
+
+  color: white;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Celle della tabella */
+.Table tbody tr td {
+
+  color: white;
+  border: solid hsla(0, 0%, 41%, 0.527) 1px;
+  padding: 5px;
+}
+
+/* Bottoni nelle celle */
+.Table tbody tr td button {
+  width: 100%;
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+/* Hover effetto */
+.Hover td {
+  background-color: rgb(0, 0, 0);
+  border: solid white 2px;
+  transition: all 0.5s ease;
+}
+
+/* Stato attivo */
+.Active td {
+  background-color: var(--SecondaryOpacity40);
+  transition: 0.3s ease;
+}

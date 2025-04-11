@@ -22,7 +22,7 @@ export default function LoginRegistration() {
   return (
     <>
     
-      <div class="ml-[auto] mr-[auto] CM -mt-[21vw]">
+      <div class="ml-[auto] mr-[auto] CM -mt-[18.85vw]">
         <RiveCanvas
           src="/rivs/LoginRegistration.riv"
           stateMachines="State Machine 1"
@@ -32,7 +32,7 @@ export default function LoginRegistration() {
       </div>
       <Show when={renderPage()}>
       <p class={`CM ${style.title}`}>Pulsix now for</p>
-      <div class="CM mt-[10.9vw] -ml-[6%] ">
+      <div class="CM mt-[13.1vw] -ml-[5.6%] ">
         <Toggle />
       </div>
       {/* Login */}

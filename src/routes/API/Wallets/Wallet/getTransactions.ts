@@ -3,7 +3,7 @@ import { db } from '~/Server/db.server';
 
 export default async function getTransactions(walletId: number) {
   'use server'; // Nota: 'use server' va all'inizio del file o della funzione esportata
-
+console.log('getTransactions', walletId);
   try {
 
     // La query restituisce una riga con SUM(balance) AS total_balance
