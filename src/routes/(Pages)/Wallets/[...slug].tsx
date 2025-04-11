@@ -20,6 +20,7 @@ import Wallet from './Wallet';
 import { calculateConvertedTotal } from '~/routes/API/exchangeRates/exchangeRates';
 import SetWallet from './_components/SetWallet';
 import { getWallet } from '~/routes/API/Wallets/getWallet';
+import Card3D from './_components/Card3D';
 
 // Tipo per l'input del fetcher
 type ResourceSourceInput = {
@@ -254,6 +255,9 @@ export default function Container() {
               {/* Cards */}
               <For each={displayData().filter((item) => item.type === 'wallet')}>
                 {(wallet: wallet) => (
+                  <Switch>
+                    {/* Card */}
+                    <Match when={wallet.type_ui === 'card'}>
                   <div class="mb-50 mt-50 z-50 px-2">
                     <Card
                       name={wallet.wallet_name}
@@ -267,6 +271,22 @@ export default function Container() {
                       id={wallet.id}
                     />
                   </div>
+                  </Match>
+                  {/* Card3D */}
+                  <Match when={wallet.type_ui === '3D'}>
+                  <div class="mb-50 z-50 px-2 -mt-180">
+                    <Card3D
+                      name={wallet.wallet_name}
+                      balance={wallet.balance}
+                      currency={wallet.currency}
+                      color={wallet.color}
+                      href={createWalletPath(currentPathname, wallet.id)}
+                      onClick={() => setWalletId(wallet.id)}
+                      id={wallet.id}
+                    />
+                  </div>
+                  </Match>
+                  </Switch>
                 )}
               </For>
             </div>
@@ -296,6 +316,7 @@ export default function Container() {
           date_of_add={new Date()}
           container_id={combinedData()?.wallet?.container_id ?? 0}
           color={combinedData()?.wallet?.color ?? 'null'}
+          type_ui={combinedData()?.wallet?.type_ui ?? 'null'}
         ></Wallet>
       </Show>
     </>

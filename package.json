@@ -12,6 +12,7 @@
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.0",
     "@solidjs/start": "^1.1.0",
+    "@splinetool/runtime": "^1.9.82",
     "@suid/css": "^0.4.0",
     "@suid/icons-material": "^0.8.1",
     "@suid/material": "^0.18.0",
