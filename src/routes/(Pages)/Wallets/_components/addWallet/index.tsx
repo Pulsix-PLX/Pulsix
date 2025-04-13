@@ -56,6 +56,7 @@ export default function FormAddWallet({
               style={{ border: '3px solid rgba(255, 255, 255, 0.3)', 'border-radius': '40px' }}
               onSubmit={(e) => {
                 e.preventDefault(); // Prevent default form submission
+                
               }}
             >
               <div class="flex flex-row gap-100">
@@ -127,13 +128,36 @@ export default function FormAddWallet({
                 size={'large'}
                 shadowColor={`${color()}`}
                 shadow={10}
-                onClick={() => setTimeout(() => setEdit(null), 500)}
+                onClick={() =>{ setTimeout(() => setEdit(null), 500);setTypeToAdd(null);}}
               />
             </form>
           </Match>
           {/* Container */}
           <Match when={typeToAdd() == 'container'}>
-            <button onclick={() => setTypeToAdd('wallet')}>Wallet</button>
+          <form
+              action={addWallet}
+              method="post"
+              class="CM w-[25vw] mt-[22vh] pl-[5vw] pr-[5vw] pb-[2vw] pt-[2vw]"
+              style={{ border: `3px solid ${color()}`, 'border-radius': '40px' }}
+            >
+              <input type="hidden" name="type" value={typeToAdd() || 'null'} />
+              <input type="hidden" name="user_id" value={user_id || 'null'} />
+              <input type="hidden" name="container_id" value={container_id || 'null'} />
+
+              <Input type="text" name="walletName" placeholder="Wallet Name" />
+
+              <Input type="text" name="category_id" placeholder="Category" />
+
+              {/* Send */}
+              <ButtonSparkle
+                text={`Add Container`}
+                class="ml-[auto] mr-[auto]"
+                size={'large'}
+                shadowColor={`${color()}`}
+                shadow={10}
+                onClick={() =>{ setTimeout(() => setEdit(null), 500);setTypeToAdd(null);}}
+              />
+            </form>
           </Match>
         </Switch>
       </Show>

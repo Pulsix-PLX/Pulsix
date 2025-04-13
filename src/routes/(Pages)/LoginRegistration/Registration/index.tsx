@@ -6,6 +6,8 @@ import Credentials from './Credentials';
 import Email from './Email';
 import Phone from './Phone';
 import { resetAllFormData } from '~/GlobalStores/FormStore';
+import Uman from './components/spline';
+import { setShowCursor } from '~/routes/UI/Cursor';
 
 //non faccio reload della pagina prima lo chiedo
 const [hasChanges, setHasChanges] = createSignal(true);
@@ -44,14 +46,20 @@ export function getHasChanges() {
 function index() {
   onMount(() => {
     setShowMenu(false);
+    setShowCursor(false);
   });
 
   onCleanup(() => {
     setShowMenu(true);
+    setShowCursor(true);
   });
 
   return (
     <>
+          <div style={{"z-index":-300}}>
+      <Uman sceneUrl={'https://prod.spline.design/f1WOGEzpLvYuyCgl/scene.splinecode'} id="scenaAlternativa" class='CM ml-[30vw] -mt-[50vw] -z-200 w-[300%] h-[300%]' /> 
+      </div>
+    <div>
       <ReloadConfirmation />
       <Fade in={true} fadeIn={4000} fadeOut={300} class={'CM -mt-30'}>
         <ProgressBar />
@@ -65,6 +73,10 @@ function index() {
       <Fade in={next() == 2} fadeIn={2000} fadeOut={300} class={'CM mt-140'}>
         <Phone/>
       </Fade>
+    
+      <Uman />
+
+      </div>
     </>
   );
 }

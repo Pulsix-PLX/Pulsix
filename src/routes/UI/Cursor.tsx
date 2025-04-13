@@ -1,7 +1,10 @@
-import { createSignal, onCleanup, onMount } from 'solid-js';
+import { createSignal, onCleanup, onMount, Show } from 'solid-js';
 import './Cursor.scss';
+export   const [showCursor, setShowCursor] = createSignal(true);
 
 const SpectacularCursor = () => {
+
+
   const [position, setPosition] = createSignal({ x: 0, y: 0 });
   const [trail, setTrail] = createSignal([]);
   const [isHovering, setIsHovering] = createSignal(false);
@@ -138,6 +141,7 @@ const SpectacularCursor = () => {
 
   return (
     <>
+    <Show when={showCursor()}>
       {/* Particelle di scia */}
       {trail().map((point, index) => (
         <div
@@ -192,6 +196,7 @@ const SpectacularCursor = () => {
           }deg)`,
         }}
       />
+      </Show>
     </>
   );
 };

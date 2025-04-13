@@ -17,7 +17,7 @@ const category_id= parseInt(data.get('category_id'))||null // Assicurati che cat
     }
     if(data.get('type')=='container'){
       result = await db.query(
-        'INSERT INTO wallets (wallet_name, type, category_id, user_id, container_id) VALUES ($1, $2, $3, $4, $5, $6, $7);',
+        'INSERT INTO wallets (wallet_name, type, category_id, user_id, container_id) VALUES ($1, $2, $3, $4, $5);',
         [data.get('walletName'), data.get('type'), category_id, data.get('user_id'), data.get('container_id')]
       );
     }

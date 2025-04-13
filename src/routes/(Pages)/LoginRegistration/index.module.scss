@@ -22,7 +22,7 @@ body{
 }
 
 .titles{
-  font-size: clamp(20px,3vw,55px);
+  font-size: clamp(20px,2.5vw,55px);
   color:hsl(0, 0%, 71%);
   &:hover{
     color: hsl(0, 0%, 45%);
@@ -31,7 +31,7 @@ body{
 }
 
 .paragraf{
-  font-size: clamp(10px,1.5vw,55px);
+  font-size: clamp(10px,1vw,55px);
   color:hsl(0, 0%, 71%);
   &:hover{
     color: hsl(0, 0%, 45%);

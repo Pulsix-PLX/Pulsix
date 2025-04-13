@@ -36,7 +36,7 @@ export default function LoginRegistration() {
         <Toggle />
       </div>
       {/* Login */}
-      <div class={`CM flex flex-col mt-[21.5%] -ml-[15.5%] ${!value() ? style.hidden : ''}`}>
+      <div class={`CM flex flex-col mt-[21%] -ml-[15.5%] ${!value() ? style.hidden : ''}`}>
         <p class={`${style.titles}`}>Welcome back</p>
         <p class={`  ${style.paragraf}`}>Update your financial goals </p>
         <p class={`-mt-16 ${style.paragraf}`}> Continue tracking your progress</p>
