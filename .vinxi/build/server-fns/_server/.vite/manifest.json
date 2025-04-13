@@ -1,0 +1,911 @@
+{
+  "_ButtonSparkle-C8CRtCd0.css": {
+    "file": "assets/ButtonSparkle-C8CRtCd0.css",
+    "src": "_ButtonSparkle-C8CRtCd0.css"
+  },
+  "_ButtonSparkle-DNpTyev3.js": {
+    "file": "assets/ButtonSparkle-DNpTyev3.js",
+    "name": "ButtonSparkle",
+    "css": [
+      "assets/ButtonSparkle-C8CRtCd0.css"
+    ]
+  },
+  "_Card-BcrU3z9h.css": {
+    "file": "assets/Card-BcrU3z9h.css",
+    "src": "_Card-BcrU3z9h.css"
+  },
+  "_Card.module-nMwE8ysR.js": {
+    "file": "assets/Card.module-nMwE8ysR.js",
+    "name": "Card.module",
+    "css": [
+      "assets/Card-BcrU3z9h.css"
+    ]
+  },
+  "_Cursor-DUhhJVLJ.css": {
+    "file": "assets/Cursor-DUhhJVLJ.css",
+    "src": "_Cursor-DUhhJVLJ.css"
+  },
+  "_Inputs-Bqq548qA.css": {
+    "file": "assets/Inputs-Bqq548qA.css",
+    "src": "_Inputs-Bqq548qA.css"
+  },
+  "_Inputs-CEYxPBfP.js": {
+    "file": "assets/Inputs-CEYxPBfP.js",
+    "name": "Inputs",
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_action-BVKOmiKt.js"
+    ],
+    "css": [
+      "assets/Inputs-Bqq548qA.css"
+    ]
+  },
+  "_Menu-DSzeyodt.css": {
+    "file": "assets/Menu-DSzeyodt.css",
+    "src": "_Menu-DSzeyodt.css"
+  },
+  "_Menu-OQmUNT5t.js": {
+    "file": "assets/Menu-OQmUNT5t.js",
+    "name": "Menu",
+    "imports": [
+      "_components-CJF4pMQg.js"
+    ],
+    "css": [
+      "assets/Menu-DSzeyodt.css"
+    ]
+  },
+  "_Title-C8lsFfVd.js": {
+    "file": "assets/Title-C8lsFfVd.js",
+    "name": "Title"
+  },
+  "_action-BVKOmiKt.js": {
+    "file": "assets/action-BVKOmiKt.js",
+    "name": "action",
+    "imports": [
+      "_routing-BSDkuvr3.js"
+    ]
+  },
+  "_components-CJF4pMQg.js": {
+    "file": "assets/components-CJF4pMQg.js",
+    "name": "components",
+    "imports": [
+      "_routing-BSDkuvr3.js"
+    ]
+  },
+  "_db.server-BYnrqg0d.js": {
+    "file": "assets/db.server-BYnrqg0d.js",
+    "name": "db.server"
+  },
+  "_deleteWallet-CHR-5aIQ.css": {
+    "file": "assets/deleteWallet-CHR-5aIQ.css",
+    "src": "_deleteWallet-CHR-5aIQ.css"
+  },
+  "_deleteWallet-D6_HIjzQ.js": {
+    "file": "assets/deleteWallet-D6_HIjzQ.js",
+    "name": "deleteWallet",
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_action-BVKOmiKt.js"
+    ],
+    "css": [
+      "assets/deleteWallet-CHR-5aIQ.css"
+    ]
+  },
+  "_exchangeRates-BMINihpv.css": {
+    "file": "assets/exchangeRates-BMINihpv.css",
+    "src": "_exchangeRates-BMINihpv.css"
+  },
+  "_exchangeRates-ChMJm5Xh.js": {
+    "file": "assets/exchangeRates-ChMJm5Xh.js",
+    "name": "exchangeRates",
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_Card.module-nMwE8ysR.js",
+      "_components-CJF4pMQg.js",
+      "_db.server-BYnrqg0d.js"
+    ],
+    "css": [
+      "assets/exchangeRates-BMINihpv.css"
+    ]
+  },
+  "_fetchEvent-1KlzQMFw.js": {
+    "file": "assets/fetchEvent-1KlzQMFw.js",
+    "name": "fetchEvent"
+  },
+  "_icons-Bh8061KW.css": {
+    "file": "assets/icons-Bh8061KW.css",
+    "src": "_icons-Bh8061KW.css"
+  },
+  "_icons-N8M97GAt.js": {
+    "file": "assets/icons-N8M97GAt.js",
+    "name": "icons",
+    "css": [
+      "assets/icons-Bh8061KW.css"
+    ]
+  },
+  "_index-2Np-G_nR.js": {
+    "file": "assets/index-2Np-G_nR.js",
+    "name": "index",
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js"
+    ],
+    "css": [
+      "assets/index-Ky9zR5dV.css"
+    ]
+  },
+  "_index-B54VJo2T.js": {
+    "file": "assets/index-B54VJo2T.js",
+    "name": "index",
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_prova-UkNyxD49.js",
+      "_index-CM2EfUOf.js",
+      "_components-CJF4pMQg.js",
+      "_Inputs-CEYxPBfP.js",
+      "_deleteWallet-D6_HIjzQ.js",
+      "_ButtonSparkle-DNpTyev3.js"
+    ],
+    "dynamicImports": [
+      "node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"
+    ]
+  },
+  "_index-BUMPztWr.css": {
+    "file": "assets/index-BUMPztWr.css",
+    "src": "_index-BUMPztWr.css"
+  },
+  "_index-Bep36fvr.js": {
+    "file": "assets/index-Bep36fvr.js",
+    "name": "index"
+  },
+  "_index-C1h2BJ6l.css": {
+    "file": "assets/index-C1h2BJ6l.css",
+    "src": "_index-C1h2BJ6l.css"
+  },
+  "_index-CI1g57kZ.js": {
+    "file": "assets/index-CI1g57kZ.js",
+    "name": "index",
+    "imports": [
+      "_icons-N8M97GAt.js"
+    ]
+  },
+  "_index-CM2EfUOf.js": {
+    "file": "assets/index-CM2EfUOf.js",
+    "name": "index",
+    "imports": [
+      "_exchangeRates-ChMJm5Xh.js",
+      "_components-CJF4pMQg.js"
+    ]
+  },
+  "_index-Ky9zR5dV.css": {
+    "file": "assets/index-Ky9zR5dV.css",
+    "src": "_index-Ky9zR5dV.css"
+  },
+  "_index.module-0iUivGU7.js": {
+    "file": "assets/index.module-0iUivGU7.js",
+    "name": "index.module",
+    "css": [
+      "assets/index-BUMPztWr.css",
+      "assets/riv-VPAlW_cg.css"
+    ]
+  },
+  "_index.module-B9JvMj-k.js": {
+    "file": "assets/index.module-B9JvMj-k.js",
+    "name": "index.module",
+    "css": [
+      "assets/index-C1h2BJ6l.css"
+    ]
+  },
+  "_otpInput-Dlb7jUEo.js": {
+    "file": "assets/otpInput-Dlb7jUEo.js",
+    "name": "otpInput",
+    "imports": [
+      "_index-CI1g57kZ.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_action-BVKOmiKt.js",
+      "_Inputs-CEYxPBfP.js",
+      "_ButtonSparkle-DNpTyev3.js"
+    ],
+    "css": [
+      "assets/otpInput-tBTztLmB.css"
+    ]
+  },
+  "_otpInput-tBTztLmB.css": {
+    "file": "assets/otpInput-tBTztLmB.css",
+    "src": "_otpInput-tBTztLmB.css"
+  },
+  "_prova-UkNyxD49.js": {
+    "file": "assets/prova-UkNyxD49.js",
+    "name": "prova",
+    "imports": [
+      "_components-CJF4pMQg.js"
+    ]
+  },
+  "_riv-VPAlW_cg.css": {
+    "file": "assets/riv-VPAlW_cg.css",
+    "src": "_riv-VPAlW_cg.css"
+  },
+  "_routing-BSDkuvr3.js": {
+    "file": "assets/routing-BSDkuvr3.js",
+    "name": "routing"
+  },
+  "_server-fns-ptihYXL4.js": {
+    "file": "assets/server-fns-ptihYXL4.js",
+    "name": "server-fns",
+    "imports": [
+      "_fetchEvent-1KlzQMFw.js"
+    ],
+    "dynamicImports": [
+      "src/routes/index.tsx?pick=default&pick=$css",
+      "src/routes/index.tsx?pick=default&pick=$css",
+      "src/routes/[...404].tsx?pick=default&pick=$css",
+      "src/routes/[...404].tsx?pick=default&pick=$css",
+      "src/routes/UI/Cursor.tsx?pick=default&pick=$css",
+      "src/routes/UI/Cursor.tsx?pick=default&pick=$css",
+      "src/routes/UI/Waves.tsx?pick=default&pick=$css",
+      "src/routes/UI/Waves.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css",
+      "src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css",
+      "src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css",
+      "src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css",
+      "src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css",
+      "src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css",
+      "src/routes/API/Wallets/deleteWallet.ts?tsr-directive-use-server=",
+      "src/routes/API/Wallets/Wallet/getTransactions.ts?tsr-directive-use-server=",
+      "src/routes/API/Auth/login/loginUser.ts?tsr-directive-use-server=",
+      "src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=",
+      "src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=",
+      "src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=",
+      "src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=",
+      "src/Server/auth.server.ts?tsr-directive-use-server=",
+      "src/Server/auth.server.ts?tsr-directive-use-server=",
+      "src/Server/auth.server.ts?tsr-directive-use-server=",
+      "src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=",
+      "src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=",
+      "src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=",
+      "src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=",
+      "src/routes/API/Wallets/getWallet.ts?tsr-directive-use-server=",
+      "src/routes/API/Wallets/setWallet.ts?tsr-directive-use-server=",
+      "src/routes/API/Auth/registration/createUser.ts?tsr-directive-use-server=",
+      "src/routes/API/Auth/registration/credentials/usernameAlreadyexist.ts?tsr-directive-use-server=",
+      "src/routes/API/Auth/registration/phone/phoneAlreadyexist.ts?tsr-directive-use-server=",
+      "src/routes/API/Auth/registration/email/emailAlreadyexist.ts?tsr-directive-use-server=",
+      "src/app.tsx"
+    ]
+  },
+  "_server-fns-runtime-4T1EILgx.js": {
+    "file": "assets/server-fns-runtime-4T1EILgx.js",
+    "name": "server-fns-runtime",
+    "imports": [
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx": {
+    "file": "assets/index-WwoiZKEg.js",
+    "name": "index",
+    "src": "node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx",
+    "isDynamicEntry": true
+  },
+  "src/Server/auth.server.ts?tsr-directive-use-server=": {
+    "file": "assets/auth.server-DMy-hh56.js",
+    "name": "auth.server",
+    "src": "src/Server/auth.server.ts?tsr-directive-use-server=",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/app.tsx": {
+    "file": "assets/app-DLO7lzbB.js",
+    "name": "app",
+    "src": "src/app.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-ptihYXL4.js",
+      "_Menu-OQmUNT5t.js",
+      "_routing-BSDkuvr3.js",
+      "_action-BVKOmiKt.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_components-CJF4pMQg.js"
+    ],
+    "css": [
+      "assets/app-CZcrTF1W.css",
+      "assets/Cursor-DUhhJVLJ.css"
+    ]
+  },
+  "src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css": {
+    "file": "index4.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_ButtonSparkle-DNpTyev3.js",
+      "_Inputs-CEYxPBfP.js",
+      "_Menu-OQmUNT5t.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_db.server-BYnrqg0d.js",
+      "_action-BVKOmiKt.js",
+      "_routing-BSDkuvr3.js",
+      "_components-CJF4pMQg.js"
+    ]
+  },
+  "src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css": {
+    "file": "index7.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_ButtonSparkle-DNpTyev3.js",
+      "_Inputs-CEYxPBfP.js",
+      "_Title-C8lsFfVd.js",
+      "_index-CI1g57kZ.js",
+      "_index.module-B9JvMj-k.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_db.server-BYnrqg0d.js",
+      "_action-BVKOmiKt.js",
+      "_routing-BSDkuvr3.js",
+      "_icons-N8M97GAt.js"
+    ]
+  },
+  "src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css": {
+    "file": "index8.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_ButtonSparkle-DNpTyev3.js",
+      "_Inputs-CEYxPBfP.js",
+      "_otpInput-Dlb7jUEo.js",
+      "_index-CI1g57kZ.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_db.server-BYnrqg0d.js",
+      "_action-BVKOmiKt.js",
+      "_routing-BSDkuvr3.js",
+      "_icons-N8M97GAt.js"
+    ]
+  },
+  "src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css": {
+    "file": "index9.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_otpInput-Dlb7jUEo.js",
+      "_ButtonSparkle-DNpTyev3.js",
+      "_Inputs-CEYxPBfP.js",
+      "_index-CI1g57kZ.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_db.server-BYnrqg0d.js",
+      "_action-BVKOmiKt.js",
+      "_routing-BSDkuvr3.js",
+      "_icons-N8M97GAt.js"
+    ]
+  },
+  "src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css": {
+    "file": "sendOtp.js",
+    "name": "sendOtp",
+    "src": "src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_otpInput-Dlb7jUEo.js",
+      "_Inputs-CEYxPBfP.js",
+      "_index-CI1g57kZ.js",
+      "_icons-N8M97GAt.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_db.server-BYnrqg0d.js",
+      "_action-BVKOmiKt.js",
+      "_routing-BSDkuvr3.js",
+      "_ButtonSparkle-DNpTyev3.js"
+    ]
+  },
+  "src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css": {
+    "file": "index14.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_icons-N8M97GAt.js"
+    ]
+  },
+  "src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css": {
+    "file": "otpInput.js",
+    "name": "otpInput",
+    "src": "src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_otpInput-Dlb7jUEo.js",
+      "_index-CI1g57kZ.js",
+      "_Inputs-CEYxPBfP.js",
+      "_action-BVKOmiKt.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_db.server-BYnrqg0d.js",
+      "_ButtonSparkle-DNpTyev3.js",
+      "_icons-N8M97GAt.js",
+      "_routing-BSDkuvr3.js"
+    ]
+  },
+  "src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css": {
+    "file": "index5.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_Menu-OQmUNT5t.js",
+      "_index-CI1g57kZ.js",
+      "_ButtonSparkle-DNpTyev3.js",
+      "_Inputs-CEYxPBfP.js",
+      "_Title-C8lsFfVd.js",
+      "_index.module-B9JvMj-k.js",
+      "_otpInput-Dlb7jUEo.js",
+      "_components-CJF4pMQg.js",
+      "_routing-BSDkuvr3.js",
+      "_icons-N8M97GAt.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_db.server-BYnrqg0d.js",
+      "_action-BVKOmiKt.js"
+    ]
+  },
+  "src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css": {
+    "file": "Toggle.js",
+    "name": "Toggle",
+    "src": "src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index.module-0iUivGU7.js"
+    ],
+    "css": [
+      "assets/riv-VPAlW_cg.css"
+    ]
+  },
+  "src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css": {
+    "file": "index2.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_Menu-OQmUNT5t.js",
+      "_index.module-0iUivGU7.js",
+      "_ButtonSparkle-DNpTyev3.js",
+      "_routing-BSDkuvr3.js",
+      "_components-CJF4pMQg.js"
+    ],
+    "css": [
+      "assets/index-Bn1gRDsI.css",
+      "assets/riv-VPAlW_cg.css"
+    ]
+  },
+  "src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css": {
+    "file": "riv.js",
+    "name": "riv",
+    "src": "src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "css": [
+      "assets/riv-VPAlW_cg.css"
+    ]
+  },
+  "src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css": {
+    "file": "index15.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "css": [
+      "assets/index-Ky9zR5dV.css"
+    ]
+  },
+  "src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css": {
+    "file": "index6.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-2Np-G_nR.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_db.server-BYnrqg0d.js"
+    ],
+    "css": [
+      "assets/index-Ky9zR5dV.css"
+    ]
+  },
+  "src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css": {
+    "file": "_...slug_.js",
+    "name": "_...slug_",
+    "src": "src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_Title-C8lsFfVd.js",
+      "_index-B54VJo2T.js",
+      "_exchangeRates-ChMJm5Xh.js",
+      "_prova-UkNyxD49.js",
+      "_index-CM2EfUOf.js",
+      "_index-2Np-G_nR.js",
+      "_deleteWallet-D6_HIjzQ.js",
+      "_index-Bep36fvr.js",
+      "_routing-BSDkuvr3.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_db.server-BYnrqg0d.js",
+      "_components-CJF4pMQg.js",
+      "_Inputs-CEYxPBfP.js",
+      "_action-BVKOmiKt.js",
+      "_ButtonSparkle-DNpTyev3.js",
+      "_Card.module-nMwE8ysR.js"
+    ],
+    "css": [
+      "assets/index-Ky9zR5dV.css"
+    ]
+  },
+  "src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css": {
+    "file": "index10.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_prova-UkNyxD49.js",
+      "_index-CM2EfUOf.js",
+      "_components-CJF4pMQg.js",
+      "_exchangeRates-ChMJm5Xh.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_Card.module-nMwE8ysR.js",
+      "_db.server-BYnrqg0d.js",
+      "_routing-BSDkuvr3.js"
+    ]
+  },
+  "src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css": {
+    "file": "LazyLoadSpline.js",
+    "name": "LazyLoadSpline",
+    "src": "src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true
+  },
+  "src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css": {
+    "file": "index11.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true
+  },
+  "src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css": {
+    "file": "index13.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_Inputs-CEYxPBfP.js",
+      "_deleteWallet-D6_HIjzQ.js",
+      "_index-CM2EfUOf.js",
+      "_ButtonSparkle-DNpTyev3.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_db.server-BYnrqg0d.js",
+      "_action-BVKOmiKt.js",
+      "_routing-BSDkuvr3.js",
+      "_exchangeRates-ChMJm5Xh.js",
+      "_Card.module-nMwE8ysR.js",
+      "_components-CJF4pMQg.js"
+    ],
+    "dynamicImports": [
+      "node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"
+    ]
+  },
+  "src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css": {
+    "file": "Card.js",
+    "name": "Card",
+    "src": "src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_Card.module-nMwE8ysR.js",
+      "_components-CJF4pMQg.js",
+      "_routing-BSDkuvr3.js"
+    ]
+  },
+  "src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css": {
+    "file": "index12.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_exchangeRates-ChMJm5Xh.js",
+      "_components-CJF4pMQg.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_Card.module-nMwE8ysR.js",
+      "_db.server-BYnrqg0d.js",
+      "_routing-BSDkuvr3.js"
+    ]
+  },
+  "src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css": {
+    "file": "index3.js",
+    "name": "index",
+    "src": "src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_Title-C8lsFfVd.js",
+      "_index-B54VJo2T.js",
+      "_exchangeRates-ChMJm5Xh.js",
+      "_index-CM2EfUOf.js",
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_db.server-BYnrqg0d.js",
+      "_prova-UkNyxD49.js",
+      "_components-CJF4pMQg.js",
+      "_routing-BSDkuvr3.js",
+      "_Inputs-CEYxPBfP.js",
+      "_action-BVKOmiKt.js",
+      "_deleteWallet-D6_HIjzQ.js",
+      "_ButtonSparkle-DNpTyev3.js",
+      "_Card.module-nMwE8ysR.js"
+    ]
+  },
+  "src/routes/API/Auth/login/loginUser.ts?tsr-directive-use-server=": {
+    "file": "assets/loginUser-lOKuXLaT.js",
+    "name": "loginUser",
+    "src": "src/routes/API/Auth/login/loginUser.ts?tsr-directive-use-server=",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_fetchEvent-1KlzQMFw.js",
+      "_db.server-BYnrqg0d.js"
+    ]
+  },
+  "src/routes/API/Auth/registration/createUser.ts?tsr-directive-use-server=": {
+    "file": "assets/createUser-B8OMM0Mu.js",
+    "name": "createUser",
+    "src": "src/routes/API/Auth/registration/createUser.ts?tsr-directive-use-server=",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/routes/API/Auth/registration/credentials/usernameAlreadyexist.ts?tsr-directive-use-server=": {
+    "file": "assets/usernameAlreadyexist-DlESc_vE.js",
+    "name": "usernameAlreadyexist",
+    "src": "src/routes/API/Auth/registration/credentials/usernameAlreadyexist.ts?tsr-directive-use-server=",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/routes/API/Auth/registration/email/emailAlreadyexist.ts?tsr-directive-use-server=": {
+    "file": "assets/emailAlreadyexist-BASsf-Xu.js",
+    "name": "emailAlreadyexist",
+    "src": "src/routes/API/Auth/registration/email/emailAlreadyexist.ts?tsr-directive-use-server=",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/routes/API/Auth/registration/phone/phoneAlreadyexist.ts?tsr-directive-use-server=": {
+    "file": "assets/phoneAlreadyexist-bH2ki4sU.js",
+    "name": "phoneAlreadyexist",
+    "src": "src/routes/API/Auth/registration/phone/phoneAlreadyexist.ts?tsr-directive-use-server=",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css": {
+    "file": "getTransactions.js",
+    "name": "getTransactions",
+    "src": "src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/routes/API/Wallets/Wallet/getTransactions.ts?tsr-directive-use-server=": {
+    "file": "assets/getTransactions-B7wMQXy1.js",
+    "name": "getTransactions",
+    "src": "src/routes/API/Wallets/Wallet/getTransactions.ts?tsr-directive-use-server=",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css": {
+    "file": "deleteWallet.js",
+    "name": "deleteWallet",
+    "src": "src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/routes/API/Wallets/deleteWallet.ts?tsr-directive-use-server=": {
+    "file": "assets/deleteWallet-DfS0S0n9.js",
+    "name": "deleteWallet",
+    "src": "src/routes/API/Wallets/deleteWallet.ts?tsr-directive-use-server=",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/routes/API/Wallets/getWallet.ts?tsr-directive-use-server=": {
+    "file": "assets/getWallet-VD3qZcEm.js",
+    "name": "getWallet",
+    "src": "src/routes/API/Wallets/getWallet.ts?tsr-directive-use-server=",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=": {
+    "file": "assets/getWallets.server-CbIIGRZN.js",
+    "name": "getWallets.server",
+    "src": "src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/routes/API/Wallets/setWallet.ts?tsr-directive-use-server=": {
+    "file": "assets/setWallet-BkA1dzP6.js",
+    "name": "setWallet",
+    "src": "src/routes/API/Wallets/setWallet.ts?tsr-directive-use-server=",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=": {
+    "file": "assets/exchangeRates-Dp8OcCeR.js",
+    "name": "exchangeRates",
+    "src": "src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=",
+    "isDynamicEntry": true,
+    "imports": [
+      "_server-fns-runtime-4T1EILgx.js",
+      "_db.server-BYnrqg0d.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  },
+  "src/routes/UI/Cursor.tsx?pick=default&pick=$css": {
+    "file": "Cursor.js",
+    "name": "Cursor",
+    "src": "src/routes/UI/Cursor.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "css": [
+      "assets/Cursor-DUhhJVLJ.css"
+    ]
+  },
+  "src/routes/UI/Waves.tsx?pick=default&pick=$css": {
+    "file": "Waves.js",
+    "name": "Waves",
+    "src": "src/routes/UI/Waves.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true
+  },
+  "src/routes/[...404].tsx?pick=default&pick=$css": {
+    "file": "_...404_.js",
+    "name": "_...404_",
+    "src": "src/routes/[...404].tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_ButtonSparkle-DNpTyev3.js",
+      "_Menu-OQmUNT5t.js",
+      "_components-CJF4pMQg.js",
+      "_routing-BSDkuvr3.js"
+    ],
+    "css": [
+      "assets/_..-D39vbXZ9.css"
+    ]
+  },
+  "src/routes/index.tsx?pick=default&pick=$css": {
+    "file": "index.js",
+    "name": "index",
+    "src": "src/routes/index.tsx?pick=default&pick=$css",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-Bep36fvr.js"
+    ]
+  },
+  "virtual:$vinxi/handler/server-fns": {
+    "file": "server-fns.js",
+    "name": "server-fns",
+    "src": "virtual:$vinxi/handler/server-fns",
+    "isEntry": true,
+    "imports": [
+      "_server-fns-ptihYXL4.js",
+      "_fetchEvent-1KlzQMFw.js"
+    ]
+  }
+}

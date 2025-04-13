@@ -275,6 +275,7 @@ export default function Container() {
                   {/* Card3D */}
                   <Match when={wallet.type_ui === '3D'}>
                   <div class="mb-50 z-50 px-2 -mt-180">
+                    
                     <Card3D
                       name={wallet.wallet_name}
                       balance={wallet.balance}
