@@ -149,11 +149,11 @@ export default function Wallet(props: WalletProps) {
       >
         <CardContainer>
           <CardBody
-            class={`border-black border-4 w-[20vw] h-[12vw] rounded-xl -mt-100`}
+            class={`border-black border-4 w-[21vw] h-[12.5vw] rounded-xl -mt-100`}
             color={props.color}
           >
              {/* edit/delete cardHolder */}
-             <CardItem translateZ={10} class="absolute ml-[16.5vw] mt-[8.6vw]" as='button'>
+             <CardItem translateZ={10} class="absolute ml-[17.7vw] mt-[9.2vw]" as='button'>
               <Show when={hover()}>
                 <img
                   class="absolute w-23 cursor-pointer z-100"

@@ -4,15 +4,7 @@ import { db } from '~/Server/db.server';
 export default async function deleteWallet(walletId: number | undefined, type: string | undefined) {
   'use server'; // Nota: 'use server' va all'inizio del file o della funzione esportata
   const executionTime = new Date();
-  const formattedTimestamp = executionTime.toLocaleString('it-IT', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false // Formato 24 ore
-  });
+
   try {
     let result;
     // La query restituisce una riga con SUM(balance) AS total_balance
@@ -20,7 +12,7 @@ export default async function deleteWallet(walletId: number | undefined, type: s
       result = await db.query(
         // Usa il tipo corretto qui
         'UPDATE wallets SET date_of_delete = $1 WHERE id = $2',
-        [formattedTimestamp,walletId]
+        [executionTime,walletId]
       );
     
 

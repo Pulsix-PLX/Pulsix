@@ -30,7 +30,7 @@ interface Properties {
   onClick: () => void; // Mantenuta ma non usata attivamente in questo esempio
   id: number; // ID univoco per logging e gestione
 }
-
+import { edit, setEdit } from '../cardHolder';
 // --- Componente Card3D con createResource ---
 export default function Card3DResource(props: Properties) {
   let canvasRef: HTMLCanvasElement | undefined;
@@ -183,117 +183,83 @@ export default function Card3DResource(props: Properties) {
       console.error(`[Card3D ${props.id}] -> ERRORE durante interazione Spline:`, e);
     }
   });
-   // --- State per gestione Long Press ---
-   const [isPressing, setIsPressing] = createSignal(false);
-   const [pressTimerId, setPressTimerId] = createSignal<number | null>(null);
-   // Coordinate iniziali per rilevare il movimento (drag/scroll)
-   const [startCoords, setStartCoords] = createSignal<{ x: number; y: number } | null>(null);
- 
-   // --- Costanti Configurabili ---
-   const LONG_PRESS_DURATION = 400; // Millisecondi per considerare "pressione lunga"
-   const MOVE_THRESHOLD = 10; // Pixel di movimento per considerare "drag" invece di press
- 
-   const handlePointerDown = (event: PointerEvent) => {
-    console.log(`[${props.id}] handlePointerDown - START`); // <-- LOG
-    setStartCoords({ x: event.clientX, y: event.clientY });
-    setIsPressing(true);
-
-    if (pressTimerId() !== null) {
-      console.log(`[${props.id}] handlePointerDown - Clearing previous timer: ${pressTimerId()}`); // <-- LOG
-      clearTimeout(pressTimerId()!);
-    }
-
-    const timerId = setTimeout(() => {
-      console.log(`[${props.id}] ---- Timer Fired (Long Press) ----`); // <-- LOG
-      setIsPressing(false); // <-- LOG stato cambiato
-      setPressTimerId(null);
-    }, LONG_PRESS_DURATION);
-
-    setPressTimerId(timerId as unknown as number);
-    console.log(`[${props.id}] handlePointerDown - Timer set: ${timerId}, isPressing: ${isPressing()}`); // <-- LOG
-  };
-
-  const handlePointerUp = (event: PointerEvent) => {
-    console.log(`[${props.id}] handlePointerUp - START, current isPressing: ${isPressing()}`); // <-- LOG stato attuale
-    const timerId = pressTimerId();
-    if (timerId !== null) {
-      console.log(`[${props.id}] handlePointerUp - Clearing timer: ${timerId}`); // <-- LOG
-      clearTimeout(timerId);
-      setPressTimerId(null);
-    }
-
-    // Controlla lo stato PRIMA di resettare
-    const shouldNavigate = isPressing();
-    console.log(`[${props.id}] handlePointerUp - Should navigate based on isPressing? ${shouldNavigate}`); // <-- LOG decisione
-
-    if (shouldNavigate) {
-        console.log(`[${props.id}] handlePointerUp - Performing navigation/action! Href: ${props.href}`); // <-- LOG azione
-        if (props.href) {
-            navigate(props.href);
-        } else {
-            props.onClick?.();
-        }
-    } else {
-        console.log(`[${props.id}] handlePointerUp - No action (long press or drag).`); // <-- LOG
-    }
-
-    // Resetta lo stato DOPO il controllo
-    setIsPressing(false);
-    setStartCoords(null);
-    console.log(`[${props.id}] handlePointerUp - END, state reset.`); // <-- LOG
-  };
-
-  const handlePointerMove = (event: PointerEvent) => {
-    if (!isPressing() || !startCoords()) {
-      // console.log(`[${props.id}] handlePointerMove - Ignored (not pressing or no start coords)`); // Log opzionale (può essere molto verboso)
-      return;
-    }
-
-    const deltaX = Math.abs(event.clientX - startCoords()!.x);
-    const deltaY = Math.abs(event.clientY - startCoords()!.y);
-
-    if (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD) {
-      console.log(`[${props.id}] handlePointerMove - Movement detected! deltaX=${deltaX}, deltaY=${deltaY}`); // <-- LOG
-      const timerId = pressTimerId();
-      if (timerId !== null) {
-        console.log(`[${props.id}] handlePointerMove - Clearing timer due to movement: ${timerId}`); // <-- LOG
-        clearTimeout(timerId);
-        setPressTimerId(null);
-      }
-      console.log(`[${props.id}] handlePointerMove - Resetting state due to movement.`); // <-- LOG
-      setIsPressing(false);
-      setStartCoords(null);
-    }
-  };
-
-  const handlePointerLeave = (event: PointerEvent) => {
-    if (isPressing()) {
-      console.log(`[${props.id}] handlePointerLeave - Pointer left while pressing, cancelling.`); // <-- LOG
-      const timerId = pressTimerId();
-      if (timerId !== null) {
-        console.log(`[${props.id}] handlePointerLeave - Clearing timer: ${timerId}`); // <-- LOG
-        clearTimeout(timerId);
-        setPressTimerId(null);
-      }
-      console.log(`[${props.id}] handlePointerLeave - Resetting state.`); // <-- LOG
-      setIsPressing(false);
-      setStartCoords(null);
-    }
-  };
 
   const navigate = useNavigate(); // <-- Ottieni la funzione di navigazione
+  // --- Stato per la Logica del Click ---
+
+// Lo stato 'open' che vuoi modificare
+const [open, setOpen] = createSignal(true);
+
+// Stato per sapere se il pulsante è attualmente premuto SULL'ELEMENTO
+const [isMouseDownOnElement, setIsMouseDownOnElement] = createSignal(false);
+// Stato per memorizzare l'orario del mousedown
+const [mouseDownTime, setMouseDownTime] = createSignal<number>(0);
+
+// Durata massima (in millisecondi) tra mousedown e mouseup per essere considerato un "click" valido
+// Un valore comune è tra 200ms e 500ms. Aggiustalo secondo le tue preferenze.
+const CLICK_THRESHOLD_MS = 300;
+
+// --- Funzione Gestore Interazione ---
+
+function handleInteraction(eventType: 'down' | 'up' | 'leave') {
+  // Usiamo props.id se disponibile per i log, altrimenti un placeholder
+  const id = typeof props !== 'undefined' ? props.id : 'Elemento';
+  console.log(`[${id}] handleInteraction - Event: ${eventType}, Current open state: ${open()}`);
+
+  if (eventType === 'down') {
+    // 1. Mouse è stato premuto SULL'elemento
+    setIsMouseDownOnElement(true);
+    setMouseDownTime(Date.now());
+    // Nota: Non facciamo setOpen(false) qui! Aspettiamo l'mouseup.
+
+  } else if (eventType === 'up') {
+    // 2. Mouse è stato rilasciato
+
+    // Controlla se il rilascio è avvenuto DOPO che un mousedown era stato registrato SU QUESTO elemento
+    if (isMouseDownOnElement()) {
+      const pressDuration = Date.now() - mouseDownTime();
+      console.log(`[${id}] Mouse up after ${pressDuration}ms`);
+
+      // Verifica se la durata è abbastanza breve da essere un click
+      if (pressDuration < CLICK_THRESHOLD_MS) {
+        // CONDIZIONE SODDISFATTA: Mousedown seguito da Mouseup in tempo breve = CLICK!
+        console.log(`[${id}] Click detected! Setting open to false.`);
+        navigate(props.href); // Naviga alla pagina specificata
+        // >>> ESEGUI L'AZIONE RICHIESTA SOLO AL CLICK <<<
+        setOpen(false);
+      } else {
+        // Se la durata è maggiore, è stata una pressione lunga o un trascinamento finito qui
+        console.log(`[${id}] Mouse up, but duration (${pressDuration}ms) exceeds threshold for click.`);
+        // Non impostiamo setOpen(false) in questo caso.
+      }
+
+      // Resetta lo stato di pressione ora che l'interazione up è gestita
+      setIsMouseDownOnElement(false);
+
+    } else {
+      // Questo mouseup è avvenuto senza un mousedown precedente valido SU QUESTO elemento
+      // (es. l'utente ha premuto fuori e rilasciato qui, o ha premuto qui, uscito, e rilasciato fuori)
+      console.log(`[${id}] Mouse up without a valid preceding mousedown on this element.`);
+    }
+
+  } else if (eventType === 'leave') {
+    // 3. Il puntatore ha lasciato l'elemento
+
+    // Se il puntatore esce MENTRE il pulsante era premuto, dobbiamo invalidare
+    // il potenziale click, altrimenti un mouseup fuori dall'elemento
+    // seguito da un rientro rapido potrebbe essere interpretato male.
+    if (isMouseDownOnElement()) {
+      console.log(`[${id}] Mouse left while down. Invalidating potential click.`);
+      setIsMouseDownOnElement(false); // Annulla lo stato "premuto"
+    }
+  }
+}
+  const [hover, setHover] = createSignal<boolean>(false);
+
   return (
 
     <div
       class="landing-container"
-      // Mantieni gli handler pointer*
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      // onPointerCancel={handlePointerLeave} // Puoi aggiungere anche questo per robustezza
-      style={{ cursor: 'pointer', "touch-action": "pan-y" }}
-      // onContextMenu={(e) => e.preventDefault()} // Opzionale
     >
       <div class="spline-wrapper" style={{ width: '80%', height: '500px', position: 'relative' /* Fallback leggero per vedere area */ }}
 >
@@ -334,6 +300,11 @@ export default function Card3DResource(props: Properties) {
         {/* Suspense è meno critico ora con l'overlay esplicito, ma può rimanere */}
         <Suspense fallback={<>{/* Fallback Suspense minimale o vuoto */}</>}>
           <canvas
+                  onmouseenter={() => setHover(true)}
+                  onmouseleave={() => setHover(false)}
+           onMouseDown={() => handleInteraction('down')}
+           onMouseUp={() => handleInteraction('up')}
+           onMouseLeave={() => handleInteraction('leave')}
             ref={canvasRef!}
             style={{
               width: '100%', height: '100%',
@@ -346,7 +317,17 @@ export default function Card3DResource(props: Properties) {
             }}
           />
         </Suspense>
-
+  <Show when={hover()}>
+                <img
+                  class="absolute ml-[20.7vw] -mt-[6vw] w-23"
+                  src="/icons/edit.png"
+                  onClick={(event) => {
+                    setEdit(props.id);
+                  }}
+                  onmouseenter={() => setHover(true)}
+                  onmouseleave={() => setHover(false)}
+                ></img>
+              </Show>
       </div>
     </div>
 

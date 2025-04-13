@@ -96,7 +96,7 @@ export default function SetWallet() {
               action={setWallet}
               method="post"
               class="CM w-[25vw] mt-[22vh] pl-[5vw] pr-[5vw] pb-[2vw] pt-[2vw]"
-              style={{ border: `3px solid ${color()}`, 'border-radius': '40px' }}
+              style={{ border: `3px solid ${color() || 'grey'}`, 'border-radius': '40px' }}
             >
               <input type="hidden" name="id" value={wallet()?.id} />
               <input type="hidden" name="type" value={wallet()?.type} />
@@ -106,12 +106,14 @@ export default function SetWallet() {
                 placeholder="Wallet Name"
                 defaultValue={wallet()?.wallet_name}
               />
-              <Input
-                type="text"
-                name="currency"
-                placeholder="Currency"
-                defaultValue={wallet()?.currency}
-              />
+              <select name='currency' value={
+                     wallet()?.currency
+                     }>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="CHF">CHF</option>
+         
+                </select>
               <Input
                 type="text"
                 name="category_id"
@@ -125,7 +127,8 @@ export default function SetWallet() {
                 placeholder="nation"
                 defaultValue={wallet()?.nation}
               />
-
+            <Switch>
+              <Match when={wallet()?.type_ui == 'card'}>
               <div class="color-picker-container" style={{ 'margin-bottom': '2rem' }}>
                 <Suspense fallback={<div>Loading Color Picker...</div>}>
                   <LazyDefaultColorPicker
@@ -137,6 +140,17 @@ export default function SetWallet() {
                   />
                 </Suspense>
               </div>
+              </Match>
+              <Match when={wallet()?.type_ui == '3D'}>
+                <select name='color' value={
+                     wallet()?.color
+                    }  onChange={(e) => setColor(e.target.value)}>
+                  <option value="black">Black</option>
+                  <option value="purple">Purple</option>
+                  {/* Add more colors as needed */}
+                </select>
+              </Match>
+            </Switch>
 
               {/* Input nascosto rimane uguale */}
               <input type="hidden" value={color() || wallet()?.color || '#ff000000'} name="color" />

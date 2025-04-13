@@ -15,12 +15,14 @@ import { getUserId } from '~/Server/auth.server';
 import type { wallet } from '~/Server/types/wallet';
 import { setWalletId } from '.';
 import Card from './_components/Card';
-import CardContainer, { card, edit } from './_components/cardHolder';
+import CardContainer, { card, edit, setEdit } from './_components/cardHolder';
 import Wallet from './Wallet';
 import { calculateConvertedTotal } from '~/routes/API/exchangeRates/exchangeRates';
 import SetWallet from './_components/SetWallet';
 import { getWallet } from '~/routes/API/Wallets/getWallet';
 import Card3D from './_components/Card3D';
+import AddWallet from './_components/addWallet';
+import FormAddWallet from './_components/addWallet';
 
 // Tipo per l'input del fetcher
 type ResourceSourceInput = {
@@ -90,7 +92,7 @@ export default function Container() {
       try {
         let itemName: string | null = null;
         let itemType: 'container' | 'wallet' | null = null;
-        let itemContent: wallet[] | null  = null;
+        let itemContent: wallet[] | null = null;
         let wallet: any = null; // Initialize wallet as null
         if (itemId === null) {
           // Case Root unused
@@ -125,7 +127,12 @@ export default function Container() {
           }
         }
 
-        const result: CombinedItemInfo = { name: itemName, type: itemType, content: itemContent, wallet:wallet };
+        const result: CombinedItemInfo = {
+          name: itemName,
+          type: itemType,
+          content: itemContent,
+          wallet: wallet,
+        };
         return result;
       } catch (error) {
         console.error('[Fetcher Updated] Errore:', error);
@@ -221,9 +228,15 @@ export default function Container() {
       <Show when={combinedData.loading || combinedData.state === 'unresolved'}>
         <div class="ml-[13vw] mt-5">Loading...</div>
       </Show>
-
-      {/* Container */}
+      {/* If is a Container */}
       <Show when={combinedData()?.type === 'container'}>
+        {/* Add wallet/container */}
+        <div class={`CM ml-[10vw]`}>
+          <button type="button" onclick={() => setEdit(-1)}>
+            Add Wallet
+          </button>
+        </div>
+        <FormAddWallet container_id={currentContainerId()} user_id={userId()}/>
         {/* Total */}
         <p class="CM mt-100">
           {(convertedTotalData()?.total_balance ?? 0).toLocaleString('it-IT', {
@@ -258,35 +271,34 @@ export default function Container() {
                   <Switch>
                     {/* Card */}
                     <Match when={wallet.type_ui === 'card'}>
-                  <div class="mb-50 mt-50 z-50 px-2">
-                    <Card
-                      name={wallet.wallet_name}
-                      balance={wallet.balance}
-                      currency={wallet.currency}
-                      nation={wallet.nation}
-                      category={wallet.category_id}
-                      color={wallet.color}
-                      href={createWalletPath(currentPathname, wallet.id)}
-                      onClick={() => setWalletId(wallet.id)}
-                      id={wallet.id}
-                    />
-                  </div>
-                  </Match>
-                  {/* Card3D */}
-                  <Match when={wallet.type_ui === '3D'}>
-                  <div class="mb-50 z-50 px-2 -mt-180">
-                    
-                    <Card3D
-                      name={wallet.wallet_name}
-                      balance={wallet.balance}
-                      currency={wallet.currency}
-                      color={wallet.color}
-                      href={createWalletPath(currentPathname, wallet.id)}
-                      onClick={() => setWalletId(wallet.id)}
-                      id={wallet.id}
-                    />
-                  </div>
-                  </Match>
+                      <div class="mb-50 mt-50 z-50 px-2">
+                        <Card
+                          name={wallet.wallet_name}
+                          balance={wallet.balance}
+                          currency={wallet.currency}
+                          nation={wallet.nation}
+                          category={wallet.category_id}
+                          color={wallet.color}
+                          href={createWalletPath(currentPathname, wallet.id)}
+                          onClick={() => setWalletId(wallet.id)}
+                          id={wallet.id}
+                        />
+                      </div>
+                    </Match>
+                    {/* Card3D */}
+                    <Match when={wallet.type_ui === '3D'}>
+                      <div class="mb-50 z-50 px-2 -mt-180">
+                        <Card3D
+                          name={wallet.wallet_name}
+                          balance={wallet.balance}
+                          currency={wallet.currency}
+                          color={wallet.color}
+                          href={createWalletPath(currentPathname, wallet.id)}
+                          onClick={() => setWalletId(wallet.id)}
+                          id={wallet.id}
+                        />
+                      </div>
+                    </Match>
                   </Switch>
                 )}
               </For>
@@ -302,7 +314,7 @@ export default function Container() {
         </Switch>
       </Show>
 
-      {/* Wallet */}
+      {/*If is a Wallet */}
       <Show when={combinedData()?.type === 'wallet'}>
         <Wallet
           id={combinedData()?.wallet?.id}
