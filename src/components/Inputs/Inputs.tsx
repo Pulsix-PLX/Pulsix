@@ -6,6 +6,7 @@ import { usernameAlreadyexist } from '~/routes/API/Auth/registration/credentials
 import { useAction } from '@solidjs/router';
 import { phoneAlreadyexist } from '~/routes/API/Auth/registration/phone/phoneAlreadyexist';
 import { emailAlreadyexist } from '~/routes/API/Auth/registration/email/emailAlreadyexist';
+import Select from './select';
 
 interface InputProps {
   name: string;
@@ -19,17 +20,19 @@ interface InputProps {
     | 'username'
     | 'phoneNumber'
     | 'usernameLogin'
-    | 'color';
+    | 'color'
+    | 'select';
+  options?: any[];
   placeholder?: string;
   required?: boolean;
   label?: string;
   class?: string;
   style?: string;
-  mountOn?:boolean;
+  mountOn?: boolean;
   defaultValue?: string;
   ValidationSchema?: (value: any) => boolean;
 }
-export  const [value, setValue] = createSignal('');
+export const [value, setValue] = createSignal('');
 export default function Input(props: InputProps) {
   //actions
   const checkUsername = useAction(usernameAlreadyexist);
@@ -41,12 +44,11 @@ export default function Input(props: InputProps) {
   const [touched, setTouched] = createSignal<boolean>(false);
 
   onMount(() => {
-
     // Se il campo è richiesto, inizializzalo come non valido (false)
     // Se non è richiesto, inizializzalo come valido (true)
     if (props.required) {
-      if(props.mountOn!=false){
-      SetForm(props.name, false);
+      if (props.mountOn != false) {
+        SetForm(props.name, false);
       }
     } else {
       SetForm(props.name, true);
@@ -178,12 +180,13 @@ export default function Input(props: InputProps) {
           const response = await checkUsername(inputValue);
           console.log('Username check response:', response);
 
-          if (response === 'already exist' ) {
-            if(props.type == 'username'){
-            SetForm(props.name, false);
-            if(props.type=='username'){
-            setErrorMessage('Username already exist');}
-            }else{
+          if (response === 'already exist') {
+            if (props.type == 'username') {
+              SetForm(props.name, false);
+              if (props.type == 'username') {
+                setErrorMessage('Username already exist');
+              }
+            } else {
               setErrorMessage('');
             }
           } else if (response.startsWith('error:')) {
@@ -191,10 +194,10 @@ export default function Input(props: InputProps) {
             setErrorMessage(`Errore verifica username: ${response.split(':')[1]}`);
           } else {
             SetForm(props.name, true);
-            if(props.type=='username'){
-            setErrorMessage('Username avaible');
-            }else{
-            setErrorMessage('Username not found');
+            if (props.type == 'username') {
+              setErrorMessage('Username avaible');
+            } else {
+              setErrorMessage('Username not found');
             }
           }
         } catch (error) {
@@ -206,46 +209,45 @@ export default function Input(props: InputProps) {
         break;
 
       case 'phoneNumber':
-         // Rimuovi eventuali spazi e trattini
-         const cleanedNumber = inputValue.replace(/[\s-]/g, '');
+        // Rimuovi eventuali spazi e trattini
+        const cleanedNumber = inputValue.replace(/[\s-]/g, '');
 
-         // Controllo che siano solo numeri
-         if (!/^\d+$/.test(cleanedNumber)) {
-           SetForm(props.name, false);
-           setErrorMessage('Phone number must contain only digits');
-           return;
-         }
- 
-         // Controllo lunghezza (ad esempio tra 7 e 10 cifre dopo il prefisso)
-         if (cleanedNumber.length < 7 || cleanedNumber.length > 10) {
-           SetForm(props.name, false);
-           setErrorMessage('Invalid phone number length');
-           return;
-         }
- 
-         // Controllo che non inizi con zeri non significativi
-         if (cleanedNumber.startsWith('0')) {
-           SetForm(props.name, false);
-           setErrorMessage('Phone number should not start with unnecessary zeros');
-           return;
-         }
+        // Controllo che siano solo numeri
+        if (!/^\d+$/.test(cleanedNumber)) {
+          SetForm(props.name, false);
+          setErrorMessage('Phone number must contain only digits');
+          return;
+        }
+
+        // Controllo lunghezza (ad esempio tra 7 e 10 cifre dopo il prefisso)
+        if (cleanedNumber.length < 7 || cleanedNumber.length > 10) {
+          SetForm(props.name, false);
+          setErrorMessage('Invalid phone number length');
+          return;
+        }
+
+        // Controllo che non inizi con zeri non significativi
+        if (cleanedNumber.startsWith('0')) {
+          SetForm(props.name, false);
+          setErrorMessage('Phone number should not start with unnecessary zeros');
+          return;
+        }
 
         const response = await checkPhone(inputValue);
-         ////   Controllo che non ci siano gia numeri registrati come quello inserito /////
-         if (response === 'already exist') {
-           SetForm(props.name, false);
-           setErrorMessage('Phone number already associated to another account');
-           return;
-         } else if (response.startsWith('error:')) {
-           SetForm(props.name, false);
-           setErrorMessage(`Errore verifica phone: ${response.split(':')[1]}`);
-           return;
-         } else {
-           SetForm(props.name, true);
-           setErrorMessage('');
-         }
+        ////   Controllo che non ci siano gia numeri registrati come quello inserito /////
+        if (response === 'already exist') {
+          SetForm(props.name, false);
+          setErrorMessage('Phone number already associated to another account');
+          return;
+        } else if (response.startsWith('error:')) {
+          SetForm(props.name, false);
+          setErrorMessage(`Errore verifica phone: ${response.split(':')[1]}`);
+          return;
+        } else {
+          SetForm(props.name, true);
+          setErrorMessage('');
+        }
 
-       
         // Validazione passata
         SetForm(props.name, true);
         setErrorMessage('');
@@ -262,9 +264,8 @@ export default function Input(props: InputProps) {
         }
         const res = await checkEmail(inputValue);
         ////   Controllo che non ci siano gia numeri registrati come quello inserito /////
-        console.log(res)
+        console.log(res);
         if (res === 'already exist') {
-         
           SetForm(props.name, false);
           setErrorMessage('Email already associated to another account');
           return;
@@ -308,6 +309,17 @@ export default function Input(props: InputProps) {
       {props.label && <label for={props.name}>{props.label}</label>}
 
       <Switch>
+        <Match when={props.type === 'select'}>
+          <Select
+            name={props.name}
+            onInput={validateInput}
+            options={props.options}
+            class={props.class}
+            style={props.style}
+            placeholder={props.defaultValue}
+          />
+        </Match>
+
         <Match when={props.type === 'password'}>
           <InputPassword
             name={props.name}
@@ -409,7 +421,6 @@ export default function Input(props: InputProps) {
             value={props.defaultValue}
           />
         </Match>
-      
       </Switch>
 
       {/* Mostra il messaggio di errore solo se il campo è stato toccato.*/}
