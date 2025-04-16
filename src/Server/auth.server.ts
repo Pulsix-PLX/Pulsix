@@ -15,7 +15,7 @@ export interface CurrentUser {
 
 // --- Funzione Helper Interna (Non Esportata) ---
 // Mettiamo qui la logica comune per recuperare i dati della sessione
-async function _getSessionData(): Promise<AuthSessionData | null> {
+async function getSessionData(): Promise<AuthSessionData | null> {
     // Controlla la secret (fondamentale)
     if (!process.env.SESSION_SECRET) {
         console.error("SESSION_SECRET non è impostata! Impossibile recuperare la sessione.");
@@ -27,7 +27,7 @@ async function _getSessionData(): Promise<AuthSessionData | null> {
         // Recupera la sessione
         const session = await useSession<AuthSessionData>({
             password: process.env.SESSION_SECRET,
-            name: "auth_session", // Nome consistente con il login
+            name: process.env.JWT_ISSUER, // Nome consistente con il login
         });
         // Restituisce i dati della sessione (o null se non ci sono dati)
         // Usiamo '?? null' per assicurarci di restituire null se session.data fosse undefined
@@ -47,7 +47,7 @@ async function _getSessionData(): Promise<AuthSessionData | null> {
  */
 export async function getUserId(): Promise<number | null> {
     'use server'; // Direttiva per RPC
-    const sessionData = await _getSessionData();
+    const sessionData = await getSessionData();
 
     if (sessionData?.userId) {
         // Tenta di convertire l'ID stringa in numero intero (base 10)
@@ -73,7 +73,7 @@ export async function getUserId(): Promise<number | null> {
  */
 export async function getUsername(): Promise<string | null> {
     'use server'; // Direttiva per RPC
-    const sessionData = await _getSessionData();
+    const sessionData = await getSessionData();
 
     // Restituisce lo username se presente, altrimenti l'espressione ?? restituisce null
     return sessionData?.username ?? null;
@@ -91,7 +91,7 @@ export async function getUsername(): Promise<string | null> {
  */
 export async function getUser(): Promise<CurrentUser | null> {
     'use server';
-    const sessionData = await _getSessionData();
+    const sessionData = await getSessionData();
     if (sessionData?.userId && sessionData?.username) {
        return { id: sessionData.userId, username: sessionData.username };
     }

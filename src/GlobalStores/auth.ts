@@ -2,7 +2,7 @@
 import { createSignal, createEffect } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import axios, { AxiosError } from 'axios'; // Importa axios e AxiosError
-
+import { api } from '~/Server/Axios';
 declare module 'axios' {
   // Estende l'interfaccia di configurazione della richiesta interna di Axios
   export interface InternalAxiosRequestConfig {
@@ -24,21 +24,12 @@ interface AuthState {
   error: string | null;
 }
 
-// Crea un'istanza di Axios configurata per le chiamate API
-const apiClient = axios.create({
-  // Imposta un baseURL se tutte le tue API iniziano con lo stesso prefisso
-  baseURL: 'http://localhost:3000/', // Esempio
-  // Importante per inviare/ricevere cookies (necessario per il refresh token)
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
+
+
 
 
 // Create the auth store
 export function createAuthStore() {
-  // Il JWT è memorizzato in memoria (segnale SolidJS)
   const [accessToken, setAccessToken] = createSignal<string | null>(null);
 
   // User state (invariato)
@@ -49,7 +40,7 @@ export function createAuthStore() {
     error: null
   });
 
-  // --- Funzioni di Interazione API (ora usano apiClient) ---
+  // --- Funzioni di Interazione API (ora usano api) ---
 
   // Fetch user data using the access token (ora interna, usata dopo login/refresh)
   async function fetchUserData() {
@@ -62,7 +53,7 @@ export function createAuthStore() {
     setState({ isLoading: true });
     try {
       // L'interceptor aggiungerà 'Authorization: Bearer ...'
-      const response = await apiClient.get<{id: string; email: string; fullName?: string}>('/API/user/me'); // Assicurati che l'endpoint esista
+      const response = await api.get<{id: string; email: string; fullName?: string}>('API/user/me'); // Assicurati che l'endpoint esista
       setState({
         user: response.data,
         isAuthenticated: true,
@@ -84,7 +75,7 @@ export function createAuthStore() {
     try {
       // Prova a fare il refresh. L'interceptor gestirà eventuali 401 iniziali (improbabile qui)
       // ma `withCredentials: true` è cruciale per inviare il cookie.
-      const response = await apiClient.post<{ accessToken: string }>('/Api/Auth/refresh');
+      const response = await api.post<{ accessToken: string }>('Api/Auth/refresh');
       setAccessToken(response.data.accessToken);
       await fetchUserData(); // Carica dati utente se il refresh ha successo
     } catch (error) {
@@ -122,9 +113,8 @@ export function createAuthStore() {
     setState({ isLoading: true, error: null });
     console.log('store')
     try {
-      const response = await apiClient.post<{ accessToken: string }>('/API/Auth/login', { username, password });
+      const response = await api.post<{ accessToken: string }>('API/Auth/login', { username, password });
       setAccessToken(response.data.accessToken);
-      await fetchUserData(); // Carica dati utente dopo login
       return true;
     } catch (error) {
       handleApiError(error, 'Login failed'); // handleApiError dovrebbe già gestire l'errore axios
@@ -133,7 +123,7 @@ export function createAuthStore() {
       setState({ isLoading: false });
     }
   }
-
+/*
   // Assicurati che il resto dello store (es. handleApiError, fetchUserData, ecc.) sia presente...
   // ... (resto del codice dello store) ...
 
@@ -142,7 +132,7 @@ export function createAuthStore() {
     setState({ isLoading: true, error: null });
     try {
       // Non ci aspettiamo un corpo specifico nella risposta di successo (solo status 201)
-      await apiClient.post('/api/auth/register', { email, password, fullName });
+      await api.post('/api/auth/register', { email, password, fullName });
       // Nessun errore, registrazione OK
       return true;
     } catch (error) {
@@ -152,7 +142,7 @@ export function createAuthStore() {
       setState({ isLoading: false });
     }
   }
-
+*/
   // Logout
   async function logout() {
      // Set loading only if not already loading to avoid flicker
@@ -172,12 +162,12 @@ export function createAuthStore() {
     try {
       // Invia richiesta al backend. `withCredentials: true` nell'istanza invia il cookie.
       // L'interceptor aggiungerà il Bearer token se presente (anche se spesso non serve per logout)
-      await apiClient.post('/api/auth/logout');
+      await api.post('API/Auth/logout');
     } catch (error) {
       // Logga l'errore ma lo stato frontend è già pulito, quindi non è critico
       console.error('Logout API call error:', error);
     } finally {
-        // Ensure loading is set to false after attempt
+        
         setState({ isLoading: false });
     }
   }
@@ -188,9 +178,9 @@ export function createAuthStore() {
   // Vengono configurati UNA VOLTA quando lo store viene creato.
 
   // 1. Request Interceptor: Aggiunge il token Bearer alle richieste uscenti
-  apiClient.interceptors.request.use(
+  api.interceptors.request.use(
     (config) => {
-      const token = accessToken(); // Legge il valore corrente del segnale
+      const token = accessToken();
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -213,7 +203,7 @@ export function createAuthStore() {
       } else {
         // Aggiorna l'header della richiesta in coda e riesegui
         prom.config.headers['Authorization'] = `Bearer ${token}`;
-        apiClient(prom.config).then(prom.resolve).catch(prom.reject);
+        api(prom.config).then(prom.resolve).catch(prom.reject);
       }
     });
     failedQueue = [];
@@ -221,7 +211,7 @@ export function createAuthStore() {
 
 
   // 2. Response Interceptor: Gestisce errori 401 e tenta il refresh
-  apiClient.interceptors.response.use(
+  api.interceptors.response.use(
     (response) => {
       // Risposta OK (2xx), restituiscila normalmente
       return response;
@@ -230,7 +220,7 @@ export function createAuthStore() {
       const originalRequest = error.config;
 
       // Se è un errore 401 e non è una richiesta di refresh essa stessa
-      if (error.response?.status === 401 && originalRequest && originalRequest.url !== '/api/auth/refresh') {
+      if (error.response?.status === 401 && originalRequest && originalRequest.url !== 'API/Auth/refresh') {
 
         if (isRefreshing) {
            // Se un refresh è già in corso, metti in coda la richiesta fallita
@@ -248,7 +238,7 @@ export function createAuthStore() {
 
         try {
           // Tenta di ottenere un nuovo token
-          const refreshResponse = await apiClient.post<{ accessToken: string }>('/api/auth/refresh');
+          const refreshResponse = await api.post<{ accessToken: string }>('API/Auth/refresh');
           const newAccessToken = refreshResponse.data.accessToken;
           setAccessToken(newAccessToken); // Aggiorna il token nello store
           console.log('Axios interceptor: Token refreshed successfully.');
@@ -262,7 +252,7 @@ export function createAuthStore() {
           processQueue(null, newAccessToken);
 
           // Riesegui la richiesta originale con il nuovo token
-          return apiClient(originalRequest);
+          return api(originalRequest);
 
         } catch (refreshError: any) {
           console.error('Axios interceptor: Refresh token failed.', refreshError);
@@ -293,22 +283,21 @@ export function createAuthStore() {
     // Methods
     initialize,
     login,
-    register,
     logout,
-    // Non esportiamo più authenticatedFetch, gli interceptor lo gestiscono
-    // Potremmo esportare apiClient se serve fare chiamate API dirette da fuori lo store
-    // apiClient: apiClient
+    // Non esportiamo authenticatedFetch, gli interceptor lo gestiscono
+    // Potremmo esportare api se serve fare chiamate API dirette da fuori lo store
+    api: api
   };
 }
 
-// Create a global instance (o fornisci tramite context)
+// Create a global instance
 export const authStore = createAuthStore();
 
-// Esempio d'uso dell'apiClient da un componente (se esportato):
+// Esempio d'uso dell'api da un componente (se esportato):
 // import { authStore } from './authStore';
 // async function loadSomeData() {
 //   try {
-//     const response = await authStore.apiClient.get('/some-protected-data');
+//     const response = await authStore.api.get('/some-protected-data');
 //     console.log(response.data);
 //   } catch (error) {
 //     console.error("Failed to load protected data:", error);

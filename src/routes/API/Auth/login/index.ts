@@ -1,9 +1,9 @@
-import type { APIEvent } from '@solidjs/start/server';
-import { setCookie, useSession } from 'vinxi/http'; // Importa useSession per la gestione delle sessioni
-import { db } from '../../../../Server/db.server'; // Assicurati che il percorso sia corretto
-import * as bcrypt from 'bcryptjs';
 import { json } from '@solidjs/router';
+import type { APIEvent } from '@solidjs/start/server';
+import * as bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import { setCookie, useSession } from 'vinxi/http';
+import { db } from '../../../../Server/db.server';
 import { generateAccessToken, generateRefreshToken } from './utils';
 
 type LoginInput = {
@@ -97,6 +97,28 @@ export async function POST(event: APIEvent) {
       );
     }
 
+    //// ---- Create Session (used for server functions) ---- ////
+    type AuthSessionData = {
+      userId?: string;
+      username?: string;
+    };
+    try {
+      const session = await useSession<AuthSessionData>(event.nativeEvent, {
+        password: process.env.SESSION_SECRET!,
+        name: process.env.JWT_ISSUER,
+        cookie: {
+          maxAge: 60 * 60 * 24, // 1 day
+          secure: process.env.NODE_ENV === 'production',
+          httpOnly: true,
+          sameSite: 'lax',
+        },
+      });
+      // Salva userId e username
+      await session.update({ userId: user.id, username:user.username });
+      console.log(`Login: Sessione server-side aggiornata per userId: ${user.id}`);
+    } catch (sessionError) {
+      console.error('Login: Errore aggiornamento sessione server-side:', sessionError);
+    }
     return json({ accessToken });
   } catch (error: any) {
     console.error('Errore durante il processo di login:', error);

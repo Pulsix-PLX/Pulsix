@@ -33,7 +33,8 @@ export default function Login() {
       return;
     }
     console.log('username:', username, 'password:', password);
-    const success = await axios.post('http://localhost:3000/API/Auth/login/login',{username,password})
+    const success = await authStore.login(username,password)
+   // const success = await axios.post('http://localhost:3000/API/Auth/login/login',{username,password})
 
     if (success) {
       navigate('/dashboard', { replace: true });

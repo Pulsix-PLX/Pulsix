@@ -5,13 +5,9 @@ import { v4 as uuidv4 } from 'uuid';
 import {db} from '../../../../Server/db.server';
 import jwt from 'jsonwebtoken';
 
-// Constants
-const BCRYPT_COST = Number(process.env.BCRYPT_COST) || 12;
+
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const JWT_ISSUER = process.env.JWT_ISSUER || 'app';
-const ACCESS_TOKEN_EXPIRY = Number(process.env.ACCESS_TOKEN_EXPIRY) || 900; // 15 min
-const REFRESH_TOKEN_EXPIRY = Number(process.env.REFRESH_TOKEN_EXPIRY) || 1209600; // 14 days
-
 
 interface JWTPayload {
   sub: string; // subject (user ID)
@@ -25,83 +21,7 @@ interface VerifiedAccessTokenPayload {
     jti: string;
 }
 
-// Password hashing 
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, BCRYPT_COST);
-}
 
-// Password verification 
-export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  return bcrypt.compare(password, hashedPassword);
-}
-
-// Generate secure random token
-export function generateSecureToken(length = 32): string {
-  return crypto.randomBytes(length).toString('hex');
-}
-
-// =========== Create Tokens ===========
-
-export function generateAccessToken(userId: string): string {
-
-  const payload: Partial<JWTPayload> = { 
-    sub: userId,
-    jti: uuidv4() // Unique identifier for this specific token
-  };
-
-  const token = jwt.sign(
-    payload,
-    JWT_SECRET!, // Use non-null assertion '!' because we checked it above
-    {
-      algorithm: 'HS256',         // Explicitly set algorithm
-      expiresIn: ACCESS_TOKEN_EXPIRY, // Set expiration time (e.g., '15m' or 900 seconds)
-      issuer: JWT_ISSUER          // Set the issuer claim
-      // 'iat' (issued at) is added automatically by the library
-    }
-  );
-
-  return token;
-}
-
-// generate and hash refresh token and save it in the DB
-export async function generateRefreshToken(
-  userId: string,
-  ipAddress: string | null, // Allow null IP address
-  userAgent: string | null // Allow null user agent
-): Promise<string> {
-  const token = generateSecureToken(40); // The actual token given to the user
-  const tokenHash = crypto // The hash stored in the DB
-    .createHash('sha256')
-    .update(token)
-    .digest('hex');
-
-  // Set expiration date
-  const expiresAt = new Date();
-  expiresAt.setSeconds(expiresAt.getSeconds() + REFRESH_TOKEN_EXPIRY);
-
-  // Use JSON.stringify only if userAgent is not null/undefined
-  const deviceInfo = userAgent ? JSON.stringify({ userAgent }) : null;
-
-  try {
-
-    await db.query(
-      `INSERT INTO refresh_tokens (id, user_id, token_hash, device_info, ip_address, expires_at)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [
-      uuidv4(),
-      userId,
-      tokenHash,
-      deviceInfo, // Can be null
-      ipAddress,  // Can be null
-      expiresAt.toISOString()
-      ]
-    );
-    return token; // Return the original token, not the hash
-  } catch (error) {
-    console.error("Error storing refresh token:", error);
-    throw new Error("Failed to generate refresh token due to database error.");
-  }
-}
 
 // =========== Verify Tokens ===========
 

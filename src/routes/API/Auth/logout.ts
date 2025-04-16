@@ -1,50 +1,81 @@
-import { Pool } from 'pg';
-import { H3Event, defineEventHandler, getCookie, deleteCookie, createError } from 'h3';
-import crypto from 'crypto';
+import { getCookie, deleteCookie, useSession } from 'vinxi/http';
 
-export default defineEventHandler(async (event: H3Event) => {
-    const db = event.context.db as Pool | undefined;
-     if (!db) {
-      console.error("logoutHandler: Database connection not found in event context");
-    }
+import type { APIEvent } from '@solidjs/start/server';
 
-    const refreshToken = getCookie(event, 'refresh_token');
-    const cookieOptions = {
-        httpOnly: true,
+import { json } from '@solidjs/router';
+import { db } from '~/Server/db.server';
+import bcrypt from 'bcryptjs';
+
+export async function POST(event: APIEvent) {
+  // ---- update Session (used for server functions) ---- //
+  type AuthSessionData = {
+    userId?: string;
+    username?: string;
+  };
+  try {
+    const session = await useSession<AuthSessionData>(event.nativeEvent, {
+      password: process.env.SESSION_SECRET!,
+      name: process.env.JWT_ISSUER,
+      cookie: {
+        maxAge: 60 * 60 * 24, // 1 day
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict' as const,
-        path: '/'
-    };
+        httpOnly: true,
+        sameSite: 'lax',
+      },
+    });
+    await session.clear();
+    console.log('Logout: Sessione server-side pulita.');
+  } catch (sessionError) {
+    console.error('Logout: Errore aggiornamento sessione server-side:', sessionError);
+  }
 
+  const BCRYPT_COST = Number(process.env.BCRYPT_COST) || 12;
+
+  const refreshToken = getCookie(event.nativeEvent, 'refresh_token');
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    path: '/',
+  };
+
+  // 1. Invalida refresh token nel DB
+  try {
+    if (refreshToken) {
+      const tokenHash = await bcrypt.hash(refreshToken, BCRYPT_COST);
+      const deleteSql = 'DELETE FROM auth.refresh_tokens WHERE token_hash = $1';
+      await db.query(deleteSql, [tokenHash]);
+      console.log('Refresh token hash deleted from DB.');
+    }
+  } catch (error) {
+    console.error('Error invalidating refresh token in DB during logout:', error);
+  }
+
+  // 2. Cancella cookie dal client
+  try {
+    deleteCookie(event.nativeEvent, 'refresh_token', cookieOptions);
+    console.log('Refresh token cookie deletion instruction sent.');
+  } catch (cookieError) {
+    console.error('Error clearing refresh token cookie during logout:', cookieError);
+  }
+
+  // 3. Cancella active_sessions (Opzionale - vedi sotto)
+  // Accedi all'ID utente tramite il contesto dell'evento nativo
+  const userId = event.nativeEvent.context.auth?.userId; // Accedi tramite nativeEvent
+  if (userId && db) {
     try {
-        if (refreshToken && db) {
-        const tokenHash = crypto
-            .createHash('sha256')
-            .update(refreshToken)
-            .digest('hex');
-        const deleteSql = 'DELETE FROM refresh_tokens WHERE token_hash = $1';
-        await db.query(deleteSql, [tokenHash]);
-        }
+      // ATTENZIONE: Questo cancella TUTTE le sessioni attive per l'utente.
+      // È questo il comportamento desiderato per un logout singolo?
+      // Spesso si invalida solo il refresh token specifico (fatto al punto 1).
+      const deleteSessionSql = 'DELETE FROM auth.active_sessions WHERE user_id = $1';
+      await db.query(deleteSessionSql, [userId]);
+      console.log(`Cleared active_sessions for user: ${userId}`);
     } catch (error) {
-        console.error('Error invalidating refresh token during logout:', error);
+      console.error('Error clearing active session during logout:', error);
     }
+  } else {
+    console.log('No userId found in nativeEvent context, skipping active_sessions clear.');
+  }
 
-    try {
-         deleteCookie(event, 'refresh_token', cookieOptions);
-    } catch (cookieError) {
-        console.error("Error clearing refresh token cookie during logout:", cookieError);
-    }
-
-    // Usa event.context.auth se impostato dal middleware requireAuth
-    const userId = event.context.auth?.userId;
-    if (userId && db) {
-        try {
-        const deleteSessionSql = 'DELETE FROM active_sessions WHERE user_id = $1';
-        await db.query(deleteSessionSql, [userId]);
-        } catch (error) {
-        console.error('Error clearing active session during logout:', error);
-        }
-    }
-
-    return { success: true };
-});
+  return json({ success: true });
+}
