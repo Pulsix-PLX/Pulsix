@@ -1,55 +1,65 @@
 import { onCleanup, onMount } from 'solid-js';
+import { useNavigate } from '@solidjs/router';
+
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
 import Input from '~/components/Inputs/Inputs';
 import { setShowMenu } from '~/components/Menus/Menu';
 import { allInputsValid, getFormValue, SetForm, SetFormValues } from '~/GlobalStores/FormStore';
-import { loginUser } from '~/routes/API/Auth/login/loginUser';
-import { createSignal } from 'solid-js';
 
-import { useAction, useNavigate } from '@solidjs/router';
+import { authStore } from '../../../../GlobalStores/auth'; // Assicurati che il percorso sia corretto
+import axios from 'axios';
 
 export default function Login() {
+  const navigate = useNavigate();
+
   onMount(() => {
     setShowMenu(false);
     SetForm({});
     SetFormValues({});
-    console.log(getFormValue('username'));
-    console.log(getFormValue('password'));
-
   });
+
   onCleanup(() => {
     setShowMenu(true);
   });
 
-  const [error, setError] = createSignal('');
-  const loginAction = useAction(loginUser);
-  const navigate= useNavigate();
   const handleSubmit = async (event: Event) => {
-    event.preventDefault(); // Previene il comportamento di default del form
-    const data={
-      username: getFormValue('username'),
-      password: getFormValue('password')
-    }
-    const response = await loginAction(data);
+    event.preventDefault();
+    console.log('in');
+    const username = getFormValue('username');
+    const password = getFormValue('password');
 
-    if (response.success) {
-      navigate('/');
+    if (!username || !password) {
+      console.error('Username or password missing from form store');
+      return;
+    }
+    console.log('username:', username, 'password:', password);
+    const success = await axios.post('http://localhost:3000/API/Auth/login/login',{username,password})
+
+    if (success) {
+      navigate('/dashboard', { replace: true });
     } else {
-      setError(' error'); // Mostra il messaggio di errore
+      console.log('Login failed, error:', authStore.error);
     }
   };
 
   return (
     <>
+      {authStore.error && <p class="text-red-500">{authStore.error}</p>}
 
-      {error() && <p class="text-red-500">{'Wrong credentials'}</p>} {/* Messaggio di errore se il login fallisce */}
       <form class="CM" method="post" onSubmit={handleSubmit}>
         <Input type="usernameLogin" name="username" placeholder="Username" required />
         <Input type="password" name="password" placeholder="Password" required />
-        <ButtonSparkle text="Login" class="ml-[auto] mr-[auto]"disabled={!allInputsValid()} />
+        <ButtonSparkle text="Login" class="ml-[auto] mr-[auto]" disabled={!allInputsValid()} />
       </form>
+      <div class="auth-links text-center mt-4">
+        <a href="/register" class="text-blue-600 hover:underline">
+          Need an account? Register
+        </a>
+        <span class="mx-2">|</span>
+        <a href="/forgot-password" class="text-blue-600 hover:underline">
+          Forgot password?
+        </a>
+      </div>
     </>
   );
 }
-
-

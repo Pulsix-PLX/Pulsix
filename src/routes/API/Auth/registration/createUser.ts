@@ -1,5 +1,4 @@
 import { action } from '@solidjs/router';
-import { setAuth } from '~/GlobalStores/AuthStore';
 import { db } from '~/Server/db.server';
 import * as bcrypt from 'bcryptjs';
 

@@ -172,8 +172,6 @@ export default function Input(props: InputProps) {
         SetForm(props.name, true);
         setErrorMessage('');
         break;
-
-      case 'username':
       case 'usernameLogin':
         try {
           console.log('Validating username:', inputValue);
@@ -181,11 +179,32 @@ export default function Input(props: InputProps) {
           console.log('Username check response:', response);
 
           if (response === 'already exist') {
+            SetForm(props.name, true);
+            setErrorMessage('');
+          } else if (response.startsWith('error:')) {
+            SetForm(props.name, false);
+            setErrorMessage(`Errore verifica username: ${response.split(':')[1]}`);
+          } else {
+            SetForm(props.name, false);
+            setErrorMessage('Username not found');
+          }
+        } catch (error) {
+          console.error('Error in username validation:', error);
+          setLoading(false);
+          SetForm(props.name, false);
+          setErrorMessage('Errore generico di verifica');
+        }
+        break;
+      case 'username':
+        try {
+          console.log('Validating username:', inputValue);
+          const response = await checkUsername(inputValue);
+          console.log('Username check response:', response);
+
+          if (response === 'already exist') {
+            SetForm(props.name, false);
             if (props.type == 'username') {
-              SetForm(props.name, false);
-              if (props.type == 'username') {
-                setErrorMessage('Username already exist');
-              }
+              setErrorMessage('Username already exist');
             } else {
               setErrorMessage('');
             }
@@ -194,11 +213,8 @@ export default function Input(props: InputProps) {
             setErrorMessage(`Errore verifica username: ${response.split(':')[1]}`);
           } else {
             SetForm(props.name, true);
-            if (props.type == 'username') {
-              setErrorMessage('Username avaible');
-            } else {
-              setErrorMessage('Username not found');
-            }
+
+            setErrorMessage('Username avaible');
           }
         } catch (error) {
           console.error('Error in username validation:', error);
