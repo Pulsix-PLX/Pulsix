@@ -1,19 +1,16 @@
-import { action } from '@solidjs/router';
-import { db } from '~/Server/db.server';
+import { db } from '../../../../server/db.server';
 
 export default async function getTransactions(walletId: number) {
   'use server'; // Nota: 'use server' va all'inizio del file o della funzione esportata
-console.log('getTransactions', walletId);
+  console.log('getTransactions', walletId);
   try {
-
     // La query restituisce una riga con SUM(balance) AS total_balance
 
-      const result = await db.query(
-        // Usa il tipo corretto qui
-        'SELECT * FROM transactions WHERE wallet_id = $1 ORDER BY date DESC',
-        [walletId]
-      );
-    
+    const result = await db.query(
+      // Usa il tipo corretto qui
+      'SELECT * FROM transactions WHERE wallet_id = $1 ORDER BY date DESC',
+      [walletId]
+    );
 
     return result?.rows ?? [];
   } catch (error: any) {

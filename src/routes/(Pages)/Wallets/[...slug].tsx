@@ -1,4 +1,4 @@
-import { A, useLocation, useParams } from '@solidjs/router';
+import { A, useLocation, useNavigate, useParams } from '@solidjs/router';
 import {
   createMemo,
   createResource,
@@ -12,7 +12,7 @@ import {
 import Title from '~/components/Title';
 import { getWalletName, getWalletsContainer } from '~/routes/API/Wallets/getWallets.server';
 import { getUserId } from '~/Server/auth.server';
-import type { wallet } from '~/Server/types/wallet';
+import type { wallet } from '../../../server/types/wallet';
 import { setWalletId } from '.';
 import Card from './_components/Card';
 import CardContainer, { card, edit, setEdit } from './_components/cardHolder';
@@ -42,7 +42,6 @@ type CombinedItemInfo = {
 
 export default function Container() {
   const [userId, setUserId] = createSignal<number | null>(null);
-
   // --- Recupero userId
   onMount(async () => {
     try {
@@ -92,7 +91,7 @@ export default function Container() {
       try {
         let itemName: string | null = null;
         let itemType: 'container' | 'wallet' | null = null;
-        let itemContent: wallet[] | null = null;
+        let itemContent: any= null;
         let wallet: any = null; // Initialize wallet as null
         if (itemId === null) {
           // Case Root unused
@@ -112,6 +111,9 @@ export default function Container() {
             // Get only if it is a container
             if (itemType === 'container') {
               itemContent = (await getWalletsContainer(userId, itemId)) ?? [];
+              if(itemContent==-1){
+                    window.location.href='/LoginRegistration'
+              }
             } else {
               console.log(`[Fetcher Updated] È ${itemType}, non recupero contenuto.`);
             }
@@ -135,6 +137,7 @@ export default function Container() {
         };
         return result;
       } catch (error) {
+        window.location.href='/LoginRegistration'
         console.error('[Fetcher Updated] Errore:', error);
         throw error;
       }

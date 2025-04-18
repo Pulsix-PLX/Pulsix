@@ -1,15 +1,15 @@
 import { action } from '@solidjs/router';
-import { db } from '~/Server/db.server';
+import { db } from '../../../../../server/db.server';
 
 export const phoneAlreadyexist = action(async (phone) => {
-  "use server";
-  
+  'use server';
+
   try {
-    console.log(phone)
+    console.log(phone);
     const result = await db.query('SELECT phone_number FROM users WHERE phone_number=$1', [phone]);
-    console.log(result.rows)
+    console.log(result.rows);
     return result.rows.length > 0 ? 'already exist' : 'available';
-  } catch (error:any) {
+  } catch (error: any) {
     console.error('Error checking phone:', error);
     return `error:${error.message}`; // Ritorna l'errore completo
   }

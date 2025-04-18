@@ -33,7 +33,7 @@ async function getSessionData(): Promise<AuthSessionData | null> {
         // Usiamo '?? null' per assicurarci di restituire null se session.data fosse undefined
         return session.data ?? null;
     } catch (error) {
-        console.error('Errore durante il recupero/decodifica della sessione:', error);
+        console.error('[AUTH.SERVER] Errore durante il recupero/decodifica della sessione:', error);
         // In caso di errore (es. cookie corrotto, secret sbagliata), restituisci null
         return null;
     }
@@ -48,13 +48,14 @@ async function getSessionData(): Promise<AuthSessionData | null> {
 export async function getUserId(): Promise<number | null> {
     'use server'; // Direttiva per RPC
     const sessionData = await getSessionData();
-
+    
     if (sessionData?.userId) {
         // Tenta di convertire l'ID stringa in numero intero (base 10)
         const numericId = parseInt(sessionData.userId, 10);
 
         // Controlla se la conversione è andata a buon fine (restituisce un numero valido)
         if (!isNaN(numericId)) {
+            
             return numericId; // Successo: restituisci l'ID numerico
         } else {
             // L'ID nella sessione non era un numero valido

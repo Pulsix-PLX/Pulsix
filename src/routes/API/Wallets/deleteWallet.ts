@@ -1,5 +1,4 @@
-import { action } from '@solidjs/router';
-import { db } from '~/Server/db.server';
+import { db } from '../../../server/db.server';
 
 export default async function deleteWallet(walletId: number | undefined, type: string | undefined) {
   'use server'; // Nota: 'use server' va all'inizio del file o della funzione esportata
@@ -9,12 +8,11 @@ export default async function deleteWallet(walletId: number | undefined, type: s
     let result;
     // La query restituisce una riga con SUM(balance) AS total_balance
 
-      result = await db.query(
-        // Usa il tipo corretto qui
-        'UPDATE wallets SET date_of_delete = $1 WHERE id = $2',
-        [executionTime,walletId]
-      );
-    
+    result = await db.query(
+      // Usa il tipo corretto qui
+      'UPDATE wallets SET date_of_delete = $1 WHERE id = $2',
+      [executionTime, walletId]
+    );
 
     return result?.rows ?? [];
   } catch (error: any) {

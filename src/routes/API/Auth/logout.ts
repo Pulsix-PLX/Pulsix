@@ -1,10 +1,11 @@
-import { getCookie, deleteCookie, useSession } from 'vinxi/http';
+import { deleteCookie, getCookie, useSession } from 'vinxi/http';
 
 import type { APIEvent } from '@solidjs/start/server';
 
 import { json } from '@solidjs/router';
-import { db } from '~/Server/db.server';
 import bcrypt from 'bcryptjs';
+import { db } from '../../../server/db.server';
+import { getUserId } from '~/Server/auth.server';
 
 export async function POST(event: APIEvent) {
   // ---- update Session (used for server functions) ---- //
@@ -12,6 +13,9 @@ export async function POST(event: APIEvent) {
     userId?: string;
     username?: string;
   };
+  console.log('Logout')
+  const sessionId = await getUserId()
+  console.log(sessionId)
   try {
     const session = await useSession<AuthSessionData>(event.nativeEvent, {
       password: process.env.SESSION_SECRET!,
@@ -28,28 +32,12 @@ export async function POST(event: APIEvent) {
   } catch (sessionError) {
     console.error('Logout: Errore aggiornamento sessione server-side:', sessionError);
   }
-
-  const BCRYPT_COST = Number(process.env.BCRYPT_COST) || 12;
-
-  const refreshToken = getCookie(event.nativeEvent, 'refresh_token');
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict' as const,
     path: '/',
   };
-
-  // 1. Invalida refresh token nel DB
-  try {
-    if (refreshToken) {
-      const tokenHash = await bcrypt.hash(refreshToken, BCRYPT_COST);
-      const deleteSql = 'DELETE FROM auth.refresh_tokens WHERE token_hash = $1';
-      await db.query(deleteSql, [tokenHash]);
-      console.log('Refresh token hash deleted from DB.');
-    }
-  } catch (error) {
-    console.error('Error invalidating refresh token in DB during logout:', error);
-  }
 
   // 2. Cancella cookie dal client
   try {
@@ -61,8 +49,8 @@ export async function POST(event: APIEvent) {
 
   // 3. Cancella active_sessions (Opzionale - vedi sotto)
   // Accedi all'ID utente tramite il contesto dell'evento nativo
-  const userId = event.nativeEvent.context.auth?.userId; // Accedi tramite nativeEvent
-  if (userId && db) {
+  const userId = sessionId; // Accedi tramite nativeEvent
+  if (userId) {
     try {
       // ATTENZIONE: Questo cancella TUTTE le sessioni attive per l'utente.
       // È questo il comportamento desiderato per un logout singolo?
@@ -76,6 +64,7 @@ export async function POST(event: APIEvent) {
   } else {
     console.log('No userId found in nativeEvent context, skipping active_sessions clear.');
   }
+
 
   return json({ success: true });
 }

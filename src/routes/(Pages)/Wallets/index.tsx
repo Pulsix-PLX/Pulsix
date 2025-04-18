@@ -3,7 +3,7 @@ import { createResource, createSignal, For, Match, onMount, Show, Switch } from 
 import Title from '~/components/Title';
 import { getWallets } from '~/routes/API/Wallets/getWallets.server';
 import { getUserId } from '~/Server/auth.server';
-import type { wallet } from '~/Server/types/wallet'; // Importa il tipo
+import type { wallet } from '../../../server/types/wallet'; // Importa il tipo
 import Card from './_components/Card';
 import CardContainer, { card, edit } from './_components/cardHolder';
 import {

@@ -1,9 +1,8 @@
-import { db } from "~/Server/db.server";
-import { wallet } from "~/Server/types/wallet";
+import { wallet } from '../../../server/types/wallet';
+import { db } from '../../../server/db.server';
 
 export async function getWallet(walletid: number) {
   'use server'; // Nota: 'use server' va all'inizio del file o della funzione esportata
-
 
   try {
     // La query restituisce una riga con SUM(balance) AS total_balance

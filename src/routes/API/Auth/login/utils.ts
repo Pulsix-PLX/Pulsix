@@ -1,12 +1,11 @@
 'use server';
 
-import { v4 as uuidv4 } from 'uuid';
-import jwt from 'jsonwebtoken';
-import { db } from '~/Server/db.server';
 import bcrypt from 'bcryptjs';
 import * as jose from 'jose';
-
-const BCRYPT_COST = Number(process.env.BCRYPT_COST) || 12;
+import jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
+import { db } from '../../../../server/db.server';
+import { webcrypto } from 'node:crypto';
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const JWT_ISSUER = process.env.JWT_ISSUER || 'app';
 const ACCESS_TOKEN_EXPIRY = Number(process.env.ACCESS_TOKEN_EXPIRY) || 900; // 15 min
@@ -27,28 +26,16 @@ export function generateAccessToken(userId: string): string {
   return token;
 }
 
-export async function generateRefreshToken(
-  userId: string,
-  ipAddress: string | null,
-  userAgent: string | null
-): Promise<string> {
+export async function generateRefreshToken(){
   const token = await generateSecureToken();
-
-  const tokenHash = await bcrypt.hash(token, BCRYPT_COST);
 
   const expiresAt = new Date();
   expiresAt.setSeconds(expiresAt.getSeconds() + REFRESH_TOKEN_EXPIRY);
 
-  const deviceInfo = userAgent ? JSON.stringify({ userAgent }) : null;
-
   try {
-    await db.query(
-      `INSERT INTO auth.refresh_tokens (id, user_id, token_hash, device_info, ip_address, expires_at)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [uuidv4(), userId, tokenHash, deviceInfo, ipAddress, expiresAt.toISOString()]
-    );
+  
 
-    return token;
+    return {token:token, expires_at:expiresAt};
   } catch (error) {
     console.error('Errore durante la memorizzazione del refresh token:', error);
     throw new Error('Impossibile generare il refresh token a causa di un errore del database.');
@@ -76,7 +63,7 @@ export async function verifyRefreshToken(token: string): Promise<string | null> 
   try {
     // Cerca il token nel database
     const result = await db.query(
-      `SELECT user_id, token_hash, expires_at FROM auth.refresh_tokens 
+      `SELECT user_id, token_hash, expires_at FROM auth.active_sessions 
        WHERE expires_at > NOW()`
     );
 

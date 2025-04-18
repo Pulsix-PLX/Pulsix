@@ -2,7 +2,7 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import {db} from '../../../../Server/db.server';
+import {db} from '../../../../server/db.server';
 import jwt from 'jsonwebtoken';
 
 

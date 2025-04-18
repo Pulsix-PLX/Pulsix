@@ -2,7 +2,8 @@
 import { createSignal, createEffect } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import axios, { AxiosError } from 'axios'; // Importa axios e AxiosError
-import { api } from '~/Server/Axios';
+import { api } from '../server/Axios';
+import { useNavigate } from '@solidjs/router';
 declare module 'axios' {
   // Estende l'interfaccia di configurazione della richiesta interna di Axios
   export interface InternalAxiosRequestConfig {
@@ -75,13 +76,20 @@ export function createAuthStore() {
     try {
       // Prova a fare il refresh. L'interceptor gestirà eventuali 401 iniziali (improbabile qui)
       // ma `withCredentials: true` è cruciale per inviare il cookie.
-      const response = await api.post<{ accessToken: string }>('Api/Auth/refresh');
+      const response = await api.post<{ accessToken: string }>('API/Auth/refresh');
+      console.log(response.data.accessToken)
       setAccessToken(response.data.accessToken);
-      await fetchUserData(); // Carica dati utente se il refresh ha successo
+      //await fetchUserData(); // Carica dati utente se il refresh ha successo
+      setState({ // Imposta tutto qui
+        isAuthenticated: true,
+        error: null,
+        isLoading: false // Assicurati che isLoading sia false qui
+      });
     } catch (error) {
       // Se il refresh fallisce (es. no cookie, cookie scaduto), è normale all'avvio
       console.log('Initialization: No valid refresh token found or refresh failed.');
       setAccessToken(null);
+   
       setState({ isAuthenticated: false, error: null }); // Non è un errore bloccante all'avvio
     } finally {
       setState({ isLoading: false });
@@ -111,7 +119,7 @@ export function createAuthStore() {
   // Login
   async function login(username: string, password: string): Promise<boolean> {
     setState({ isLoading: true, error: null });
-    console.log('store')
+    console.log('Login')
     try {
       const response = await api.post<{ accessToken: string }>('API/Auth/login', { username, password });
       setAccessToken(response.data.accessToken);
@@ -181,8 +189,16 @@ export function createAuthStore() {
   api.interceptors.request.use(
     (config) => {
       const token = accessToken();
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
+      console.log('INTERCEPTOR: Token value:', token); // Log del token
+      console.log('INTERCEPTOR: Config headers object:', config.headers); // Log dell'oggetto headers
+      if (token && config.headers) { 
+        console.log('token yess')
+        // Skip adding Authorization header for login or registration requests
+        if (config.url !== 'API/Auth/login' && config.url !== 'API/Auth/registration') {
+         
+          config.headers.Authorization = `Bearer ${token}`;
+          console.log('header',config.headers.Authorization)
+        }
       }
       return config;
     },
@@ -219,8 +235,8 @@ export function createAuthStore() {
     async (error: AxiosError) => {
       const originalRequest = error.config;
 
-      // Se è un errore 401 e non è una richiesta di refresh essa stessa
-      if (error.response?.status === 401 && originalRequest && originalRequest.url !== 'API/Auth/refresh') {
+      // Se è un errore 401 e non è una richiesta di refresh essa stessa o proviene da login o registration
+      if (error.response?.status === 401 && originalRequest && originalRequest.url !== 'API/Auth/refresh' && originalRequest.url !== 'API/Auth/login'&& originalRequest.url !== 'API/Auth/registration') {
 
         if (isRefreshing) {
            // Se un refresh è già in corso, metti in coda la richiesta fallita
