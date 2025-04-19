@@ -12,7 +12,7 @@
   --listActive: #E4ECFA;
   --listTextActive: #6C7486;
   --listBorder: none;
-
+ 
   &.light {
       --text: #CDD9ED;
       --border: #CDD9ED;
@@ -27,11 +27,12 @@
       --listBorder: #E4ECFA;
       --textFilled: #6C7486;
   }
-
+  z-index: 1000; 
   width: 220px;
   position: relative;
 
   & > span {
+    z-index: 1000; 
       cursor: pointer;
       padding: 9px 16px;
       border-radius: 6px;
@@ -67,6 +68,15 @@
   }
 
   ul {
+    overflow-y: auto;
+    &::-webkit-scrollbar {
+        display: none; // Nasconde completamente la scrollbar
+        // Alternativa (a volte più compatibile se 'display: none' dà problemi):
+        // width: 0;
+        // height: 0;
+        // background: transparent; // Rende trasparente lo sfondo della scrollbar (utile con width/height > 0)
+      }
+      
       margin: 0;
       padding: 0;
       list-style: none;
@@ -76,7 +86,7 @@
       max-height: calc(var(--max-scroll) * 42px);
       top: 42px;
       left: 0;
-      z-index: 1;
+      z-index: 1000;
       right: 0;
       background: black;
       border-radius: 6px;

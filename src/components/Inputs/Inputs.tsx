@@ -23,6 +23,7 @@ interface InputProps {
     | 'color'
     | 'select';
   options?: any[];
+  values?: any[];
   placeholder?: string;
   required?: boolean;
   label?: string;
@@ -68,7 +69,7 @@ export default function Input(props: InputProps) {
   });
 
   // Schema Validation
-  function validateInput(e: Event) {
+  function validateInput(e:any) {
     // Imposta touched a true quando l'utente interagisce con l'input
     setTouched(true);
 
@@ -330,9 +331,11 @@ export default function Input(props: InputProps) {
             name={props.name}
             onInput={validateInput}
             options={props.options}
+            values={props.values}
             class={props.class}
             style={props.style}
-            placeholder={props.defaultValue}
+            placeholder={props.placeholder}
+            initialValue={props.defaultValue}
           />
         </Match>
 

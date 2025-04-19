@@ -1,0 +1,320 @@
+@use "sass:color";
+
+// --- Variabili Colore (True Black / White Contrast Theme) ---
+$bg-primary: #090909;       // Base NERA per popup
+$bg-secondary: #101010;     // Grigio scurissimo per input
+$bg-hover: #282828;         // Hover leggermente più visibile su nero
+
+$text-primary: #EAEAEA;     // Testo principale (bianco sporco)
+$text-secondary: #888888;   // Testo secondario/muted (grigio medio)
+$text-disabled: #454545;    // Testo altri mesi (grigio molto scuro)
+
+// Bordi chiari come richiesto
+$border-color: #FFFFFF;      // Bordo grigio chiaro
+$border-focus: var(--Secondary);      // Bordo bianco per focus
+
+// Selezione come da immagine (sfondo chiaro, testo scuro)
+$selected-bg: #E0E0E0;      // Sfondo selezione (grigio chiaro)
+$selected-text: #101010;    // Testo selezione (scuro)
+
+$accent-secondary: #BDBDBD;   // Colore testo 'oggi' (grigio chiaro, visibile su nero)
+
+$shadow: 0 4px 8px rgba(0, 0, 0, 0.5); // Ombra per popup su sfondo chiaro (se necessario)
+$border-radius: 10px; // Raggio minimo per look squadrato
+$transition-duration: 0.1s;
+$transition-easing: ease-out;
+$popup-animation: 0.15s $transition-easing;
+
+
+// --- Stili Globali Componente ---
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 260px; // Ancora più stretto
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 12px; // Font base molto piccolo per compattezza
+  color: $text-primary;
+  // Lo sfondo nero viene dal popup ora
+
+  &[data-open="true"] {
+    .control {
+      border-color: $border-focus; // Bordo bianco focus
+    }
+  }
+}
+
+// --- Controllo Input + Trigger ---
+.control {
+  height: 2.3vw;
+  display: flex;
+  align-items: center;
+  border: 1px solid $border-color; // Bordo chiaro
+  border-radius: $border-radius;
+  background-color: $bg-secondary; // Sfondo input scurissimo
+  transition: border-color $transition-duration $transition-easing;
+  overflow: hidden;
+}
+
+.input {
+  flex-grow: 1;
+  padding: 6px 9px; // Padding MOLTO ridotto
+  border: none;
+  outline: none;
+  color: $text-primary;
+  background-color: transparent;
+  font-size: inherit;
+  cursor: pointer;
+  width: 100%;
+  min-width: 0;
+  appearance: none;
+  &::placeholder {
+    color: $text-secondary;
+    opacity: 0.7;
+  }
+}
+
+.trigger {
+  flex-shrink: 0;
+  padding: 6px; // Padding MOLTO ridotto
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  color: $text-secondary;
+  transition: color $transition-duration $transition-easing;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+
+  &:hover {
+    color: $text-primary;
+  }
+
+  svg {
+    display: block;
+    width: 15px; // Icona piccola
+    height: 15px;
+    fill: currentColor;
+  }
+}
+
+// --- Popup Calendario ---
+.calendar {
+  margin-top: 0.5vw;
+  position: absolute;
+  top: calc(100% + 3px); // Vicinissimo
+  left: 0;
+  right: 0;
+  width: auto;
+  background-color: $bg-primary; // Sfondo NERO
+  border-radius: $border-radius;
+  border: 0.2px solid var(--Secondary); // Bordo chiaro
+  box-shadow: $shadow; // Ombra potrebbe servire se il datepicker è su sfondo chiaro
+  padding: 6px; // Padding interno MINIMO
+  z-index: 1000;
+  overflow: hidden;
+  animation: scaleIn $popup-animation forwards;
+  transform-origin: top center;
+  opacity: 0;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.98) translateY(-2px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+// --- Controlli Navigazione Interna ---
+.viewControl {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -11px; // Margine ridotto
+  margin-bottom: 5px; // Margine ridotto
+  padding: 0 2px; // Padding laterale minimo
+  
+}
+
+.navButton,
+.viewTrigger,
+span.viewTrigger {
+  border: none;
+  background-color: transparent;
+  padding: 3px; // Padding minimo controllo
+  border-radius: $border-radius;
+  font-weight: 500;
+  color: $text-secondary; // Muted di default
+  transition: background-color $transition-duration $transition-easing, color $transition-duration $transition-easing;
+  appearance: none;
+  font-size: 0.9em; // Font piccolo
+   
+}
+
+.navButton,
+.viewTrigger {
+  &:hover {
+    background-color: $bg-hover;
+    color: $text-primary;
+
+  }
+}
+
+.navButton {
+  width: 30px; // Bottone piccolo
+  height: 35px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8em; // Dimensione freccia
+   &:hover {
+     color: $text-primary;
+     background-color: $bg-hover;
+   }
+}
+
+.viewTrigger { // Testo Mese/Anno
+  flex-grow: 1;
+  text-align: center;
+  margin: 0 2px;
+  font-size: 1.3em;
+  cursor: pointer;
+  font-weight: 600; // Leggermente più bold
+  color: $text-primary; // Colore primario
+  padding: 3px 5px;
+}
+
+span.viewTrigger { // Range anni (non cliccabile)
+  cursor: default;
+  font-weight: 500;
+  color: $text-secondary;
+  padding: 3px 5px;
+  &:hover {
+    background-color: transparent;
+    color: $text-secondary;
+  }
+}
+
+
+// --- Tabella Giorni ---
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.tableHeader {
+  padding-bottom: 4px; // Spazio ridotto
+  text-align: center;
+  font-size: 0.9em; // Molto piccolo
+  font-weight: 500;
+  color: $text-secondary;
+  text-transform: uppercase;
+}
+
+// --- Tabella Giorni ---
+
+// ... altri stili .table, .tableHeader ...
+
+.tableCell {
+  padding: 0px 0px; // Leggero padding orizzontale tra le celle se necessario
+  text-align: center;
+  vertical-align: middle;
+}
+
+.cellTrigger {
+  width: 100%; // Occupa tutta la larghezza della cella
+  // aspect-ratio: 1 / 1; // <<< RIMUOVI QUESTA RIGA O COMMENTALA
+  height: auto; // Lascia che l'altezza sia definita dal contenuto e dal padding
+  padding: 8px 16px; // <<< PADDING VERTICALE RIDOTTO (Controlla l'altezza qui - prova 3px, 4px, 5px)
+                   //     Padding orizzontale a 0 perché la larghezza è 100%
+  border-radius: $border-radius; // Mantieni o riduci leggermente se preferisci (es. 2px)
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+ // font-size: 1.2em; // Font potrebbe necessitare di ulteriore riduzione
+  color: $text-primary;
+  transition: background-color $transition-duration $transition-easing, color $transition-duration $transition-easing;
+  display: flex; // Mantiene il numero centrato
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  appearance: none;
+ // border: #EAEAEA 1px solid;
+
+  &:hover:not(.selected) {
+    background-color: $bg-hover;
+
+  }
+
+  // Stile selezione come da immagine
+  &.selected {
+
+    background-color: $selected-bg;
+    color: $selected-text;
+    font-weight: 600;
+  }
+
+  // Stile 'today' applicato inline da TSX (solo colore testo)
+  // style={ isCurrentMonth && isToday && !isSelected ? { color: styles.accentSecondaryColor } : {} }
+
+  // Stile giorni altri mesi
+  &.otherMonth {
+    color: $text-disabled;
+    &:hover {
+       background-color: $bg-hover;
+       color: $text-secondary;
+    }
+  }
+}
+
+// ... resto del file SCSS ...
+
+// --- Griglie Mesi/Anni ---
+.monthGrid, .yearGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px; // Gap minimo
+  width: 100%;
+  padding: 0px 0; // Padding verticale minimo
+}
+
+.yearGrid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px; // Gap minimo
+}
+
+.monthCell, .yearCell {
+  padding: 2px 2px; // Padding minimo verticale
+  border-radius: $border-radius;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color $transition-duration $transition-easing, color $transition-duration $transition-easing;
+  color: $text-secondary;
+  font-size: 1.3em; // Font piccolo
+  appearance: none;
+
+  &:hover {
+    background-color: $bg-hover;
+    color: $text-primary;
+  }
+
+  &.selected {
+    background-color: $selected-bg;
+    color: $selected-text;
+    font-weight: 600;
+  }
+}
+
+// --- Media Query ---
+// Probabilmente non necessaria data la compattezza
+
+// --- Esporta colore per TSX ---
+:export {
+  accentSecondaryColor: $accent-secondary;
+}

@@ -140,96 +140,63 @@ async function rateLimitMiddleware(event: FetchEvent): Promise<Response | void> 
 
 // --- Lista Percorsi Pubblici da Saltare (Approccio B) ---
 // Definisce percorsi e pattern che NON richiedono autenticazione Bearer.
-const publicPathsToSkipAuth: ReadonlyArray<string | RegExp> = [
-    '/', // Root path
-    '/favicon.ico',
-    '/manifest.webmanifest',
-    '/sw.js',
-    '/robots.txt',
-    '/assets/',          // Prefisso asset statici
-    '/@vite/',          // Vite dev paths
-    '/@id/',            // Vite dev paths
-    '/node_modules/',   // Vite dev paths
-    // API Pubbliche di Autenticazione
+const publicApiPaths: ReadonlyArray<string | RegExp> = [
     '/API/Auth/login',
     '/API/Auth/registration',
-    '/LoginRegistration',
-    '/LoginRegistration/Login',
-    '/LoginRegistration/Registration',
     '/API/Auth/refresh',
-    '/API/Auth/logout', // Il logout spesso si basa sul refresh token nel cookie
-    // Aggiungi qui altri percorsi specifici (es. '/api/public-data', '/about-us')
-    // Esempio Regex per tipi di file comuni (opzionale, più fragile):
-    // /\.(css|js|json|png|jpe?g|gif|svg|webp|woff2?|ttf|otf)(\?.*)?$/i,
+    '/API/Auth/logout',
+    // Aggiungi qui altri endpoint API pubblici
 ];
 
+// --- Prefisso comune per le API protette ---
+const API_PREFIX = '/API/'; // O '/api/' - Sii consistente!
 /**
  * Middleware di Autenticazione (Approccio B - Generale).
  * Tenta l'autenticazione per tutte le richieste tranne quelle in `publicPathsToSkipAuth`.
  */
-async function authMiddleware(event: FetchEvent): Promise<Response | void> {
+async function apiAuthMiddleware(event: FetchEvent): Promise<Response | void> {
     const url = new URL(event.request.url);
-    const pathname = url.pathname; // Il percorso della richiesta attuale
+    const pathname = url.pathname;
 
-    // console.log(`[Auth Middleware DEBUG] Checking auth for path: "${pathname}"`);
+    // 1. Ignora tutto ciò che NON inizia con il prefisso API
+    if (!pathname.startsWith(API_PREFIX)) {
+        // console.log(`[ApiAuth Middleware] SKIPPING AUTH for non-API path: "${pathname}"`);
+        return; // Non è una chiamata API, lascia passare (gestione auth lato pagina/componente)
+    }
 
-    // 1. Controlla se il percorso è esplicitamente pubblico
+    // 2. Controlla se è un endpoint API pubblico
     let matchedPattern: string | RegExp | null = null;
-    const shouldSkipAuth = publicPathsToSkipAuth.some(pattern => {
+    const isPublicApi = publicApiPaths.some(pattern => {
         let isMatch = false;
         if (typeof pattern === 'string') {
-            // !!! LOGICA CORRETTA !!!
-            if (pattern === '/') {
-                // Caso speciale: Il pattern '/' matcha SOLO il percorso root esatto
-                isMatch = pathname === '/';
-            } else {
-                // Altri pattern stringa: gestisci prefissi (endsWith '/') o match esatti
-                isMatch = pattern.endsWith('/') ? pathname.startsWith(pattern) : pathname === pattern;
-            }
+            isMatch = pattern.endsWith('/') ? pathname.startsWith(pattern) : pathname === pattern;
         } else { // È una RegExp
             isMatch = pattern.test(pathname);
         }
-
         if (isMatch) {
             matchedPattern = pattern;
         }
         return isMatch;
     });
 
-    // 2. Gestisci lo skip o procedi con l'autenticazione
-    if (shouldSkipAuth) {
-        console.log(`[Auth Middleware] SKIPPING AUTH for path "${pathname}" because it matched the public pattern: ${matchedPattern}`);
-        return; // Salta autenticazione
-    } else {
-        console.log(`[Auth Middleware] Path "${pathname}" is NOT public. Running auth check...`);
-        const result = await checkAuthLogic(event); // Chiama la logica di verifica token
-
-        if (result instanceof Response) {
-            // Auth fallita
-            console.warn(`[Middleware] Auth check failed for "${pathname}". Status: ${result.status}`);
-            return result;
-        } else {
-            // Auth riuscita
-            (event.locals as AppLocals).user = result.user;
-            console.log(`[Middleware] Auth successful for user ${result.user?.id} on path "${pathname}"`);
-        }
+    if (isPublicApi) {
+        console.log(`[ApiAuth Middleware] SKIPPING AUTH for public API path "${pathname}" (matched: ${matchedPattern})`);
+        return; // API pubblica, salta autenticazione Bearer
     }
 
+    // 3. È un endpoint API protetto: esegui il controllo del token Bearer
+    console.log(`[ApiAuth Middleware] Path "${pathname}" is a PROTECTED API endpoint. Running auth check...`);
+    const result = await checkAuthLogic(event); // Chiama la logica di verifica token
 
-
-    // 2. Non è pubblico: tenta l'autenticazione
-    // console.log(`[Middleware] Running Auth check for potentially protected path: ${pathname}`);
-    const result = await checkAuthLogic(event);
-    
     if (result instanceof Response) {
-        // Auth fallita (manca header per risorsa protetta, token invalido, ecc.)
-        // Il log dettagliato è già in checkAuthLogic
+        // Auth fallita (token mancante/invalido/scaduto, utente non trovato/bloccato)
+        console.warn(`[ApiAuth Middleware] Auth check failed for API "${pathname}". Status: ${result.status}`);
         return result; // Restituisci l'errore (401, 403, 500)
     } else {
-        // Auth riuscita: allega l'utente a event.locals
+        // Auth riuscita
         (event.locals as AppLocals).user = result.user;
-        // console.log(`[Middleware] Auth successful for user ${result.user?.id} on path ${pathname}`);
-        // Lascia proseguire alla route API o Server Action
+        console.log(`[ApiAuth Middleware] Auth successful for user ${result.user?.id} on API path "${pathname}"`);
+        // Lascia proseguire alla route API
     }
 }
 
@@ -248,7 +215,7 @@ export default createMiddleware({
         rateLimitMiddleware,
 
         // 3. Autenticazione (Approccio B)
-        authMiddleware
+        apiAuthMiddleware
     ],
 
     /** Eseguiti prima di inviare la risposta. */

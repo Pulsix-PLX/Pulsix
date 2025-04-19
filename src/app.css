@@ -47,6 +47,8 @@ body {
   font-family: 'Default','Times New Roman', Times, serif; /* Font di default */
   background-color: var(--Background);
   overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 h1 {
   color: var(--TextPrimary);
