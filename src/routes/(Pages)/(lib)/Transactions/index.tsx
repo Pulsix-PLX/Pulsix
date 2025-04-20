@@ -1,10 +1,12 @@
-import { createSignal, For, onMount } from 'solid-js';
+import { useNavigate } from '@solidjs/router';
+import { createEffect, createSignal, For, onMount } from 'solid-js';
 import ButtonSparkle from '~/components/Buttons/AnimatedIconButton/ButtonSparkle';
 import DatePicker from '~/components/Inputs/DatePicker';
 import DateRangePicker from '~/components/Inputs/DateRangePicker';
 import Input from '~/components/Inputs/Inputs'; // Assumendo che questo sia il componente corretto
 import { setShowMenu } from '~/components/Menus/Menu';
-import { SetForm, SetFormValues } from '~/GlobalStores/FormStore';
+import { authStore } from '~/GlobalStores/auth';
+import { allInputsValid, getFormValue, SetForm, SetFormValues } from '~/GlobalStores/FormStore';
 // Rimuovo l'import di Select se ora usi Input type="select"
 // import Select from "~/components/Inputs/select";
 import { getWallets } from '~/routes/API/Wallets/getWallets.server'; // Assicurati che il percorso sia corretto
@@ -144,16 +146,42 @@ export default function Index() {
     }
   });
 
+  onMount(() => SetFormValues('type', type()));
+  const [type, setType] = createSignal<string>('income');
+  async function handleSubmit() {
+    const data = {
+      cause: getFormValue('cause'),
+      date: getFormValue('date'),
+      categoryId: getFormValue('category') || null,
+      amount: getFormValue('amount'),
+      walletId: getFormValue('wallet'),
+      type: getFormValue('type'),
+      userId: await getUserId(),
+    };
+    await authStore.api.post('API/Wallets/Wallet/addTransaction', data);
+  }
+  createEffect(() => {
+    SetFormValues('type', type());
+    console.log(getFormValue('type'));
+  });
   return (
     <>
-      <form
-        action={''}
-        method="post"
-        class="CM w-[25vw] mt-[25vh] pl-[5vw] pr-[5vw] pb-[2vw] pt-[2vw] min-w-[280px] min-h-[200px]"
-        style={{ border: '3px solid rgba(255, 255, 255, 0.3)', 'border-radius': '40px' }}
+      <button
+        type="button"
+        onClick={() => {
+          window.location.href = '/Login'; //used to reset the global store values
+        }}
       >
-        <DatePicker></DatePicker>
-
+        Go back
+      </button>
+      <form
+        // onSubmit={(e)=>e.preventDefault()}
+        class="CM w-[25vw] mt-[15vh] pl-[5vw] pr-[5vw] pb-[2vw] pt-[2vw] min-w-[280px] min-h-[200px]"
+        style={{
+          border: `3px solid ${allInputsValid() ? 'var(--Secondary)' : 'rgba(255, 255, 255, 0.3)'}`,
+          'border-radius': '40px',
+        }}
+      >
         {/* Wallet */}
         <Input
           type="select"
@@ -162,36 +190,36 @@ export default function Index() {
           values={walletIds()}
           placeholder="Wallet"
           class="ml-30"
+          required
         />
-        <div class="-z-20">
-          {/* Cause */}
-          <Input type="text" name="cause" placeholder="Cause" />
+
+        {/* Cause */}
+        <Input type="text" name="cause" placeholder="Cause" />
+        {/* Income / Expense */}
+        <div class='flex flex-row gap-50 ml-0'>
+        <ButtonSparkle text="Income" type="button" onClick={() => setType('Income')} />
+        <ButtonSparkle text="Expense" type="button" onClick={() => setType('Expense')} />
         </div>
         {/* Amount */}
-        <Input type="text" name="cause" placeholder="Cause" />
+        <Input type="text" name="amount" placeholder="Amount" required />
         {/* Category */}
-        <Input type="text" name="cause" placeholder="Cause" />
-        {/* Data */}
-
         <Input
           type="select"
-          name="wallet"
+          name="category"
           options={walletPaths()}
           values={walletIds()}
-          placeholder="Wallet"
           class="ml-30"
+          placeholder="category"
         />
+        {/* Date */}
+        <Input type="date" name="date" placeholder="Date" class="ml-10" />
 
-        <Input
-          type="select"
-          name="wallet"
-          options={walletPaths()}
-          values={walletIds()}
-          placeholder="Seleziona un wallet..."
-        />
-
-        <ButtonSparkle text="Send"></ButtonSparkle>
-        <DateRangePicker></DateRangePicker>
+        <ButtonSparkle
+          text="Send"
+          class="ml-[auto] mr-[auto]"
+          onClick={handleSubmit}
+          disabled={!allInputsValid()}
+        ></ButtonSparkle>
       </form>
     </>
   );

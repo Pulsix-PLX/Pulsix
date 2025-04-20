@@ -12,11 +12,13 @@ interface ParticleProps {
   originX: number;
   originY: number;
   size: number;
+
 }
 
 // Update the SparkleButtonProps interface
 interface SparkleButtonProps {
   text: string;
+  type?:'submit'|'reset'|'button';
   icon?: JSX.Element;
   particleIcon?: JSX.Element;
   particleCount?: number;
@@ -123,6 +125,7 @@ export default function ButtonSparkle(props: SparkleButtonProps) {
       <button
         class={`button ${props.class || ''} ${isActive() && props.shadowColor ? 'hover' : ''}`}
         style={ getButtonStyle()}
+        type={props.type || 'submit'}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={props.onClick}

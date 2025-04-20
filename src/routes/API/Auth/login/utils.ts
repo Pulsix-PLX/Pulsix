@@ -11,7 +11,7 @@ const JWT_ISSUER = process.env.JWT_ISSUER || 'app';
 const ACCESS_TOKEN_EXPIRY = Number(process.env.ACCESS_TOKEN_EXPIRY) || 900; // 15 min
 const REFRESH_TOKEN_EXPIRY = Number(process.env.REFRESH_TOKEN_EXPIRY) || 1209600; // 14 days
 
-export function generateAccessToken(userId: string): string {
+export function generateAccessToken(userId: number): string {
   const payload = {
     sub: userId,
     jti: uuidv4(),

@@ -73,7 +73,8 @@ export async function POST(event: APIEvent) {
     console.log(ipAddress, userAgent);
 
     //// ---- Tokens ---- ////
-    const accessToken = generateAccessToken(user.id);
+    const userIdNumber = Number(user.id); 
+    const accessToken = generateAccessToken(userIdNumber);
     const refreshToken = await generateRefreshToken();
     console.log('Access token: ', accessToken);
     console.log('Refresh token: ', refreshToken);

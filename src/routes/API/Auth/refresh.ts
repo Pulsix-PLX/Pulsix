@@ -184,7 +184,7 @@ export async function POST(event: APIEvent) {
     /// --- 4. Se siamo qui, Refresh Token VALIDO e Utente ATTIVO --- ///
 
     // Genera un NUOVO Access Token
-    const newAccessToken = generateAccessToken(userId.toString()); // generateAccessToken vuole stringa
+    const newAccessToken = generateAccessToken(userId); // generateAccessToken vuole stringa
 
     // [Opzionale] Ruota Refresh Token (più sicuro)
     // Se vuoi ruotare il refresh token ad ogni refresh:

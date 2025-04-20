@@ -1,8 +1,21 @@
 import { createSignal, Index, Show, onMount, onCleanup, JSX } from "solid-js";
 import styles from "./DatePicker.module.scss";
 
-export default function DatePicker() {
-  const [date, setDate] = createSignal<Date | null>(null);
+
+interface InputProps {
+  name: string;
+  placeholder?: string;
+  required?: boolean;
+  label?: string;
+  class?: string;
+  style?: string;
+  onInput?: (e: any) => void;
+  onChange?: (e: any) => void;
+  initialValue?: Date;
+}
+
+export default function DatePicker(props:InputProps) {
+  const [date, setDate] = createSignal<Date | null>(props.initialValue || null);
   const [isOpen, setIsOpen] = createSignal(false);
   const [view, setView] = createSignal<"day" | "month" | "year">("day");
   const [currentMonth, setCurrentMonth] = createSignal(new Date().getMonth());
@@ -91,10 +104,14 @@ export default function DatePicker() {
 
   const handleDaySelect = (day: Date) => {
     setDate(day);
+    console.log(date())
     setCurrentMonth(day.getMonth());
     setCurrentYear(day.getFullYear());
     setIsOpen(false);
     setView("day");
+    if (props.onInput) {
+      props.onInput(formatDate(date()));
+    }
   };
   const handleMonthSelect = (month: number) => {
     setCurrentMonth(month);
@@ -125,13 +142,14 @@ export default function DatePicker() {
 
 
   return (
-    <div ref={containerRef} class={styles.container} data-open={isOpen()}>
+    <div ref={containerRef} class={`${props.class} ${styles.container}`} data-open={isOpen()}>
       <div class={styles.control}>
         <input
           type="text"
           class={styles.input}
-          placeholder="mm/dd/yyyy" // Placeholder come da immagine
+          placeholder={props.placeholder || "mm/dd/yyyy"} // Placeholder come da immagine
           value={formatDate(date())}
+
           readonly
           onClick={() => setIsOpen(!isOpen())}
           aria-label="Selected date" // Etichetta inglese
@@ -211,7 +229,7 @@ export default function DatePicker() {
                                 }}
                                 // Applica stile inline per 'today' se non selezionato
                                 style={ isCurrentMonth && isToday && !isSelected ? { color: styles.accentSecondaryColor } : {} }
-                                onClick={() => handleDaySelect(dayDate)}
+                                onClick={(e) =>{ handleDaySelect(dayDate) }}
                                 aria-label={`Select ${dayDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`} // Etichetta inglese
                               >
                                 {dayDate.getDate()}

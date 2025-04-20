@@ -7,6 +7,7 @@ import { useAction } from '@solidjs/router';
 import { phoneAlreadyexist } from '~/routes/API/Auth/registration/phone/phoneAlreadyexist';
 import { emailAlreadyexist } from '~/routes/API/Auth/registration/email/emailAlreadyexist';
 import Select from './select';
+import DatePicker from './DatePicker';
 
 interface InputProps {
   name: string;
@@ -30,7 +31,7 @@ interface InputProps {
   class?: string;
   style?: string;
   mountOn?: boolean;
-  defaultValue?: string;
+  defaultValue?: any;
   ValidationSchema?: (value: any) => boolean;
 }
 export const [value, setValue] = createSignal('');
@@ -47,6 +48,7 @@ export default function Input(props: InputProps) {
   onMount(() => {
     // Se il campo è richiesto, inizializzalo come non valido (false)
     // Se non è richiesto, inizializzalo come valido (true)
+
     if (props.required) {
       if (props.mountOn != false) {
         SetForm(props.name, false);
@@ -54,7 +56,8 @@ export default function Input(props: InputProps) {
     } else {
       SetForm(props.name, true);
     }
-  });
+  
+});
 
   // Rivalidare passwordConfirm quando password cambia
   createEffect(() => {
@@ -73,15 +76,25 @@ export default function Input(props: InputProps) {
     // Imposta touched a true quando l'utente interagisce con l'input
     setTouched(true);
 
+    var inputValue;
+    if(props.type!='date'){
+
     const target = e.target as HTMLInputElement;
-    const inputValue = target.value;
+     inputValue = target.value;
 
     // Aggiorna il valore locale
     setValue(inputValue);
 
     // Salva il valore dell'input nello store
     SetFormValues(props.name, inputValue);
-
+    }else{
+      inputValue = e;
+      setValue(e);
+  
+      // Salva il valore dell'input nello store
+      SetFormValues(props.name, e);
+    
+    }
     console.log(props.name, value());
 
     // Se il campo non è richiesto e vuoto, impostalo su true
@@ -308,6 +321,16 @@ export default function Input(props: InputProps) {
         }
         break;
 
+        case 'select':
+
+          if (!inputValue) {
+            SetForm(props.name, false);
+            setErrorMessage('Select something');
+          } else {
+            SetForm(props.name, true);
+            setErrorMessage('');
+          }
+          break;
       case 'date':
         const dateValid = !isNaN(Date.parse(inputValue));
         if (!dateValid) {
@@ -332,6 +355,17 @@ export default function Input(props: InputProps) {
             onInput={validateInput}
             options={props.options}
             values={props.values}
+            class={props.class}
+            style={props.style}
+            placeholder={props.placeholder}
+            initialValue={props.defaultValue}
+          />
+        </Match>
+
+        <Match when={props.type === 'date'}>
+          <DatePicker
+            name={props.name}
+            onInput={validateInput}
             class={props.class}
             style={props.style}
             placeholder={props.placeholder}
@@ -418,17 +452,6 @@ export default function Input(props: InputProps) {
           />
         </Match>
 
-        <Match when={props.type === 'date'}>
-          <input
-            name={props.name}
-            placeholder={props.placeholder}
-            class={props.class}
-            style={props.style}
-            type="date"
-            onInput={validateInput}
-            onChange={validateInput}
-          />
-        </Match>
         <Match when={props.type === 'color'}>
           <input
             name={props.name}

@@ -11,7 +11,6 @@ export default function Credentials() {
     SetForm({});
     SetFormValues({});
   });
-
   return (
     <>
       <div
@@ -28,9 +27,9 @@ export default function Credentials() {
           <Input name="username" type="username" placeholder="Username" required />
           <Input name="password" type="password" placeholder="Password" required />
           <Input name="passwordConfirm" type="passwordConfirm" placeholder="Confirm" required />
+          <Input name="dateOfBirthday" type="date" placeholder="Date of Birthday" required />
           <Input name="name" type="text" placeholder="Name" required />
           <Input name="surname" type="text" placeholder="Surmane" required />
-          <Input name="dateOfBirthday" type="date" placeholder="Surmane" required />
 
           <ButtonSparkle
             shadow={10}

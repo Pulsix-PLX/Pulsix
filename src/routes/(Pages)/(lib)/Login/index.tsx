@@ -10,7 +10,6 @@ import { authStore } from '../../../../GlobalStores/auth'; // Assicurati che il 
 import axios from 'axios';
 
 export default function Login() {
-  const navigate = useNavigate();
 
   onMount(() => {
     setShowMenu(false);
@@ -31,8 +30,10 @@ export default function Login() {
     }
     console.log('username:', username, 'password:', password);
     const success = await authStore.login(username,password)
+    SetForm({});
+    SetFormValues({});
     if (success) {
-      navigate('/Transactions');
+      window.location.href='/Transactions' //used to reset the global store values 
     } else {
       console.log('Login failed, error:', authStore.error);
     }

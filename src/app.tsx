@@ -13,8 +13,8 @@ import { authStore } from './GlobalStores/auth';
 import FancySpinner from './routes/UI/Loading';
 
 // Definisci le route pubbliche ESATTE che non richiedono login
-const AUTH_PATHS = ['/LoginRegistration']; // Pagine specifiche di auth/reg
-const PUBLIC_PATHS_ALLOWED_WHEN_LOGGED_OUT = ['/', '/LoginRegistration', '/LoginRegistration/Registration', '/LoginRegistration/Login']; // Pagine accessibili da sloggato
+const AUTH_PATHS = ['/LoginRegistration']; // Per spinner su sfondo nero
+const PUBLIC_PATHS_ALLOWED_WHEN_LOGGED_OUT = ['/', '/LoginRegistration', '/LoginRegistration/registration', '/LoginRegistration/Login', '/login',]; // Pagine accessibili da sloggato
 
 
 const RootLayout: Component<RouteSectionProps> = (props) => {
@@ -32,7 +32,7 @@ const RootLayout: Component<RouteSectionProps> = (props) => {
       console.log("Effect Exit: Still loading.");
       return;
     }
-
+   console.log(path)
     // Determina se siamo su una pagina pubblica o di autenticazione
      isAuthPage = AUTH_PATHS.includes(path);
     const isAllowedPublic = PUBLIC_PATHS_ALLOWED_WHEN_LOGGED_OUT.includes(path);
