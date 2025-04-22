@@ -34,7 +34,7 @@ export async function POST (event:APIEvent) {
 
    // Estraiamo le intestazioni (prima riga)
    const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
-
+   
     console.log(headers);
 
     // Prendiamo solo le prime 5 righe per l'anteprima

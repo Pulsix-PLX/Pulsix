@@ -1,0 +1,166 @@
+/* ModernDropzone.css - Revised for Dark Theme & Drag Animations */
+
+/* Base variables */
+:root {
+
+
+  /* Color Palette (Dark Theme) */
+  --dropzone-bg: #070707; /* Very dark gray/blue (es. Tailwind gray-900) */
+  --dropzone-bg-hover: #1f2937; /* Slightly lighter dark (es. Tailwind gray-800) */
+  --dropzone-bg-dragging: #1f2937; /* Same as hover or slightly different */
+  --dropzone-text-color: #9ca3af; /* Muted gray (es. Tailwind gray-400) */
+  --dropzone-text-strong-color: #e5e7eb; /* Lighter gray (es. Tailwind gray-200) */
+  --dropzone-border-color: var(--Secondary); /* Darker border (es. Tailwind gray-700) */
+  --dropzone-border-color-hover: var(--Secondary); /* Use Secondary color on hover */
+  --dropzone-border-color-dragging: var(--Secondary); /* Use Secondary color on drag */
+  --dropzone-icon-color: #6b7280; /* Icon color (es. Tailwind gray-500) */
+  --dropzone-icon-color-hover: var(--Secondary);
+  --dropzone-icon-color-dragging: var(--Secondary);
+  --dropzone-browse-link-color: var(--Secondary);
+
+  /* Effects & Transitions */
+  --dropzone-shadow-dragging: 0 15px 30px -5px rgba(0, 0, 0, 0.4), /* Più pronunciata */
+                              0 8px 15px -6px rgba(0, 0, 0, 0.3);
+  --dropzone-scale-dragging: 1.04; /* Ingrandimento più evidente */
+  --dropzone-border-radius: 0.75rem; /* 12px */
+  --dropzone-transition-speed: 0.25s; /* Transizione più reattiva */
+  --dropzone-easing-transform: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Easing morbido */
+  --dropzone-easing-color: ease-out;
+}
+
+.modern-dropzone-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.modern-dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem; /* Aumenta padding verticale */
+  min-height: 200px;      /* Aumenta altezza minima */
+  background-color: var(--dropzone-bg);
+  border: 2.5px dashed var(--dropzone-border-color);
+  border-radius: var(--dropzone-border-radius);
+  color: var(--dropzone-text-color);
+  cursor: pointer;
+  text-align: center;
+  overflow: hidden; /* Nasconde l'ombra finché non viene applicata */
+
+  /* --- Core Transitions --- */
+  /* Animiamo tutte le proprietà che cambiano */
+  transition: background-color var(--dropzone-transition-speed) var(--dropzone-easing-color),
+              border-color var(--dropzone-transition-speed) var(--dropzone-easing-color),
+              border-style var(--dropzone-transition-speed) var(--dropzone-easing-color),
+              transform var(--dropzone-transition-speed) var(--dropzone-easing-transform),
+              box-shadow var(--dropzone-transition-speed) var(--dropzone-easing-transform);
+}
+
+/* --- Hover State (Senza trascinare file) --- */
+.modern-dropzone:hover {
+  background-color: var(--dropzone-bg-hover);
+  border-color: var(--dropzone-border-color-hover);
+  /* Nessun ingrandimento o ombra solo sull'hover normale */
+}
+
+.modern-dropzone:hover .dropzone-icon {
+   color: var(--dropzone-icon-color-hover);
+   transform: scale(1.08); /* Leggero ingrandimento icona su hover */
+}
+
+.modern-dropzone:hover .dropzone-browse-link {
+  color: var(--dropzone-text-strong-color); /* Link più chiaro su hover */
+}
+
+/* --- Dragging State (Quando un file è sopra) --- */
+.modern-dropzone.dragging {
+  background-color: var(--dropzone-bg-dragging);
+  border-color: var(--dropzone-border-color-dragging);
+  border-style: solid; /* Bordo diventa solido */
+  transform: scale(var(--dropzone-scale-dragging)); /* Applica ingrandimento */
+  box-shadow: var(--dropzone-shadow-dragging);      /* Applica ombra */
+}
+
+/* --- Content Styling --- */
+.dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity var(--dropzone-transition-speed) ease, transform var(--dropzone-transition-speed) ease;
+  z-index: 1; /* Assicura che il contenuto sia sopra effetti come l'ombra */
+}
+
+/* --- Icon --- */
+.dropzone-icon {
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 1rem;
+  color: var(--dropzone-icon-color);
+  transition: color var(--dropzone-transition-speed) var(--dropzone-easing-color),
+              transform var(--dropzone-transition-speed) cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Transizione icona (può avere easing diverso) */
+}
+
+/* Icona durante il trascinamento */
+.modern-dropzone.dragging .dropzone-icon {
+  color: var(--dropzone-icon-color-dragging);
+  transform: scale(1.15) translateY(-4px); /* Icona si ingrandisce e si solleva un po' */
+}
+
+/* --- Text --- */
+.dropzone-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 0.5rem 0;
+  transition: color var(--dropzone-transition-speed) var(--dropzone-easing-color);
+}
+
+.dropzone-text strong {
+  color: var(--dropzone-text-strong-color);
+  font-weight: 600;
+}
+
+/* Testo durante il trascinamento */
+.modern-dropzone.dragging .dropzone-text {
+  color: var(--dropzone-text-strong-color); /* Testo più chiaro */
+}
+
+/* --- Browse Link --- */
+.dropzone-browse-link {
+  font-size: 0.9rem;
+  color: var(--dropzone-browse-link-color);
+  font-weight: 500;
+  text-decoration: none; /* Rimuovi sottolineatura base */
+  position: relative;
+  transition: color var(--dropzone-transition-speed) ease;
+}
+/* Aggiungi sottolineatura animata (opzionale) */
+.dropzone-browse-link::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0);
+    height: 1.5px;
+    bottom: -3px; /* Distanza dal testo */
+    left: 0;
+    background-color: var(--Secondary);
+    transform-origin: bottom right;
+    transition: transform 0.25s ease-out;
+}
+.modern-dropzone:hover .dropzone-browse-link::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+
+
+/* Rimuoviamo la vecchia animazione del bordo rotante,
+   se non è più necessaria con l'effetto ombra/scala */
+/*
+.dropzone-border-animation { ... }
+@keyframes spin { ... }
+.modern-dropzone.dragging .dropzone-border-animation { ... }
+.modern-dropzone::before { ... }
+.modern-dropzone.dragging::before { ... }
+*/
