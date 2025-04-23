@@ -289,9 +289,9 @@ export default function Mapper() {
     try {
         // *** Invia i DATI PROCESSATI al server ***
         await authStore.api.post('API/Wallets/Wallet/addTransactionByFile/addTransactions', {
-            transactions: validDataToSend // Invia l'array di oggetti processati
-            // Non serve più inviare columnMapping o transactionTypeLogic al server
-            // a meno che tu non voglia salvarli per future importazioni
+            transactions: validDataToSend,
+            walletId:context.walletId 
+            
         });
 
         console.log(`Inviate ${validDataToSend.length} transazioni processate al server.`);
@@ -613,8 +613,8 @@ export default function Mapper() {
                       {(example) => (
                         <tr class="border-b border-gray-200">
                           {/* Mostra i dati estratti per ogni campo */}
-                          <td class="p-2">{example.cause}</td>
                           <td class="p-2">{example.amount}</td>
+                          <td class="p-2">{example.cause}</td>
                           <td class="p-2">{example.date}</td>
                           {/* Mostra l'interpretazione con colore */}
                           <td

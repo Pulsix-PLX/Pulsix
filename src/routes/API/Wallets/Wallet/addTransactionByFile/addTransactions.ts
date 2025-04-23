@@ -1,66 +1,65 @@
 import { db } from '../../../../../server/db.server'; // Il tuo accesso al DB
 import type { APIEvent } from '@solidjs/start/server';
 import { json } from '@solidjs/router';
-// Rimuovi getUserId da qui, usiamo event.locals
-// import { getUserId } from '~/Server/auth.server';
-import { z } from 'zod'; // Libreria opzionale ma raccomandata per validazione input
+import { z } from 'zod'; // Uso Zod per validazione payload
 
-// --- Interfacce e Tipi ---
-
-// Tipo per una singola transazione pre-processata dal client
-// Deve corrispondere all'output di processCsvData
+// --- Interfacce e Tipi (Invariati) ---
 const ProcessedTransactionSchema = z.object({
   cause: z.string().nullable(),
-  amount: z.number().positive().nullable(), // Amount deve essere positivo
-  date: z.string().nullable(), // Stringa data, il server la parserà/validerà
+  amount: z.number().positive().nullable(),
+  date: z.string().nullable(),
   type: z.enum(['Income', 'Expense']).nullable(),
-  category_id: z.string().nullable(), // Mantenuto come stringa per ora
-  subCategory_id: z.string().nullable(), // Mantenuto come stringa per ora
-  // Aggiungi currency qui se la invii dal client
-  // currency: z.string().length(3).nullable(),
-}).strict(); // strict() per assicurarsi non ci siano campi extra
+  category_id: z.string().nullable(),
+  subCategory_id: z.string().nullable(),
+}).strict();
 
-// Tipo per l'intero payload della richiesta
 const ImportPayloadSchema = z.object({
-   // L'ID del wallet in cui importare le transazioni. DEVE essere fornito!
-  walletId: z.number().int().positive(), // O z.string() se usi UUID/stringhe come ID
-  transactions: z.array(ProcessedTransactionSchema), // Un array di transazioni processate
+  walletId: z.number().int().positive(),
+  transactions: z.array(ProcessedTransactionSchema),
 }).strict();
 
 type ImportPayload = z.infer<typeof ImportPayloadSchema>;
 type ProcessedTransaction = z.infer<typeof ProcessedTransactionSchema>;
 
-// Tipo per AppLocals (per accedere a event.locals.user.id)
 interface AppLocals {
     user?: { id: number; tokenId: string; state: string; };
     startTime?: number;
 }
 
+// --- Classe Errore Personalizzata (Utile per identificare l'errore di riga) ---
+class RowProcessingError extends Error {
+    public index: number;
+    public transactionData: ProcessedTransaction;
+
+    constructor(message: string, index: number, transactionData: ProcessedTransaction) {
+        super(message);
+        this.name = 'RowProcessingError';
+        this.index = index;
+        this.transactionData = transactionData;
+    }
+}
 
 export async function POST(event: APIEvent) {
   'use server';
 
-  // 1. Ottieni l'ID Utente Autenticato dal Middleware
+  // 1. Ottieni User ID (Invariato)
   const locals = event.locals as AppLocals;
   const userId = locals.user?.id;
-
   if (!userId) {
-    // Questo non dovrebbe accadere per un endpoint protetto se il middleware funziona
     console.error('FATAL: User ID not found in event.locals for addTransactions endpoint!');
     return json({ success: false, message: 'Utente non autorizzato o errore interno.' }, { status: 401 });
   }
 
-  // 2. Leggi e Valida il Payload JSON dal Client usando Zod
+  // 2. Leggi e Valida Payload (Invariato)
   let payload: ImportPayload;
   try {
     const rawPayload = await event.request.json();
-    payload = ImportPayloadSchema.parse(rawPayload); // Valida la struttura e i tipi
+    payload = ImportPayloadSchema.parse(rawPayload);
      if (payload.transactions.length === 0) {
         return json({ success: false, message: 'Nessuna transazione valida fornita per l\'importazione.' }, { status: 400 });
      }
   } catch (error) {
     console.error("Errore parsing o validazione payload (Zod):", error);
-     // Se l'errore è di Zod, puoi restituire dettagli più specifici
      if (error instanceof z.ZodError) {
          return json({ success: false, message: 'Payload non valido.', errors: error.errors }, { status: 400 });
      }
@@ -68,120 +67,106 @@ export async function POST(event: APIEvent) {
   }
 
   const { walletId, transactions } = payload;
-  const errorsProcessingRows: { index: number; error: string; transaction: ProcessedTransaction }[] = [];
-  const successfulInserts: any[] = []; // Potresti voler salvare gli ID inseriti
+  let processedCount = 0; // Contatore righe processate con successo prima dell'errore
 
-  // --- Validazione Aggiuntiva Server-Side (Es. Wallet Esistente) ---
-  // È cruciale verificare che il walletId fornito esista E appartenga all'utente autenticato
-  try {
+  // --- Validazione Wallet (Invariato) ---
+   try {
       const walletCheck = await db.query('SELECT 1 FROM public.wallets WHERE id = $1 AND user_id = $2', [walletId, userId]);
       if (walletCheck.rowCount === 0) {
           console.warn(`Tentativo di import nel wallet ${walletId} non trovato o non appartenente all'utente ${userId}.`);
-          return json({ success: false, message: `Wallet di destinazione (ID: ${walletId}) non trovato o non accessibile.` }, { status: 400 }); // O 403/404
+          return json({ success: false, message: `Wallet di destinazione (ID: ${walletId}) non trovato o non accessibile.` }, { status: 400 });
       }
   } catch(dbError: any) {
        console.error(`Errore DB controllo wallet ${walletId} per utente ${userId}:`, dbError);
        return json({ success: false, message: 'Errore interno durante la verifica del wallet.' }, { status: 500 });
   }
 
-
-  // --- Inserimento Massivo nel Database con Transazione ---
-  const client = await db.connect(); // Ottieni una connessione dal pool
+  // --- Inserimento Atomico con Transazione ---
+  const client = await db.connect();
   try {
     await client.query('BEGIN'); // Inizia transazione
 
-    console.log(`SERVER: Inizio inserimento di ${transactions.length} transazioni pre-processate nel wallet ${walletId} per user ${userId}.`);
+    console.log(`SERVER: Inizio inserimento atomico di ${transactions.length} transazioni nel wallet ${walletId} per user ${userId}.`);
 
     for (let i = 0; i < transactions.length; i++) {
         const tx = transactions[i];
+        // Nota: non incrementiamo processedCount qui, lo facciamo solo dopo l'insert riuscito
 
-        // --- Validazione Server-Side per Riga ---
-        // Il client ha già fatto molto, ma validiamo l'essenziale
+        // --- Validazione Server-Side per Riga (Lancia Errore) ---
         if (tx.amount === null || tx.amount <= 0) {
-            errorsProcessingRows.push({ index: i, error: 'Importo non valido o mancante.', transaction: tx });
-            continue; // Salta questa transazione
+            throw new RowProcessingError('Importo non valido o mancante.', i, tx);
         }
-         if (tx.type === null) {
-            errorsProcessingRows.push({ index: i, error: 'Tipo transazione (Income/Expense) non determinato.', transaction: tx });
-            continue; // Salta questa transazione
+        if (tx.type === null) {
+             throw new RowProcessingError('Tipo transazione (Income/Expense) non determinato.', i, tx);
         }
         let parsedDate: Date;
         try {
             if (!tx.date) throw new Error('Data mancante');
-            parsedDate = new Date(tx.date); // Tenta il parsing
+            parsedDate = new Date(tx.date);
             if (isNaN(parsedDate.getTime())) throw new Error('Formato data non valido');
         } catch (dateError: any) {
-             errorsProcessingRows.push({ index: i, error: `Data non valida (${dateError.message}): "${tx.date}"`, transaction: tx });
-            continue; // Salta questa transazione
+             throw new RowProcessingError(`Data non valida (${dateError.message}): "${tx.date}"`, i, tx);
         }
 
-        // Opzionale: Validazione/Lookup category_id / subCategory_id qui se necessario
+        // --- Inserimento Riga (Lancia errore DB nel catch principale) ---
+        const insertQuery = `
+            INSERT INTO public.transactions
+            (cause, amount, wallet_id, type, category_id, subCategory_id, "date", user_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING id`;
+        const params = [
+            tx.cause, tx.amount, walletId, tx.type,
+            tx.category_id, tx.subCategory_id,
+            parsedDate.toISOString(), userId
+        ];
+        await client.query(insertQuery, params);
 
-        // --- Inserimento Riga ---
-        try {
-             // !!! Adatta nomi colonne e tipi a public.transactions !!!
-            const insertQuery = `
-                INSERT INTO public.transactions
-                (cause, amount, wallet_id, type, category_id, subCategory_id, "date", user_id)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-                RETURNING id`; // O *
-            const params = [
-                tx.cause,
-                tx.amount,
-                walletId, // ID Wallet di destinazione globale
-                tx.type, //'Income' o 'Expense'
-                tx.category_id, // Potrebbe necessitare conversione/validazione
-                tx.subCategory_id, // Potrebbe necessitare conversione/validazione
-                parsedDate.toISOString(), // Data valida in formato ISO
-                userId // ID Utente autenticato
-            ];
-            const result = await client.query(insertQuery, params);
-            if (result.rows[0]) {
-                successfulInserts.push(result.rows[0].id); // Salva l'ID inserito
-            }
-        } catch (rowInsertError: any) {
-             console.error(`Errore inserimento riga ${i} nel DB:`, rowInsertError);
-             errorsProcessingRows.push({ index: i, error: `Errore DB: ${rowInsertError.message || 'Errore sconosciuto'}`, transaction: tx });
-             // Continua con le altre righe? O fai rollback? Dipende dalla tua strategia
-             // Per ora continuiamo, ma potresti voler fare un ROLLBACK qui se una riga fallisce.
-        }
+        // Se l'insert è riuscito, incrementa il contatore
+        processedCount++;
+
     } // Fine ciclo for
 
-    // Se ci sono stati errori per riga E vuoi che l'intero import fallisca, fai rollback
-    if (errorsProcessingRows.length > 0 /* && VOGLIO_ROLLBACK_SU_ERRORE_RIGA */) {
-        console.warn(`Rollback dovuto a ${errorsProcessingRows.length} errori durante l'elaborazione delle righe.`);
-        await client.query('ROLLBACK');
-        return json({
-            success: false,
-            message: `Importazione annullata. Si sono verificati ${errorsProcessingRows.length} errori durante l'elaborazione delle righe.`,
-            insertedCount: 0,
-            errors: errorsProcessingRows
-        }, { status: 400 }); // Bad Request a causa di errori nei dati
+    // Se il ciclo è completato senza errori, esegui il COMMIT
+    await client.query('COMMIT');
+    console.log(`SERVER: COMMIT Eseguito. ${processedCount} transazioni inserite con successo per wallet ${walletId}, user ${userId}.`);
+
+    // Restituisci Successo Completo
+    return json({
+        success: true,
+        message: `Importazione completata con successo. ${processedCount} transazioni inserite.`,
+        insertedCount: processedCount,
+    }, { status: 200 });
+
+  } catch (error: any) {
+    // Cattura qualsiasi errore avvenuto nel blocco try
+    console.error('[Server Bulk Insert] Errore durante l\'inserimento - Esecuzione ROLLBACK. Righe processate prima errore:', processedCount, 'Errore:', error.message);
+    await client.query('ROLLBACK'); // Annulla TUTTA la transazione
+
+    let responseMessage = `Errore durante l'importazione alla riga ${processedCount + 1}. Importazione annullata.`; // Riga user-friendly (parte da 1)
+    let specificError = error.message || 'Errore sconosciuto';
+    let statusCode = 500; // Default a Internal Server Error
+
+    // Controlla se è l'errore specifico che abbiamo lanciato per la validazione
+    if (error instanceof RowProcessingError) {
+        responseMessage = `Errore alla riga ${error.index + 1}: ${error.message}. Importazione annullata.`;
+        specificError = error.message; // Sovrascrive con il messaggio più specifico
+        statusCode = 400; // Bad Request perché l'errore è nei dati forniti
+        // Potresti loggare error.transactionData qui se utile per il debug server-side
+        // console.error("Dati riga fallita:", error.transactionData);
     } else {
-        // Nessun errore bloccante, conferma la transazione
-        await client.query('COMMIT');
-        console.log(`SERVER: Inserimento completato per wallet ${walletId}. Righe inserite con successo: ${successfulInserts.length}. Errori per riga: ${errorsProcessingRows.length}`);
-        // Restituisci Successo
-        return json({
-            success: true,
-            message: `Importazione completata. ${successfulInserts.length} transazioni inserite. ${errorsProcessingRows.length} righe hanno avuto errori non bloccanti.`,
-            insertedCount: successfulInserts.length,
-            insertedIds: successfulInserts, // Opzionale
-            errors: errorsProcessingRows // Restituisce eventuali errori per riga
-        }, { status: 200 });
+        // Altrimenti è probabilmente un errore DB o altro errore interno
+        responseMessage = `Errore database o interno alla riga ${processedCount + 1}. Importazione annullata.`;
     }
 
-  } catch (dbError: any) {
-    // Errore durante BEGIN, COMMIT, o query non catturata prima
-    console.error('[Server Bulk Insert] Errore transazione DB:', dbError);
-    try { await client.query('ROLLBACK'); } catch (rbError) { console.error("Errore durante ROLLBACK:", rbError); }
+    // Restituisci solo il messaggio di errore principale e il conteggio
     return json({
         success: false,
-        message: 'Errore del database durante l\'operazione di importazione.',
-        details: dbError.message,
-        insertedCount: successfulInserts.length, // Potrebbero esserci stati inserimenti prima del commit fallito? No con rollback.
-        errors: errorsProcessingRows
-    }, { status: 500 });
+        message: responseMessage,
+        // 'specificError' non viene incluso nella risposta JSON come richiesto,
+        // ma è usato per costruire il messaggio principale.
+        processedSuccessfully: processedCount // N. righe inserite con successo PRIMA dell'errore
+    }, { status: statusCode });
+
   } finally {
     client.release(); // Rilascia sempre la connessione al pool
   }
