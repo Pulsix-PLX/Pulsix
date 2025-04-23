@@ -1,212 +1,188 @@
-// Esempio di struttura per il tuo endpoint server (es. in un file API di SolidStart)
 import { db } from '../../../../../server/db.server'; // Il tuo accesso al DB
 import type { APIEvent } from '@solidjs/start/server';
-import { getUserId } from '~/Server/auth.server'; // Funzione per ottenere l'ID utente AUTENTICATO
 import { json } from '@solidjs/router';
+// Rimuovi getUserId da qui, usiamo event.locals
+// import { getUserId } from '~/Server/auth.server';
+import { z } from 'zod'; // Libreria opzionale ma raccomandata per validazione input
 
-// Interfaccia per il payload atteso dal frontend
-interface BulkImportPayload {
-  rowsToImport: any[];                           // Array di righe (quelle da csvState.fileData.rows)
-  columnMapping: Record<string, string>;       // Oggetto { csvHeader: systemFieldId }
-  transactionTypeLogic: TransactionTypeLogic;  // Oggetto con la logica per Entrata/Uscita
-  // Aggiungi qui altri parametri se necessari (es. walletId di destinazione globale?)
+// --- Interfacce e Tipi ---
+
+// Tipo per una singola transazione pre-processata dal client
+// Deve corrispondere all'output di processCsvData
+const ProcessedTransactionSchema = z.object({
+  cause: z.string().nullable(),
+  amount: z.number().positive().nullable(), // Amount deve essere positivo
+  date: z.string().nullable(), // Stringa data, il server la parserà/validerà
+  type: z.enum(['Income', 'Expense']).nullable(),
+  category_id: z.string().nullable(), // Mantenuto come stringa per ora
+  subCategory_id: z.string().nullable(), // Mantenuto come stringa per ora
+  // Aggiungi currency qui se la invii dal client
+  // currency: z.string().length(3).nullable(),
+}).strict(); // strict() per assicurarsi non ci siano campi extra
+
+// Tipo per l'intero payload della richiesta
+const ImportPayloadSchema = z.object({
+   // L'ID del wallet in cui importare le transazioni. DEVE essere fornito!
+  walletId: z.number().int().positive(), // O z.string() se usi UUID/stringhe come ID
+  transactions: z.array(ProcessedTransactionSchema), // Un array di transazioni processate
+}).strict();
+
+type ImportPayload = z.infer<typeof ImportPayloadSchema>;
+type ProcessedTransaction = z.infer<typeof ProcessedTransactionSchema>;
+
+// Tipo per AppLocals (per accedere a event.locals.user.id)
+interface AppLocals {
+    user?: { id: number; tokenId: string; state: string; };
+    startTime?: number;
 }
 
-// Interfaccia per la logica del tipo (dovrebbe corrispondere a quella del frontend)
-interface TransactionTypeLogic {
-  mode: 'auto' | 'column';
-  columnName?: string;
-  positiveValue?: string;
-  negativeValue?: string;
-  negativeIsExpense: boolean;
-}
 
 export async function POST(event: APIEvent) {
-  'use server'; // Assicurati sia all'inizio
+  'use server';
 
-  let payload: BulkImportPayload;
-  let userId: number | null; // O il tipo restituito da getUserId
+  // 1. Ottieni l'ID Utente Autenticato dal Middleware
+  const locals = event.locals as AppLocals;
+  const userId = locals.user?.id;
 
-  // 1. Ottieni l'ID Utente Autenticato (SICUREZZA!)
-  //    NON fidarti di un userId inviato nel payload dal client.
+  if (!userId) {
+    // Questo non dovrebbe accadere per un endpoint protetto se il middleware funziona
+    console.error('FATAL: User ID not found in event.locals for addTransactions endpoint!');
+    return json({ success: false, message: 'Utente non autorizzato o errore interno.' }, { status: 401 });
+  }
+
+  // 2. Leggi e Valida il Payload JSON dal Client usando Zod
+  let payload: ImportPayload;
   try {
-    userId = await getUserId(); // Usa la tua funzione per ottenere l'ID dalla sessione/token
-    if (!userId) {
-      return json({ message: 'Non autorizzato.' }, { status: 401 });
-    }
-  } catch (authError) {
-    console.error("Errore autenticazione:", authError);
-    return json({ message: 'Errore di autenticazione.' }, { status: 500 });
+    const rawPayload = await event.request.json();
+    payload = ImportPayloadSchema.parse(rawPayload); // Valida la struttura e i tipi
+     if (payload.transactions.length === 0) {
+        return json({ success: false, message: 'Nessuna transazione valida fornita per l\'importazione.' }, { status: 400 });
+     }
+  } catch (error) {
+    console.error("Errore parsing o validazione payload (Zod):", error);
+     // Se l'errore è di Zod, puoi restituire dettagli più specifici
+     if (error instanceof z.ZodError) {
+         return json({ success: false, message: 'Payload non valido.', errors: error.errors }, { status: 400 });
+     }
+    return json({ success: false, message: 'Payload della richiesta non valido o malformato.' }, { status: 400 });
   }
 
-  // 2. Leggi e valida il payload dal client
+  const { walletId, transactions } = payload;
+  const errorsProcessingRows: { index: number; error: string; transaction: ProcessedTransaction }[] = [];
+  const successfulInserts: any[] = []; // Potresti voler salvare gli ID inseriti
+
+  // --- Validazione Aggiuntiva Server-Side (Es. Wallet Esistente) ---
+  // È cruciale verificare che il walletId fornito esista E appartenga all'utente autenticato
   try {
-    payload = await event.request.json();
-    // Aggiungi validazione più robusta qui se necessario
-    if (!payload || !Array.isArray(payload.rowsToImport) || !payload.columnMapping || !payload.transactionTypeLogic) {
-        throw new Error("Payload incompleto o malformato.");
-    }
-  } catch (e) {
-    console.error("Errore parsing JSON payload:", e);
-    return json({ message: 'Payload della richiesta non valido o mancante.' }, { status: 400 });
+      const walletCheck = await db.query('SELECT 1 FROM public.wallets WHERE id = $1 AND user_id = $2', [walletId, userId]);
+      if (walletCheck.rowCount === 0) {
+          console.warn(`Tentativo di import nel wallet ${walletId} non trovato o non appartenente all'utente ${userId}.`);
+          return json({ success: false, message: `Wallet di destinazione (ID: ${walletId}) non trovato o non accessibile.` }, { status: 400 }); // O 403/404
+      }
+  } catch(dbError: any) {
+       console.error(`Errore DB controllo wallet ${walletId} per utente ${userId}:`, dbError);
+       return json({ success: false, message: 'Errore interno durante la verifica del wallet.' }, { status: 500 });
   }
 
-  const { rowsToImport, columnMapping, transactionTypeLogic } = payload;
-  const processedRowsForDb: any[] = []; // Array per contenere le righe pronte per l'INSERT
-  const errorsProcessingRows: any[] = []; // Array per eventuali errori per riga
 
-  // 3. Elabora ogni riga LATO SERVER
-  console.log(`SERVER: Inizio elaborazione di ${rowsToImport.length} righe...`);
-  // Crea una mappa inversa per facilitare l'accesso: { systemFieldId: csvHeaderName }
-  const systemToCsvHeader: Record<string, string | undefined> = {};
-  for (const [csvHeader, systemField] of Object.entries(columnMapping)) {
-    systemToCsvHeader[systemField] = csvHeader;
-  }
+  // --- Inserimento Massivo nel Database con Transazione ---
+  const client = await db.connect(); // Ottieni una connessione dal pool
+  try {
+    await client.query('BEGIN'); // Inizia transazione
 
-  for (let i = 0; i < rowsToImport.length; i++) {
-    const originalRow = rowsToImport[i];
-    try {
-        // Estrai i dati usando la mappa inversa
-        const amountHeader = systemToCsvHeader['amount'];
-        const dateHeader = systemToCsvHeader['date'];
-        const causeHeader = systemToCsvHeader['cause'];
-        const currencyHeader = systemToCsvHeader['currency'];
-        const walletHeader = systemToCsvHeader['walletId']; // Potrebbe non essere qui se è globale
+    console.log(`SERVER: Inizio inserimento di ${transactions.length} transazioni pre-processate nel wallet ${walletId} per user ${userId}.`);
 
-        // --- Validazione Dati Mappati Essenziali ---
-        if (!amountHeader || originalRow[amountHeader] === undefined || originalRow[amountHeader] === null) {
-            throw new Error("Colonna 'amount' non mappata o valore mancante.");
+    for (let i = 0; i < transactions.length; i++) {
+        const tx = transactions[i];
+
+        // --- Validazione Server-Side per Riga ---
+        // Il client ha già fatto molto, ma validiamo l'essenziale
+        if (tx.amount === null || tx.amount <= 0) {
+            errorsProcessingRows.push({ index: i, error: 'Importo non valido o mancante.', transaction: tx });
+            continue; // Salta questa transazione
         }
-         if (!dateHeader || originalRow[dateHeader] === undefined || originalRow[dateHeader] === null) {
-            throw new Error("Colonna 'date' non mappata o valore mancante.");
+         if (tx.type === null) {
+            errorsProcessingRows.push({ index: i, error: 'Tipo transazione (Income/Expense) non determinato.', transaction: tx });
+            continue; // Salta questa transazione
         }
-        // Aggiungi controlli per altri campi obbligatori (cause?, walletId se per riga)
-
-        // --- Parsing e Conversione Tipi ---
-        const amountRaw = originalRow[amountHeader];
-        const amount = parseFloat(String(amountRaw).replace(',', '.')); // Gestisce virgola e converte
-        if (isNaN(amount)) {
-           throw new Error(`Valore 'amount' non numerico: "${amountRaw}"`);
+        let parsedDate: Date;
+        try {
+            if (!tx.date) throw new Error('Data mancante');
+            parsedDate = new Date(tx.date); // Tenta il parsing
+            if (isNaN(parsedDate.getTime())) throw new Error('Formato data non valido');
+        } catch (dateError: any) {
+             errorsProcessingRows.push({ index: i, error: `Data non valida (${dateError.message}): "${tx.date}"`, transaction: tx });
+            continue; // Salta questa transazione
         }
 
-        const dateRaw = originalRow[dateHeader];
-        const date = new Date(dateRaw); // Prova a parsare la data
-        if (isNaN(date.getTime())) {
-            throw new Error(`Valore 'date' non valido: "${dateRaw}"`);
-            // Considera librerie più robuste per parsing date se i formati sono vari
-        }
-        const formattedDate = date.toISOString(); // Formato standard per DB
+        // Opzionale: Validazione/Lookup category_id / subCategory_id qui se necessario
 
-        const cause = causeHeader ? String(originalRow[causeHeader] ?? '') : 'Import da CSV'; // Fallback per causa
-        const currency = currencyHeader ? String(originalRow[currencyHeader] ?? 'EUR') : 'EUR'; // Fallback valuta
-        const walletId = walletHeader ? String(originalRow[walletHeader]) : null; // Ottieni walletId se mappato per riga
-        // TODO: SE walletId NON è mappato per riga, devi ottenerlo in altro modo (es. parametro globale dell'API?)
-
-        // --- Applica Logica Tipo Transazione ---
-        let type: string; // Es. 'INCOME', 'EXPENSE' o i tuoi tipi specifici
-        if (transactionTypeLogic.mode === 'auto') {
-            type = (amount < 0) === transactionTypeLogic.negativeIsExpense ? 'EXPENSE' : 'INCOME'; // Adatta ai tuoi tipi
-        } else if (transactionTypeLogic.mode === 'column' /* && controlli aggiuntivi */) {
-            const typeValue = originalRow[transactionTypeLogic.columnName!];
-            if (typeValue === transactionTypeLogic.positiveValue) type = 'INCOME'; // Adatta
-            else if (typeValue === transactionTypeLogic.negativeValue) type = 'EXPENSE'; // Adatta
-            else {
-                throw new Error(`Valore non riconosciuto ("${typeValue}") nella colonna tipo "${transactionTypeLogic.columnName}"`);
-            }
-        } else {
-             throw new Error("Logica tipo transazione non valida.");
-        }
-
-        // --- Compila i dati per il DB ---
-        // !!! Assicurati che i nomi delle colonne (amount, wallet_id, ecc.)
-        // !!! e i tipi corrispondano ESATTAMENTE alla tua tabella 'public.transactions'
-        const rowForDb = {
-            cause: cause,
-            amount: Math.abs(amount), // Salva sempre importo positivo? O mantieni segno e usa 'type'? Dipende dal tuo DB schema. Assumiamo type gestisca il segno.
-            wallet_id: walletId, // Assicurati che questo ID esista e appartenga all'utente! Potrebbe servire una query di validazione qui.
-            type: type,
-            category_id: null, // Manca la mappatura per categoryId? Da dove viene? Mettiamo null per ora.
-            date: formattedDate,
-            user_id: userId // Usa l'ID utente verificato dal server!
-        };
-
-        // Aggiungi la riga processata all'array per l'inserimento bulk
-        processedRowsForDb.push(rowForDb);
-
-    } catch (rowError: any) {
-      console.error(`Errore elaborazione riga ${i}:`, originalRow, rowError);
-      errorsProcessingRows.push({ rowIndex: i, error: rowError.message, rowData: originalRow });
-      // Decidi se continuare o fermare l'intero import se una riga fallisce
-      // continue; // Continua con la prossima riga
-      // break; // Ferma l'elaborazione
-    }
-  }
-
-  // 4. Inserimento Massivo nel Database (se non ci sono stati errori bloccanti)
-  if (processedRowsForDb.length > 0 /* && !processingShouldStop */) {
-    // --- Inizio Transazione Database ---
-    // La libreria/client DB che usi potrebbe avere un modo per gestire le transazioni
-    // Esempio concettuale con pg (node-postgres):
-    const client = await db.connect(); // Ottieni una connessione dal pool
-    try {
-        await client.query('BEGIN'); // Inizia transazione
-
-        // Costruisci una query INSERT multipla (più efficiente)
-        // ATTENZIONE ALLA SICUREZZA: Usa query parametrizzate!
-        // Questo è un esempio concettuale, la sintassi esatta dipende dalla libreria DB.
-        const values: any[] = [];
-        const valuePlaceholders: string[] = [];
-        let paramIndex = 1;
-        processedRowsForDb.forEach(row => {
-            const paramsForRow: any[] = [
-                row.cause, row.amount, row.wallet_id, row.type,
-                row.category_id, row.date, row.user_id
+        // --- Inserimento Riga ---
+        try {
+             // !!! Adatta nomi colonne e tipi a public.transactions !!!
+            const insertQuery = `
+                INSERT INTO public.transactions
+                (cause, amount, wallet_id, type, category_id, subCategory_id, "date", user_id)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                RETURNING id`; // O *
+            const params = [
+                tx.cause,
+                tx.amount,
+                walletId, // ID Wallet di destinazione globale
+                tx.type, //'Income' o 'Expense'
+                tx.category_id, // Potrebbe necessitare conversione/validazione
+                tx.subCategory_id, // Potrebbe necessitare conversione/validazione
+                parsedDate.toISOString(), // Data valida in formato ISO
+                userId // ID Utente autenticato
             ];
-            // Aggiunge ($1, $2, $3, ...) per questa riga
-            valuePlaceholders.push(`(${paramsForRow.map((_, idx) => `$${paramIndex + idx}`).join(', ')})`);
-            values.push(...paramsForRow);
-            paramIndex += paramsForRow.length;
-        });
+            const result = await client.query(insertQuery, params);
+            if (result.rows[0]) {
+                successfulInserts.push(result.rows[0].id); // Salva l'ID inserito
+            }
+        } catch (rowInsertError: any) {
+             console.error(`Errore inserimento riga ${i} nel DB:`, rowInsertError);
+             errorsProcessingRows.push({ index: i, error: `Errore DB: ${rowInsertError.message || 'Errore sconosciuto'}`, transaction: tx });
+             // Continua con le altre righe? O fai rollback? Dipende dalla tua strategia
+             // Per ora continuiamo, ma potresti voler fare un ROLLBACK qui se una riga fallisce.
+        }
+    } // Fine ciclo for
 
-        const insertQuery = `
-            INSERT INTO public.transactions
-            (cause, amount, wallet_id, type, category_id, "date", user_id)
-            VALUES ${valuePlaceholders.join(', ')}
-            RETURNING id`; // O RETURNING * se vuoi indietro le righe inserite
-
-        console.log(`SERVER: Esecuzione INSERT per ${processedRowsForDb.length} righe.`);
-        const result = await client.query(insertQuery, values);
-
-        await client.query('COMMIT'); // Conferma transazione
-        console.log(`SERVER: Inserimento completato. Righe inserite: ${result.rowCount}`);
-
-        // 5. Restituisci Successo
+    // Se ci sono stati errori per riga E vuoi che l'intero import fallisca, fai rollback
+    if (errorsProcessingRows.length > 0 /* && VOGLIO_ROLLBACK_SU_ERRORE_RIGA */) {
+        console.warn(`Rollback dovuto a ${errorsProcessingRows.length} errori durante l'elaborazione delle righe.`);
+        await client.query('ROLLBACK');
         return json({
-            message: `Importazione completata con successo. ${result.rowCount} transazioni inserite.`,
-            insertedCount: result.rowCount,
-            errorsProcessing: errorsProcessingRows // Restituisce eventuali errori per riga
+            success: false,
+            message: `Importazione annullata. Si sono verificati ${errorsProcessingRows.length} errori durante l'elaborazione delle righe.`,
+            insertedCount: 0,
+            errors: errorsProcessingRows
+        }, { status: 400 }); // Bad Request a causa di errori nei dati
+    } else {
+        // Nessun errore bloccante, conferma la transazione
+        await client.query('COMMIT');
+        console.log(`SERVER: Inserimento completato per wallet ${walletId}. Righe inserite con successo: ${successfulInserts.length}. Errori per riga: ${errorsProcessingRows.length}`);
+        // Restituisci Successo
+        return json({
+            success: true,
+            message: `Importazione completata. ${successfulInserts.length} transazioni inserite. ${errorsProcessingRows.length} righe hanno avuto errori non bloccanti.`,
+            insertedCount: successfulInserts.length,
+            insertedIds: successfulInserts, // Opzionale
+            errors: errorsProcessingRows // Restituisce eventuali errori per riga
         }, { status: 200 });
-
-    } catch (dbError: any) {
-        await client.query('ROLLBACK'); // Annulla transazione in caso di errore DB
-        console.error('[Server Bulk Insert] Errore DB:', dbError);
-        return json({
-            message: 'Errore del database durante l\'inserimento massivo.',
-            details: dbError.message,
-            errorsProcessing: errorsProcessingRows // Include errori di elaborazione precedenti
-        }, { status: 500 });
-    } finally {
-        client.release(); // Rilascia la connessione al pool
     }
-     // --- Fine Transazione Database ---
 
-  } else {
-     // Nessuna riga processata o errore bloccante durante l'elaborazione
-     console.log("SERVER: Nessuna riga valida da inserire.");
-     return json({
-         message: `Importazione non eseguita. ${errorsProcessingRows.length > 0 ? 'Errori durante l\'elaborazione delle righe.' : 'Nessuna riga valida trovata.'}`,
-         insertedCount: 0,
-         errorsProcessing: errorsProcessingRows
-        }, { status: 400 }); // Bad Request se nessuna riga valida
+  } catch (dbError: any) {
+    // Errore durante BEGIN, COMMIT, o query non catturata prima
+    console.error('[Server Bulk Insert] Errore transazione DB:', dbError);
+    try { await client.query('ROLLBACK'); } catch (rbError) { console.error("Errore durante ROLLBACK:", rbError); }
+    return json({
+        success: false,
+        message: 'Errore del database durante l\'operazione di importazione.',
+        details: dbError.message,
+        insertedCount: successfulInserts.length, // Potrebbero esserci stati inserimenti prima del commit fallito? No con rollback.
+        errors: errorsProcessingRows
+    }, { status: 500 });
+  } finally {
+    client.release(); // Rilascia sempre la connessione al pool
   }
 }

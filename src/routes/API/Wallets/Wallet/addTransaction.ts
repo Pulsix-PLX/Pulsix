@@ -13,8 +13,9 @@ export async function POST(event:APIEvent) {
     return json({ message: 'Corpo della richiesta non valido o mancante.' }, { status: 400 });
 }
 
+const userId = await getUserId();
 // Estrai i valori dal corpo parsato
-const { cause, date, categoryId, amount, walletId, type, userId } = formData;
+const { cause, date, categoryId, amount, walletId, type } = formData;
 
   console.log('cause:', cause, 'date:', date, 'categoryId:', categoryId, 'amount:', amount, 'walletId:', walletId, 'type:', type, 'userId:', userId);
   try {

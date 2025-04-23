@@ -1,6 +1,6 @@
 import { onMount, Show } from 'solid-js';
 import PathWallets from '../../utils/pathWallets';
-import { context, initializeData } from './context';
+import { context, initializeData, setStep } from './context';
 import UploadFile from './Upload';
 import Preview from './Preview';
 import { setShowMenu } from '~/components/Menus/Menu';
@@ -173,6 +173,7 @@ export default function index() {
 
   // Chiama l'azione del context per inizializzare i dati
   initializeData({ headers: sampleHeaders, rows: sampleRows }, sampleWalletId);
+  setStep('mapping')
   return (
     <>
       {/* Step 1: Upload del file */}

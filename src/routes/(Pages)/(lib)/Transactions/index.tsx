@@ -46,10 +46,11 @@ export default function Index() {
       date: getFormValue('date'),
       categoryId: getFormValue('category') || null,
       amount: getFormValue('amount'),
-      walletId: getFormValue('wallet'),
+      walletId: getFormValue('walletId'),
       type: getFormValue('type'),
-      userId: await getUserId(),
+    //  userId: await getUserId(),
     };
+    console.log(data.walletId)
     await authStore.api.post('API/Wallets/Wallet/addTransaction', data);
   }
   createEffect(() => {

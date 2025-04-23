@@ -7,6 +7,7 @@ import FancySpinner from './UI/Loading';
 import Card3D from './(Pages)/Wallets/_components/Card3D';
 import { PulsixButton } from 'pulsix-solid';
 import { setShowMenu } from '~/components/Menus/Menu';
+
 /*
 declare module 'solid-js' {
   namespace JSX {
@@ -33,6 +34,7 @@ export default function index() {
     setTimeout(()=>setShowMenu(true),100)
     
   });
+
   return (
     <>
       <div class="flex flex-row ml-200">

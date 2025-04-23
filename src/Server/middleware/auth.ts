@@ -16,7 +16,7 @@ import { handleCors, appendCorsHeaders, isPreflightRequest, type H3Event } from 
 import { db } from '../db.server'; // Verifica percorso
 
 // --- Configurazione CORS ---
-// !!! *** PERSONALIZZA QUESTA LISTA CON I DOMINI AUTORIZZATI *** !!!
+// !!! ***Blocca solo richieste dal browser PERSONALIZZA QUESTA LISTA CON I DOMINI AUTORIZZATI *** !!!
 const allowedOrigins: ReadonlyArray<string> = [
     'http://localhost:3000',              // Sviluppo locale SolidStart
     'https://tuo-dominio-produzione.com', // Il tuo dominio di produzione
