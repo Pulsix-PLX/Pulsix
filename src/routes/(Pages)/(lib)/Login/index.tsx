@@ -43,19 +43,15 @@ export default function Login() {
     <>
       {authStore.error && <p class="text-red-500">{authStore.error}</p>}
 
-      <form class="CM" method="post" onSubmit={handleSubmit}>
+      <form class="CM mt-[10vh]" method="post" onSubmit={handleSubmit}>
         <Input type="usernameLogin" name="username" placeholder="Username" required />
         <Input type="password" name="password" placeholder="Password" required />
-        <ButtonSparkle text="Login" class="ml-[auto] mr-[auto]" disabled={!allInputsValid()} />
+        <ButtonSparkle text="Go Transactions" class="ml-[auto] mr-[auto] " disabled={!allInputsValid()} />
       </form>
-      <div class="auth-links text-center mt-4">
-        <a href="/register" class="text-blue-600 hover:underline">
-          Need an account? Register
-        </a>
-        <span class="mx-2">|</span>
-        <a href="/forgot-password" class="text-blue-600 hover:underline">
-          Forgot password?
-        </a>
+      <div class="CM mt-[90vh]">
+        <button onClick={() => window.open("http://localhost:3000/LoginRegistration/Registration", "_blank")} class="text-blue-600 hover:text-white">
+          Need to register?
+        </button>
       </div>
     </>
   );

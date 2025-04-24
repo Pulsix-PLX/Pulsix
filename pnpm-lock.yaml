@@ -108,11 +108,11 @@ importers:
         specifier: ^8.14.1
         version: 8.14.1
       pulsix:
-        specifier: ^1.0.3
-        version: 1.0.3
+        specifier: ^1.0.5
+        version: 1.0.5
       pulsix-solid:
-        specifier: ^1.0.15
-        version: 1.0.15(pulsix@1.0.3)(solid-js@1.9.5)
+        specifier: ^1.0.17
+        version: 1.0.17(pulsix@1.0.5)(solid-js@1.9.5)
       react-element-to-jsx-string:
         specifier: ^17.0.0
         version: 17.0.0(react-dom@19.0.0(react@19.0.0))(react-is@19.0.0)(react@19.0.0)
@@ -4641,14 +4641,14 @@ packages:
   public-encrypt@4.0.3:
     resolution: {integrity: sha512-zVpa8oKZSz5bTMTFClc1fQOnyyEzpl5ozpi1B5YcvBrdohMjH2rfsBtyXcuNuwjsDIXmBYlF2N5FlJYhR29t8Q==}
 
-  pulsix-solid@1.0.15:
-    resolution: {integrity: sha512-nXo9060T20/rWx/3d6xm9Yi9c0eb4tNukb96dg2xaCxW2OS+5iBpwEjZguzuaIGj1XokxlIf8lzApSU2aO8j3A==}
+  pulsix-solid@1.0.17:
+    resolution: {integrity: sha512-W4qAdnU1BRgcgYPjJZ6GrCk0Zok0ya5mdi3RUUlAUikcJ5C1GrGXZPwQkkftfV0+W4kbcZ/4XrRiFmjYKE45XA==}
     peerDependencies:
       pulsix: ^1.0.1-alpha.0
       solid-js: ^1.7.0
 
-  pulsix@1.0.3:
-    resolution: {integrity: sha512-Nm//9XNn2BMdpwZl69EmrEH83DUPR1HwDUKuHyPePcWufJqxI02Fbv1ekLXZLUQ2r8Kil8tNigWvdQiRxCC5pA==}
+  pulsix@1.0.5:
+    resolution: {integrity: sha512-1u7ag/6iSmxrtljRHJE5js0O9HbiV5i+axMxXej4uSPN1I+5kwrxqgWu1fw1MD5ltP2gvvE5fQZgue19l139hA==}
 
   punycode@1.4.1:
     resolution: {integrity: sha512-jmYNElW7yvO7TV33CjSmvSiE2yco3bV2czu/OzDKdMNVZQWfxCblURLhf+47syQRBntjfLdd/H0egrzIG+oaFQ==}
@@ -10923,12 +10923,12 @@ snapshots:
       randombytes: 2.1.0
       safe-buffer: 5.2.1
 
-  pulsix-solid@1.0.15(pulsix@1.0.3)(solid-js@1.9.5):
+  pulsix-solid@1.0.17(pulsix@1.0.5)(solid-js@1.9.5):
     dependencies:
-      pulsix: 1.0.3
+      pulsix: 1.0.5
       solid-js: 1.9.5
 
-  pulsix@1.0.3: {}
+  pulsix@1.0.5: {}
 
   punycode@1.4.1: {}
 

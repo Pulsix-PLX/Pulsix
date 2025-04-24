@@ -18,7 +18,7 @@ import '@thednp/solid-color-picker/style.css';
 import GlowButton from '~/components/Buttons/GlowButton';
 
 import deleteWallet from '~/routes/API/Wallets/deleteWallet';
-import { getFormValue } from '~/GlobalStores/FormStore';
+import { allInputsValid, getFormValue } from '~/GlobalStores/FormStore';
 import { authStore } from '~/GlobalStores/auth';
 const LazyDefaultColorPicker = lazy(() =>
   import('@thednp/solid-color-picker').then((module) => ({ default: module.DefaultColorPicker }))
@@ -33,51 +33,31 @@ export default function FormAddWallet({
   const [typeToAdd, setTypeToAdd] = createSignal<string | null>(null); // State for color
   const [typeCard, setTypeCard] = createSignal<string>('card'); // State for color
 
-  const [color, setColor] = createSignal('grey'); // State for color
+  const [color, setColor] = createSignal<any>('grey'); // State for color
   const [confirmDelete, setConfirmDelete] = createSignal<boolean>(false); // State for color
   const [hoverDelete, setHoverDelete] = createSignal<'cancel' | 'confirm' | null>(null); // State for color
 
   async function submit(e: Event) {
     e.preventDefault();
     const walletName = getFormValue('walletName');
-    const type = getFormValue('type');
     const nation = getFormValue('nation');
     const currency = getFormValue('currency');
-    const container_id = getFormValue('container_id');
-    const color = getFormValue('color');
-    const type_ui = getFormValue('type_ui');
     const category_id = getFormValue('category_id') || null;
-    console.log(
-      'walletName:',
-      walletName,
-      'type:',
-      type,
-      'nation:',
-      nation,
-      'currency:',
-      currency,
-      'container_id:',
-      container_id,
-      'color:',
-      color,
-      'type_ui:',
-      type_ui,
-      'category_id:',
-      category_id
-    );
+    console.log(color())
     const data = {
-      walletName,
-      type,
-      nation,
-      currency,
-      container_id,
-      color,
-      type_ui,
-      category_id,
+      walletName:walletName,
+      type:typeToAdd(),
+      nation:nation,
+      currency:currency || "EUR",
+      container_id:container_id,
+      color:color(),
+      type_ui:typeCard(),
+      category_id:category_id,
     };
     try {
       const res = await authStore.api.post('API/Wallets/addWallet', data);
-      console.log(res)
+      setEdit(null);
+      setTypeToAdd(null)
     } catch (error) {
       console.error(error);
     }
@@ -104,7 +84,7 @@ export default function FormAddWallet({
               }}
             >
               <div class="flex flex-row gap-100">
-                <button onclick={() => setTypeToAdd('container')}>Container</button>
+                <button onclick={() =>{setColor('grey'); setTypeToAdd('container')}}>Container</button>
                 <button onclick={() => setTypeToAdd('wallet')}>Wallet</button>
               </div>
             </form>
@@ -117,11 +97,8 @@ export default function FormAddWallet({
               class="CM w-[25vw] mt-[22vh] pl-[5vw] pr-[5vw] pb-[2vw] pt-[2vw]"
               style={{ border: `3px solid ${color()}`, 'border-radius': '40px' }}
             >
-              <input type="hidden" name="type" value={typeToAdd() || 'null'} />
-              <input type="hidden" name="user_id" value={user_id || 'null'} />
-              <input type="hidden" name="container_id" value={container_id || 'null'} />
 
-              <Input type="text" name="walletName" placeholder="Wallet Name" />
+              <Input type="text" name="walletName" placeholder="Wallet Name" defaultError="Provide" required/>
               <select name="currency">
                 <option value="USD">USD</option>
                 <option value="EUR" selected>
@@ -165,10 +142,6 @@ export default function FormAddWallet({
                   </div>
                 </Match>
               </Switch>
-
-              {/* Input hidden for color */}
-              <input type="hidden" value={color()} name="color" />
-
               {/* Send */}
               <ButtonSparkle
                 text={`Add Wallet`}
@@ -176,7 +149,7 @@ export default function FormAddWallet({
                 size={'large'}
                 shadowColor={`${color()}`}
                 shadow={10}
-                // onClick={() =>{ setTimeout(() => setEdit(null), 500);setTypeToAdd(null);}}
+                disabled={!allInputsValid()}
               />
             </form>
           </Match>
@@ -202,7 +175,6 @@ export default function FormAddWallet({
                 size={'large'}
                 shadowColor={`${color()}`}
                 shadow={10}
-                //onClick={() =>{ setTimeout(() => setEdit(null), 1500);setTypeToAdd(null);}}
               />
             </form>
           </Match>

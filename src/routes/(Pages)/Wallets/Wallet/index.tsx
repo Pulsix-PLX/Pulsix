@@ -1,6 +1,6 @@
 import { createResource, Show } from 'solid-js';
 import getTransactions from '~/routes/API/Wallets/Wallet/getTransactions';
-import { wallet } from '~/Server/types/wallet';
+import { wallet } from '~/server/types/wallet';
 import TableWallet from './components/table.tsx';
 
 export default function Wallet(props: wallet) {

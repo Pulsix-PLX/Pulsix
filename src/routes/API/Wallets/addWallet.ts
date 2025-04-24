@@ -28,7 +28,7 @@ let data;
   } = data;
 
   const user_id = event.locals.user?.id;
-
+console.log(data)
   try {
     let result;
 

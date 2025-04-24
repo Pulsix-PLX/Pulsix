@@ -38,7 +38,25 @@ export default function Index() {
 
 
 
-  onMount(() => SetFormValues('type', type()));
+
+
+  const desiredWidth = 1700; // Imposta la larghezza desiderata
+  const desiredHeight = 900; // Imposta l'altezza desiderata
+  const screenWidth = window.screen.availWidth || window.screen.width; // Fallback a width
+  const screenHeight = window.screen.availHeight || window.screen.height; // Fallback a height
+  const desiredX = Math.max(0, (screenWidth - desiredWidth) / 2); // Usa Math.max per evitare coordinate negative su schermi piccoli
+  const desiredY = Math.max(0, (screenHeight - desiredHeight) / 2);
+  try {
+    window.resizeTo(desiredWidth, desiredHeight);
+    window.moveTo(desiredX, desiredY);
+    console.log(`Window resize attempted to ${desiredWidth}x${desiredHeight}`);
+} catch (resizeError) {
+    // Il browser potrebbe bloccare il ridimensionamento
+    console.warn("Window resize failed or was blocked by the browser:", resizeError);
+    // Non è un errore bloccante per il login, quindi non rilanciamo l'errore
+};
+
+  onMount(() =>{setShowMenu(false);  SetFormValues('type', type())});
   const [type, setType] = createSignal<string>('income');
   async function handleSubmit() {
     const data = {

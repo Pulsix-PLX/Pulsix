@@ -232,6 +232,7 @@ svg {
   -webkit-background-clip: text;
   color: transparent;
   transition: background var(--transition);
+  text-align: center;
 }
 
 .button svg {

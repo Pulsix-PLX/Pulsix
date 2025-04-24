@@ -32,6 +32,7 @@ interface InputProps {
   style?: string;
   mountOn?: boolean;
   defaultValue?: any;
+  defaultError?: any;
   ValidationSchema?: (value: any) => boolean;
 }
 export const [value, setValue] = createSignal('');
@@ -50,14 +51,16 @@ export default function Input(props: InputProps) {
     // Se non è richiesto, inizializzalo come valido (true)
 
     if (props.required) {
+      if (props.defaultError) {
+        setErrorMessage(props.defaultError);
+      }
       if (props.mountOn != false) {
         SetForm(props.name, false);
       }
     } else {
       SetForm(props.name, true);
     }
-  
-});
+  });
 
   // Rivalidare passwordConfirm quando password cambia
   createEffect(() => {
@@ -72,28 +75,26 @@ export default function Input(props: InputProps) {
   });
 
   // Schema Validation
-  function validateInput(e:any) {
+  function validateInput(e: any) {
     // Imposta touched a true quando l'utente interagisce con l'input
     setTouched(true);
 
     var inputValue;
-    if(props.type!='date'){
+    if (props.type != 'date') {
+      const target = e.target as HTMLInputElement;
+      inputValue = target.value;
 
-    const target = e.target as HTMLInputElement;
-     inputValue = target.value;
+      // Aggiorna il valore locale
+      setValue(inputValue);
 
-    // Aggiorna il valore locale
-    setValue(inputValue);
-
-    // Salva il valore dell'input nello store
-    SetFormValues(props.name, inputValue);
-    }else{
+      // Salva il valore dell'input nello store
+      SetFormValues(props.name, inputValue);
+    } else {
       inputValue = e;
       setValue(e);
-  
+
       // Salva il valore dell'input nello store
       SetFormValues(props.name, e);
-    
     }
     console.log(props.name, value());
 
@@ -117,7 +118,7 @@ export default function Input(props: InputProps) {
   async function defaultValidationSchema(inputValue: string) {
     if (!inputValue && props.required) {
       SetForm(props.name, false);
-      setErrorMessage('Provide something');
+      setErrorMessage('Provide');
       return;
     }
 
@@ -128,7 +129,7 @@ export default function Input(props: InputProps) {
       case 'text':
         if (!inputValue) {
           SetForm(props.name, false);
-          setErrorMessage('Provide something');
+          setErrorMessage('Provide');
         } else {
           SetForm(props.name, true);
           setErrorMessage('');
@@ -321,16 +322,15 @@ export default function Input(props: InputProps) {
         }
         break;
 
-        case 'select':
-
-          if (!inputValue) {
-            SetForm(props.name, false);
-            setErrorMessage('Select something');
-          } else {
-            SetForm(props.name, true);
-            setErrorMessage('');
-          }
-          break;
+      case 'select':
+        if (!inputValue) {
+          SetForm(props.name, false);
+          setErrorMessage('Select something');
+        } else {
+          SetForm(props.name, true);
+          setErrorMessage('');
+        }
+        break;
       case 'date':
         const dateValid = !isNaN(Date.parse(inputValue));
         if (!dateValid) {
@@ -466,11 +466,11 @@ export default function Input(props: InputProps) {
       </Switch>
 
       {/* Mostra il messaggio di errore solo se il campo è stato toccato.*/}
-      {touched() && errorMessage() && (
+      {(touched() && errorMessage()) || props.defaultError ? (
         <div class="error-message" style={{ color: 'var(--Secondary)' }}>
           {errorMessage()}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
