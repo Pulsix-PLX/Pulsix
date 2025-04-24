@@ -8,7 +8,6 @@ import {
   Show,
   Suspense,
   Switch,
-  
 } from 'solid-js';
 import Input from '~/components/Inputs/Inputs';
 import { getWallet } from '~/routes/API/Wallets/getWallet';
@@ -19,7 +18,8 @@ import '@thednp/solid-color-picker/style.css';
 import GlowButton from '~/components/Buttons/GlowButton';
 
 import deleteWallet from '~/routes/API/Wallets/deleteWallet';
-import { addWallet } from '~/routes/API/Wallets/addWallet';
+import { getFormValue } from '~/GlobalStores/FormStore';
+import { authStore } from '~/GlobalStores/auth';
 const LazyDefaultColorPicker = lazy(() =>
   import('@thednp/solid-color-picker').then((module) => ({ default: module.DefaultColorPicker }))
 );
@@ -31,12 +31,57 @@ export default function FormAddWallet({
   user_id: number | null;
 }) {
   const [typeToAdd, setTypeToAdd] = createSignal<string | null>(null); // State for color
-  const [typeCard, setTypeCard] = createSignal<string | null>(null); // State for color
+  const [typeCard, setTypeCard] = createSignal<string>('card'); // State for color
 
   const [color, setColor] = createSignal('grey'); // State for color
   const [confirmDelete, setConfirmDelete] = createSignal<boolean>(false); // State for color
   const [hoverDelete, setHoverDelete] = createSignal<'cancel' | 'confirm' | null>(null); // State for color
 
+  async function submit(e: Event) {
+    e.preventDefault();
+    const walletName = getFormValue('walletName');
+    const type = getFormValue('type');
+    const nation = getFormValue('nation');
+    const currency = getFormValue('currency');
+    const container_id = getFormValue('container_id');
+    const color = getFormValue('color');
+    const type_ui = getFormValue('type_ui');
+    const category_id = getFormValue('category_id') || null;
+    console.log(
+      'walletName:',
+      walletName,
+      'type:',
+      type,
+      'nation:',
+      nation,
+      'currency:',
+      currency,
+      'container_id:',
+      container_id,
+      'color:',
+      color,
+      'type_ui:',
+      type_ui,
+      'category_id:',
+      category_id
+    );
+    const data = {
+      walletName,
+      type,
+      nation,
+      currency,
+      container_id,
+      color,
+      type_ui,
+      category_id,
+    };
+    try {
+      const res = await authStore.api.post('API/Wallets/addWallet', data);
+      console.log(res)
+    } catch (error) {
+      console.error(error);
+    }
+  }
   return (
     <>
       <Show when={edit() == -1}>
@@ -56,7 +101,6 @@ export default function FormAddWallet({
               style={{ border: '3px solid rgba(255, 255, 255, 0.3)', 'border-radius': '40px' }}
               onSubmit={(e) => {
                 e.preventDefault(); // Prevent default form submission
-                
               }}
             >
               <div class="flex flex-row gap-100">
@@ -69,8 +113,7 @@ export default function FormAddWallet({
           {/* Wallet */}
           <Match when={typeToAdd() == 'wallet'}>
             <form
-              action={addWallet}
-              method="post"
+              onSubmit={submit}
               class="CM w-[25vw] mt-[22vh] pl-[5vw] pr-[5vw] pb-[2vw] pt-[2vw]"
               style={{ border: `3px solid ${color()}`, 'border-radius': '40px' }}
             >
@@ -79,12 +122,13 @@ export default function FormAddWallet({
               <input type="hidden" name="container_id" value={container_id || 'null'} />
 
               <Input type="text" name="walletName" placeholder="Wallet Name" />
-              <select name='currency'>
-                  <option value="USD">USD</option>
-                  <option value="EUR" selected>EUR</option>
-                  <option value="CHF">CHF</option>
-         
-                </select>
+              <select name="currency">
+                <option value="USD">USD</option>
+                <option value="EUR" selected>
+                  EUR
+                </option>
+                <option value="CHF">CHF</option>
+              </select>
               <Input type="text" name="category_id" placeholder="Category" />
 
               <Input type="text" name="nation" placeholder="nation" />
@@ -110,7 +154,11 @@ export default function FormAddWallet({
                 </Match>
                 <Match when={typeCard() == '3D'}>
                   <div style={{ 'margin-bottom': '2rem' }}>
-                    <select name="color" value={'black'} onChange={(e) => setColor(e.currentTarget.value)}>
+                    <select
+                      name="color"
+                      value={'black'}
+                      onChange={(e) => setColor(e.currentTarget.value)}
+                    >
                       <option value="black">Black</option>
                       <option value="purple">Purple</option>
                     </select>
@@ -128,15 +176,14 @@ export default function FormAddWallet({
                 size={'large'}
                 shadowColor={`${color()}`}
                 shadow={10}
-                onClick={() =>{ setTimeout(() => setEdit(null), 500);setTypeToAdd(null);}}
+                // onClick={() =>{ setTimeout(() => setEdit(null), 500);setTypeToAdd(null);}}
               />
             </form>
           </Match>
           {/* Container */}
           <Match when={typeToAdd() == 'container'}>
-          <form
-              action={addWallet}
-              method="post"
+            <form
+              onSubmit={submit}
               class="CM w-[25vw] mt-[22vh] pl-[5vw] pr-[5vw] pb-[2vw] pt-[2vw]"
               style={{ border: `3px solid ${color()}`, 'border-radius': '40px' }}
             >
@@ -155,7 +202,7 @@ export default function FormAddWallet({
                 size={'large'}
                 shadowColor={`${color()}`}
                 shadow={10}
-                onClick={() =>{ setTimeout(() => setEdit(null), 500);setTypeToAdd(null);}}
+                //onClick={() =>{ setTimeout(() => setEdit(null), 1500);setTypeToAdd(null);}}
               />
             </form>
           </Match>
