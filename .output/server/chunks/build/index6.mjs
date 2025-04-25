@@ -1,7 +1,13 @@
-import { createComponent, ssr, ssrHydrationKey, escape } from 'solid-js/web';
-import { createResource, Show } from 'solid-js';
-import { A, I } from './index-2Np-G_nR.mjs';
-import './server-fns-runtime-4T1EILgx.mjs';
+import { ssr, ssrHydrationKey, escape, createComponent } from 'solid-js/web';
+import { onMount, onCleanup } from 'solid-js';
+import { B } from './ButtonSparkle-BxHzGCPC.mjs';
+import { r, J, m as mt, u as ut } from './Inputs-Cq_fgt2H.mjs';
+import { b } from './Menu-B3jw0GIl.mjs';
+import { j } from './auth-BeHg-fWi.mjs';
+import { M as Me } from './routing-Th2JWmJV.mjs';
+import 'solid-js/store';
+import 'gsap';
+import './server-fns-runtime-DEO2-sKc.mjs';
 import 'solid-js/web/storage';
 import '../_/nitro.mjs';
 import 'node:crypto';
@@ -12,24 +18,27 @@ import 'node:buffer';
 import 'vinxi/lib/invariant';
 import 'vinxi/lib/path';
 import 'node:url';
-import 'node:fs';
+import 'vite-plugin-node-polyfills/shims/process';
+import 'vite-plugin-node-polyfills/shims/global';
 import 'node:async_hooks';
-import 'node:path';
-import './db.server-BYnrqg0d.mjs';
+import 'jsonwebtoken';
 import 'pg';
+import 'axios';
+import 'node:fs';
+import 'node:path';
+import './action-CiKOD-Zz.mjs';
+import './components-Bjb1kgqQ.mjs';
 
-var l = ["<div", ' class="CM mt-[15vw]">', "</div>"];
-function W(t) {
-  console.log("props", t);
-  const [r, { refetch: o }] = createResource(() => t.id, A);
-  return createComponent(Show, { get when() {
-    return r();
-  }, get children() {
-    return ssr(l, ssrHydrationKey(), escape(createComponent(I, { get transactions() {
-      return r();
-    }, refetch: o })));
-  } });
+var f = ["<form", ' class="CM" method="post"><!--$-->', "<!--/--><!--$-->", "<!--/--><!--$-->", "<!--/--></form>"], h = ["<div", ' class="auth-links text-center mt-4"><a href="/register" class="text-blue-600 hover:underline">Need an account? Register</a><span class="mx-2">|</span><a href="/forgot-password" class="text-blue-600 hover:underline">Forgot password?</a></div>'], g = ["<p", ' class="text-red-500">', "</p>"];
+function R() {
+  return Me(), onMount(() => {
+    b(false), r({}), J({});
+  }), onCleanup(() => {
+    b(true);
+  }), [j.error && ssr(g, ssrHydrationKey(), escape(j.error)), ssr(f, ssrHydrationKey(), escape(createComponent(mt, { type: "usernameLogin", name: "username", placeholder: "Username", required: true })), escape(createComponent(mt, { type: "password", name: "password", placeholder: "Password", required: true })), escape(createComponent(B, { text: "Login", class: "ml-[auto] mr-[auto]", get disabled() {
+    return !ut();
+  } }))), ssr(h, ssrHydrationKey())];
 }
 
-export { W as default };
+export { R as default };
 //# sourceMappingURL=index6.mjs.map

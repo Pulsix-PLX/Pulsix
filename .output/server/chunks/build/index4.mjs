@@ -1,18 +1,14 @@
 import { ssr, ssrHydrationKey, escape, createComponent } from 'solid-js/web';
-import { onMount, onCleanup, createSignal } from 'solid-js';
-import { B } from './ButtonSparkle-DNpTyev3.mjs';
-import { r, j, v as ve, w as we, y as ye } from './Inputs-CEYxPBfP.mjs';
-import { b } from './Menu-OQmUNT5t.mjs';
-import { E } from './server-fns-runtime-4T1EILgx.mjs';
-import { c as de } from '../_/nitro.mjs';
-import { r as r$1 } from './db.server-BYnrqg0d.mjs';
-import * as h from 'bcryptjs';
-import { Y, Q } from './action-BVKOmiKt.mjs';
-import { M as Me } from './routing-BSDkuvr3.mjs';
+import { onMount } from 'solid-js';
+import { B } from './ButtonSparkle-BxHzGCPC.mjs';
+import { r, J, m as mt, u as ut } from './Inputs-Cq_fgt2H.mjs';
+import { b } from './Menu-B3jw0GIl.mjs';
+import { j } from './auth-BeHg-fWi.mjs';
 import 'solid-js/store';
 import 'gsap';
-import './components-CJF4pMQg.mjs';
+import './server-fns-runtime-DEO2-sKc.mjs';
 import 'solid-js/web/storage';
+import '../_/nitro.mjs';
 import 'node:crypto';
 import 'node:http';
 import 'node:https';
@@ -21,34 +17,26 @@ import 'node:buffer';
 import 'vinxi/lib/invariant';
 import 'vinxi/lib/path';
 import 'node:url';
-import 'node:fs';
+import 'vite-plugin-node-polyfills/shims/process';
+import 'vite-plugin-node-polyfills/shims/global';
 import 'node:async_hooks';
-import 'node:path';
+import 'jsonwebtoken';
 import 'pg';
+import 'axios';
+import 'node:fs';
+import 'node:path';
+import './action-CiKOD-Zz.mjs';
+import './routing-Th2JWmJV.mjs';
+import './components-Bjb1kgqQ.mjs';
 
-const R = E(async (s) => {
-  const { password: a, username: l } = s;
-  try {
-    const e = await r$1.query("SELECT id, username, password FROM users WHERE username = $1", [l]);
-    if (e.rows.length === 0) return { success: false, message: "Credenziali non valide" };
-    const r = e.rows[0];
-    return await h.compare(a, r.password) ? (await (await de({ password: process.env.SESSION_SECRET, name: "auth_session" })).update({ userId: r.id, username: r.username }), console.log(`Sessione (cookie criptato) aggiornata per utente ${r.username}`), { success: true }) : { success: false, message: "Credenziali non valide" };
-  } catch (e) {
-    return console.error("Errore durante il login:", e), process.env.SESSION_SECRET ? { success: false, message: "Errore durante il processo di login" } : (console.error("SESSION_SECRET non \xE8 impostata!"), { success: false, message: "Errore di configurazione server." });
-  }
-}, "src_routes_API_Auth_login_loginUser_ts--loginUser_action", "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Auth/login/loginUser.ts?tsr-directive-use-server="), $ = Q(R, "loginUser");
-var P = ["<form", ' class="CM" method="post"><!--$-->', "<!--/--><!--$-->", "<!--/--><!--$-->", "<!--/--></form>"], A = ["<p", ' class="text-red-500">Wrong credentials</p>'];
-function J() {
-  onMount(() => {
-    b(false), r({}), j({}), console.log(ve("username")), console.log(ve("password"));
-  }), onCleanup(() => {
-    b(true);
-  });
-  const [s, a] = createSignal("");
-  return Y($), Me(), [s() && ssr(A, ssrHydrationKey()), " ", ssr(P, ssrHydrationKey(), escape(createComponent(we, { type: "usernameLogin", name: "username", placeholder: "Username", required: true })), escape(createComponent(we, { type: "password", name: "password", placeholder: "Password", required: true })), escape(createComponent(B, { text: "Login", class: "ml-[auto] mr-[auto]", get disabled() {
-    return !ye();
-  } })))];
+var d = ["<form", ' class="CM mt-[10vh]" method="post"><!--$-->', "<!--/--><!--$-->", "<!--/--><!--$-->", "<!--/--></form>"], c = ["<div", ' class="CM mt-[90vh]"><button class="text-blue-600 hover:text-white">Need to register?</button></div>'], f = ["<p", ' class="text-red-500">', "</p>"];
+function K() {
+  return onMount(() => {
+    b(false), r({}), J({});
+  }), [j.error && ssr(f, ssrHydrationKey(), escape(j.error)), ssr(d, ssrHydrationKey(), escape(createComponent(mt, { type: "usernameLogin", name: "username", placeholder: "Username", required: true })), escape(createComponent(mt, { type: "password", name: "password", placeholder: "Password", required: true })), escape(createComponent(B, { text: "Go Transactions", class: "ml-[auto] mr-[auto] ", get disabled() {
+    return !ut();
+  } }))), ssr(c, ssrHydrationKey())];
 }
 
-export { J as default };
+export { K as default };
 //# sourceMappingURL=index4.mjs.map

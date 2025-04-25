@@ -1,44 +1,19 @@
-import { ssr, createComponent, ssrHydrationKey, escape } from 'solid-js/web';
-import { createSignal, onMount, onCleanup, Show } from 'solid-js';
-import { e as b$1, M as Me } from '../_/nitro.mjs';
-import { R as R$1, w as w$1, b as b$2 } from './index.module-0iUivGU72.mjs';
-import { B } from './ButtonSparkle-DNpTyev32.mjs';
-import 'node:crypto';
-import 'node:http';
-import 'node:https';
-import 'node:events';
-import 'node:buffer';
-import 'vinxi/lib/invariant';
-import 'vinxi/lib/path';
-import 'node:url';
-import 'node:fs';
-import 'solid-js/web/storage';
-import 'node:async_hooks';
-import 'node:path';
-import 'solid-js/store';
+import { createComponent, ssr, ssrHydrationKey, escape, ssrAttribute } from 'solid-js/web';
+import { createSignal, Show } from 'solid-js';
 
-const x = "_hidden_1kmeb_10", _ = "_title_1kmeb_14", h = "_titles_1kmeb_24", w = "_paragraf_1kmeb_33", e = { hidden: x, title: _, titles: h, paragraf: w };
-var C = ["<div", ' class="CM flex flex-col"><div class="', '"></div><div id="ContainerTexts" class="mt-[1vw] flex flex-row z-20 w-[4.5vw] h-[0.8vw]" style="', '"><div class="', '">Login</div><div class="', '">SignUp</div></div></div>'];
-function k() {
-  return ssr(C, ssrHydrationKey(), `${escape(b$2.toggle, true)}`, "text-align:center", `ml-[45%] text-center ${w$1() ? escape(b$2.activeText, true) : escape(b$2.text, true)}`, `ml-[150%] align-middle ${w$1() ? escape(b$2.text, true) : escape(b$2.activeText, true)}`);
-}
-var M = ["<div", ' class="ml-[auto] mr-[auto] CM -mt-[18.85vw]">', "</div>"], S = ["<p", ' class="', '">Pulsix now for</p>'], b = ["<div", ' class="CM mt-[13.1vw] -ml-[5.6%] ">', "</div>"], R = ["<div", ' class="', '"><p class="', '">Welcome back</p><p class="', '">Update your financial goals </p><p class="', '"> Continue tracking your progress</p><div class="mt-[15%] ml-[23%]">', "</div></div>"], y = ["<div", ' class="', '"><p class="', '">Be one of us</p><p class="', '">Smart tracking</p><p class="', '"> Smarter decisions</p><div class="mt-[15%] ml-[23%]">', "</div></div>"];
-function H() {
-  const [c, m] = createSignal(false);
-  onMount(() => {
-    b$1(false), setTimeout(() => {
-      m(true);
-    }, 300);
-  }), onCleanup(() => {
-    b$1(true);
-  });
-  const l = Me();
-  return [ssr(M, ssrHydrationKey(), escape(createComponent(R$1, { src: "/rivs/LoginRegistration.riv", stateMachines: "State Machine 1", artboard: "Sandesh", onLoad: () => console.log("Animation loaded!") }))), createComponent(Show, { get when() {
-    return c();
+var h = ["<div", ' class="TableWrapper"><table class="Table"><thead><tr><th>Cause</th><th>Amount</th><th>Category</th><th class="text-center">Date</th></tr></thead><tbody><!--$-->', "<!--/--><!--$-->", "<!--/--></tbody></table></div>"], y = ["<tr", ' class="text-white text-xl" style="', `"><td colspan="5">There isn't anything, add a transaction!</td></tr>`], m = ["<tr", '><td class="text-black"><button>', '</button></td><td class="text-black text-right"><button>', "</button></td><td><button>", '</button></td><td class="text-black"><button>', "</button></td></tr>"];
+const [p, $] = createSignal(null), [g, H] = createSignal(null);
+function I(n) {
+  const [d, v] = createSignal("Income"), [o, f] = createSignal(void 0), [r, x] = createSignal(void 0), [i, D] = createSignal(void 0);
+  return createComponent(Show, { get when() {
+    return n.transactions;
   }, get children() {
-    return [ssr(S, ssrHydrationKey(), `CM ${escape(e.title, true)}`), ssr(b, ssrHydrationKey(), escape(createComponent(k, {}))), ssr(R, ssrHydrationKey(), `CM flex flex-col mt-[21.5%] -ml-[15.5%] ${w$1() ? "" : escape(e.hidden, true)}`, `${escape(e.titles, true)}`, `  ${escape(e.paragraf, true)}`, `-mt-16 ${escape(e.paragraf, true)}`, escape(createComponent(B, { text: "Go to dashboard", shadow: 40, onClick: () => l("/LoginRegistration/Login") }))), ssr(y, ssrHydrationKey(), `CM flex flex-col mt-[21.5%] ml-[16.5%] ${w$1() ? escape(e.hidden, true) : ""}`, `${escape(e.titles, true)}`, `  ${escape(e.paragraf, true)}`, `-mt-16 ${escape(e.paragraf, true)}`, escape(createComponent(B, { text: "Join Now", shadow: 40, shadowColor: "rgba(255, 27, 77, 1)", onClick: () => l("/LoginRegistration/Registration") })))];
-  } })];
+    return ssr(h, ssrHydrationKey(), n.transactions.length ? escape(null) : ssr(y, ssrHydrationKey(), "justify-content:center"), escape(n.transactions.filter((t) => d() ? t.type == d() : true).filter((t) => {
+      var _a, _b, _c, _d;
+      return o() && r() ? t.Date >= ((_a = o()) != null ? _a : 0) && t.Date <= ((_b = r()) != null ? _b : 1 / 0) : o() ? t.Date >= ((_c = o()) != null ? _c : 0) : r() ? t.Date <= ((_d = r()) != null ? _d : 1 / 0) : true;
+    }).filter((t) => i() ? t.CategoryName === i() : true).map((t, w) => ssr(m, ssrHydrationKey() + ssrAttribute("class", p() === t.id ? "Hover" : g() === t.id ? "Active" : "", false), escape(t.cause), escape(t.amount), escape(t.category_id), t.date ? escape(new Date(t.date).toISOString().split("T")[0]) : ""))));
+  } });
 }
 
-export { H as default };
+export { g as ActiveRow, p as HoveredRow, H as SetActiveRow, $ as SetHoveredRow, I as default };
 //# sourceMappingURL=index22.mjs.map

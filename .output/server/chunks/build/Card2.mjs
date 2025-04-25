@@ -9,10 +9,16 @@ import 'node:buffer';
 import 'vinxi/lib/invariant';
 import 'vinxi/lib/path';
 import 'node:url';
-import 'node:fs';
+import 'vite-plugin-node-polyfills/shims/process';
+import 'vite-plugin-node-polyfills/shims/global';
+import 'node:async_hooks';
+import 'jsonwebtoken';
+import 'pg';
 import 'solid-js';
 import 'solid-js/web/storage';
-import 'node:async_hooks';
+import 'solid-js/store';
+import 'axios';
+import 'node:fs';
 import 'node:path';
 
 var l = ["<div", ' class><p class="', '">', '</p><p class="', '"><!--$-->', "<!--/--><!--$-->", "<!--/--></p></div>"];

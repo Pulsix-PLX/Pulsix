@@ -1,100 +1,23 @@
-import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import nodeCrypto, { createHash } from 'node:crypto';
+import nodeCrypto, { createHash } from 'node:crypto';
 import http from 'node:http';
 import https from 'node:https';
 import { EventEmitter } from 'node:events';
 import { Buffer as Buffer$1 } from 'node:buffer';
 import invariant from 'vinxi/lib/invariant';
 import { virtualId, handlerModule, join } from 'vinxi/lib/path';
-import { pathToFileURL, fileURLToPath } from 'node:url';
-import { promises, existsSync } from 'node:fs';
-import { sharedConfig, lazy, createComponent, useContext, createContext as createContext$1, createMemo, createSignal, createRenderEffect, on, runWithOwner, getOwner, startTransition, resetErrorBoundaries, batch, untrack, mergeProps as mergeProps$1, splitProps, Show, onCleanup, getListener, catchError, ErrorBoundary, Suspense, createUniqueId, onMount, children, createRoot } from 'solid-js';
+import { pathToFileURL } from 'node:url';
+import o$3 from 'vite-plugin-node-polyfills/shims/process';
+import g$2 from 'vite-plugin-node-polyfills/shims/global';
+import { AsyncLocalStorage } from 'node:async_hooks';
+import O$3 from 'jsonwebtoken';
+import e$1 from 'pg';
+import { sharedConfig, lazy, createComponent, useContext, createContext as createContext$1, createMemo, createSignal, createRenderEffect, on, runWithOwner, getOwner, startTransition, resetErrorBoundaries, batch, untrack, mergeProps as mergeProps$1, splitProps, Show, onMount, onCleanup, getListener, catchError, ErrorBoundary, createEffect, Suspense, createUniqueId, For, children, createRoot } from 'solid-js';
 import { renderToString, getRequestEvent, isServer, ssrElement, escape, mergeProps, ssr, createComponent as createComponent$1, ssrHydrationKey, renderToStream, NoHydration, useAssets, Hydration, ssrAttribute, HydrationScript, delegateEvents, spread } from 'solid-js/web';
 import { provideRequestEvent } from 'solid-js/web/storage';
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { resolve as resolve$1, dirname as dirname$1, join as join$1 } from 'node:path';
-
-const subtle = nodeCrypto.webcrypto?.subtle || {};
-const randomUUID = () => {
-  return nodeCrypto.randomUUID();
-};
-const getRandomValues = (array) => {
-  return nodeCrypto.webcrypto.getRandomValues(array);
-};
-const _crypto = {
-  randomUUID,
-  getRandomValues,
-  subtle
-};
-
-const suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
-const suspectConstructorRx = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
-const JsonSigRx = /^\s*["[{]|^\s*-?\d{1,16}(\.\d{1,17})?([Ee][+-]?\d+)?\s*$/;
-function jsonParseTransform(key, value) {
-  if (key === "__proto__" || key === "constructor" && value && typeof value === "object" && "prototype" in value) {
-    warnKeyDropped(key);
-    return;
-  }
-  return value;
-}
-function warnKeyDropped(key) {
-  console.warn(`[destr] Dropping "${key}" key to prevent prototype pollution.`);
-}
-function destr(value, options = {}) {
-  if (typeof value !== "string") {
-    return value;
-  }
-  const _value = value.trim();
-  if (
-    // eslint-disable-next-line unicorn/prefer-at
-    value[0] === '"' && value.endsWith('"') && !value.includes("\\")
-  ) {
-    return _value.slice(1, -1);
-  }
-  if (_value.length <= 9) {
-    const _lval = _value.toLowerCase();
-    if (_lval === "true") {
-      return true;
-    }
-    if (_lval === "false") {
-      return false;
-    }
-    if (_lval === "undefined") {
-      return void 0;
-    }
-    if (_lval === "null") {
-      return null;
-    }
-    if (_lval === "nan") {
-      return Number.NaN;
-    }
-    if (_lval === "infinity") {
-      return Number.POSITIVE_INFINITY;
-    }
-    if (_lval === "-infinity") {
-      return Number.NEGATIVE_INFINITY;
-    }
-  }
-  if (!JsonSigRx.test(value)) {
-    if (options.strict) {
-      throw new SyntaxError("[destr] Invalid JSON");
-    }
-    return value;
-  }
-  try {
-    if (suspectProtoRx.test(value) || suspectConstructorRx.test(value)) {
-      if (options.strict) {
-        throw new Error("[destr] Possible prototype pollution");
-      }
-      return JSON.parse(value, jsonParseTransform);
-    }
-    return JSON.parse(value);
-  } catch (error) {
-    if (options.strict) {
-      throw error;
-    }
-    return value;
-  }
-}
+import { createStore } from 'solid-js/store';
+import d$2 from 'axios';
+import { promises, existsSync } from 'node:fs';
+import { resolve, dirname, join as join$1 } from 'node:path';
 
 const HASH_RE = /#/g;
 const AMPERSAND_RE = /&/g;
@@ -105,7 +28,6 @@ const ENC_CARET_RE = /%5e/gi;
 const ENC_BACKTICK_RE = /%60/gi;
 const ENC_PIPE_RE = /%7c/gi;
 const ENC_SPACE_RE = /%20/gi;
-const ENC_SLASH_RE = /%2f/gi;
 function encode(text) {
   return encodeURI("" + text).replace(ENC_PIPE_RE, "|");
 }
@@ -121,9 +43,6 @@ function decode$1(text = "") {
   } catch {
     return "" + text;
   }
-}
-function decodePath(text) {
-  return decode$1(text.replace(ENC_SLASH_RE, "%252F"));
 }
 function decodeQueryKey(text) {
   return decode$1(text.replace(PLUS_RE, " "));
@@ -744,6 +663,76 @@ function _routerNodeToTable(initialPath, initialNode) {
   return table;
 }
 
+const suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
+const suspectConstructorRx = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
+const JsonSigRx = /^\s*["[{]|^\s*-?\d{1,16}(\.\d{1,17})?([Ee][+-]?\d+)?\s*$/;
+function jsonParseTransform(key, value) {
+  if (key === "__proto__" || key === "constructor" && value && typeof value === "object" && "prototype" in value) {
+    warnKeyDropped(key);
+    return;
+  }
+  return value;
+}
+function warnKeyDropped(key) {
+  console.warn(`[destr] Dropping "${key}" key to prevent prototype pollution.`);
+}
+function destr(value, options = {}) {
+  if (typeof value !== "string") {
+    return value;
+  }
+  const _value = value.trim();
+  if (
+    // eslint-disable-next-line unicorn/prefer-at
+    value[0] === '"' && value.endsWith('"') && !value.includes("\\")
+  ) {
+    return _value.slice(1, -1);
+  }
+  if (_value.length <= 9) {
+    const _lval = _value.toLowerCase();
+    if (_lval === "true") {
+      return true;
+    }
+    if (_lval === "false") {
+      return false;
+    }
+    if (_lval === "undefined") {
+      return void 0;
+    }
+    if (_lval === "null") {
+      return null;
+    }
+    if (_lval === "nan") {
+      return Number.NaN;
+    }
+    if (_lval === "infinity") {
+      return Number.POSITIVE_INFINITY;
+    }
+    if (_lval === "-infinity") {
+      return Number.NEGATIVE_INFINITY;
+    }
+  }
+  if (!JsonSigRx.test(value)) {
+    if (options.strict) {
+      throw new SyntaxError("[destr] Invalid JSON");
+    }
+    return value;
+  }
+  try {
+    if (suspectProtoRx.test(value) || suspectConstructorRx.test(value)) {
+      if (options.strict) {
+        throw new Error("[destr] Possible prototype pollution");
+      }
+      return JSON.parse(value, jsonParseTransform);
+    }
+    return JSON.parse(value);
+  } catch (error) {
+    if (options.strict) {
+      throw error;
+    }
+    return value;
+  }
+}
+
 function isPlainObject(value) {
   if (value === null || typeof value !== "object") {
     return false;
@@ -805,6 +794,19 @@ const defuFn = createDefu((object, key, currentValue) => {
     return true;
   }
 });
+
+const subtle = nodeCrypto.webcrypto?.subtle || {};
+const randomUUID = () => {
+  return nodeCrypto.randomUUID();
+};
+const getRandomValues = (array) => {
+  return nodeCrypto.webcrypto.getRandomValues(array);
+};
+const _crypto = {
+  randomUUID,
+  getRandomValues,
+  subtle
+};
 
 // src/utils.ts
 var alphabetByEncoding = {};
@@ -1102,7 +1104,7 @@ var unseal = async (_crypto, sealed, password, options) => {
   return null;
 };
 
-function o$2(n){throw new Error(`${n} is not implemented yet!`)}let i$1 = class i extends EventEmitter{__unenv__={};readableEncoding=null;readableEnded=true;readableFlowing=false;readableHighWaterMark=0;readableLength=0;readableObjectMode=false;readableAborted=false;readableDidRead=false;closed=false;errored=null;readable=false;destroyed=false;static from(e,t){return new i(t)}constructor(e){super();}_read(e){}read(e){}setEncoding(e){return this}pause(){return this}resume(){return this}isPaused(){return  true}unpipe(e){return this}unshift(e,t){}wrap(e){return this}push(e,t){return  false}_destroy(e,t){this.removeAllListeners();}destroy(e){return this.destroyed=true,this._destroy(e),this}pipe(e,t){return {}}compose(e,t){throw new Error("Method not implemented.")}[Symbol.asyncDispose](){return this.destroy(),Promise.resolve()}async*[Symbol.asyncIterator](){throw o$2("Readable.asyncIterator")}iterator(e){throw o$2("Readable.iterator")}map(e,t){throw o$2("Readable.map")}filter(e,t){throw o$2("Readable.filter")}forEach(e,t){throw o$2("Readable.forEach")}reduce(e,t,r){throw o$2("Readable.reduce")}find(e,t){throw o$2("Readable.find")}findIndex(e,t){throw o$2("Readable.findIndex")}some(e,t){throw o$2("Readable.some")}toArray(e){throw o$2("Readable.toArray")}every(e,t){throw o$2("Readable.every")}flatMap(e,t){throw o$2("Readable.flatMap")}drop(e,t){throw o$2("Readable.drop")}take(e,t){throw o$2("Readable.take")}asIndexedPairs(e){throw o$2("Readable.asIndexedPairs")}};let l$2 = class l extends EventEmitter{__unenv__={};writable=true;writableEnded=false;writableFinished=false;writableHighWaterMark=0;writableLength=0;writableObjectMode=false;writableCorked=0;closed=false;errored=null;writableNeedDrain=false;destroyed=false;_data;_encoding="utf8";constructor(e){super();}pipe(e,t){return {}}_write(e,t,r){if(this.writableEnded){r&&r();return}if(this._data===void 0)this._data=e;else {const s=typeof this._data=="string"?Buffer$1.from(this._data,this._encoding||t||"utf8"):this._data,a=typeof e=="string"?Buffer$1.from(e,t||this._encoding||"utf8"):e;this._data=Buffer$1.concat([s,a]);}this._encoding=t,r&&r();}_writev(e,t){}_destroy(e,t){}_final(e){}write(e,t,r){const s=typeof t=="string"?this._encoding:"utf8",a=typeof t=="function"?t:typeof r=="function"?r:void 0;return this._write(e,s,a),true}setDefaultEncoding(e){return this}end(e,t,r){const s=typeof e=="function"?e:typeof t=="function"?t:typeof r=="function"?r:void 0;if(this.writableEnded)return s&&s(),this;const a=e===s?void 0:e;if(a){const u=t===s?void 0:t;this.write(a,u,s);}return this.writableEnded=true,this.writableFinished=true,this.emit("close"),this.emit("finish"),this}cork(){}uncork(){}destroy(e){return this.destroyed=true,delete this._data,this.removeAllListeners(),this}compose(e,t){throw new Error("Method not implemented.")}};const c$2=class c{allowHalfOpen=true;_destroy;constructor(e=new i$1,t=new l$2){Object.assign(this,e),Object.assign(this,t),this._destroy=g$3(e._destroy,t._destroy);}};function _$3(){return Object.assign(c$2.prototype,i$1.prototype),Object.assign(c$2.prototype,l$2.prototype),c$2}function g$3(...n){return function(...e){for(const t of n)t(...e);}}const m$2=_$3();let A$4 = class A extends m$2{__unenv__={};bufferSize=0;bytesRead=0;bytesWritten=0;connecting=false;destroyed=false;pending=false;localAddress="";localPort=0;remoteAddress="";remoteFamily="";remotePort=0;autoSelectFamilyAttemptedAddresses=[];readyState="readOnly";constructor(e){super();}write(e,t,r){return  false}connect(e,t,r){return this}end(e,t,r){return this}setEncoding(e){return this}pause(){return this}resume(){return this}setTimeout(e,t){return this}setNoDelay(e){return this}setKeepAlive(e,t){return this}address(){return {}}unref(){return this}ref(){return this}destroySoon(){this.destroy();}resetAndDestroy(){const e=new Error("ERR_SOCKET_CLOSED");return e.code="ERR_SOCKET_CLOSED",this.destroy(e),this}};let y$4 = class y extends i$1{aborted=false;httpVersion="1.1";httpVersionMajor=1;httpVersionMinor=1;complete=true;connection;socket;headers={};trailers={};method="GET";url="/";statusCode=200;statusMessage="";closed=false;errored=null;readable=false;constructor(e){super(),this.socket=this.connection=e||new A$4;}get rawHeaders(){const e=this.headers,t=[];for(const r in e)if(Array.isArray(e[r]))for(const s of e[r])t.push(r,s);else t.push(r,e[r]);return t}get rawTrailers(){return []}setTimeout(e,t){return this}get headersDistinct(){return p(this.headers)}get trailersDistinct(){return p(this.trailers)}};function p(n){const e={};for(const[t,r]of Object.entries(n))t&&(e[t]=(Array.isArray(r)?r:[r]).filter(Boolean));return e}let w$2 = class w extends l$2{statusCode=200;statusMessage="";upgrading=false;chunkedEncoding=false;shouldKeepAlive=false;useChunkedEncodingByDefault=false;sendDate=false;finished=false;headersSent=false;strictContentLength=false;connection=null;socket=null;req;_headers={};constructor(e){super(),this.req=e;}assignSocket(e){e._httpMessage=this,this.socket=e,this.connection=e,this.emit("socket",e),this._flush();}_flush(){this.flushHeaders();}detachSocket(e){}writeContinue(e){}writeHead(e,t,r){e&&(this.statusCode=e),typeof t=="string"&&(this.statusMessage=t,t=void 0);const s=r||t;if(s&&!Array.isArray(s))for(const a in s)this.setHeader(a,s[a]);return this.headersSent=true,this}writeProcessing(){}setTimeout(e,t){return this}appendHeader(e,t){e=e.toLowerCase();const r=this._headers[e],s=[...Array.isArray(r)?r:[r],...Array.isArray(t)?t:[t]].filter(Boolean);return this._headers[e]=s.length>1?s:s[0],this}setHeader(e,t){return this._headers[e.toLowerCase()]=t,this}setHeaders(e){for(const[t,r]of Object.entries(e))this.setHeader(t,r);return this}getHeader(e){return this._headers[e.toLowerCase()]}getHeaders(){return this._headers}getHeaderNames(){return Object.keys(this._headers)}hasHeader(e){return e.toLowerCase()in this._headers}removeHeader(e){delete this._headers[e.toLowerCase()];}addTrailers(e){}flushHeaders(){}writeEarlyHints(e,t){typeof t=="function"&&t();}};const E$1=(()=>{const n=function(){};return n.prototype=Object.create(null),n})();function R$4(n={}){const e=new E$1,t=Array.isArray(n)||H$3(n)?n:Object.entries(n);for(const[r,s]of t)if(s){if(e[r]===void 0){e[r]=s;continue}e[r]=[...Array.isArray(e[r])?e[r]:[e[r]],...Array.isArray(s)?s:[s]];}return e}function H$3(n){return typeof n?.entries=="function"}function S$4(n={}){if(n instanceof Headers)return n;const e=new Headers;for(const[t,r]of Object.entries(n))if(r!==void 0){if(Array.isArray(r)){for(const s of r)e.append(t,String(s));continue}e.set(t,String(r));}return e}const C$1=new Set([101,204,205,304]);async function b$4(n,e){const t=new y$4,r=new w$2(t);t.url=e.url?.toString()||"/";let s;if(!t.url.startsWith("/")){const d=new URL(t.url);s=d.host,t.url=d.pathname+d.search+d.hash;}t.method=e.method||"GET",t.headers=R$4(e.headers||{}),t.headers.host||(t.headers.host=e.host||s||"localhost"),t.connection.encrypted=t.connection.encrypted||e.protocol==="https",t.body=e.body||null,t.__unenv__=e.context,await n(t,r);let a=r._data;(C$1.has(r.statusCode)||t.method.toUpperCase()==="HEAD")&&(a=null,delete r._headers["content-length"]);const u={status:r.statusCode,statusText:r.statusMessage,headers:r._headers,body:a};return t.destroy(),r.destroy(),u}async function O$1(n,e,t={}){try{const r=await b$4(n,{url:e,...t});return new Response(r.body,{status:r.status,statusText:r.statusText,headers:S$4(r.headers)})}catch(r){return new Response(r.toString(),{status:Number.parseInt(r.statusCode||r.code)||500,statusText:r.statusText})}}
+function o$2(n){throw new Error(`${n} is not implemented yet!`)}let i$3 = class i extends EventEmitter{__unenv__={};readableEncoding=null;readableEnded=true;readableFlowing=false;readableHighWaterMark=0;readableLength=0;readableObjectMode=false;readableAborted=false;readableDidRead=false;closed=false;errored=null;readable=false;destroyed=false;static from(e,t){return new i(t)}constructor(e){super();}_read(e){}read(e){}setEncoding(e){return this}pause(){return this}resume(){return this}isPaused(){return  true}unpipe(e){return this}unshift(e,t){}wrap(e){return this}push(e,t){return  false}_destroy(e,t){this.removeAllListeners();}destroy(e){return this.destroyed=true,this._destroy(e),this}pipe(e,t){return {}}compose(e,t){throw new Error("Method not implemented.")}[Symbol.asyncDispose](){return this.destroy(),Promise.resolve()}async*[Symbol.asyncIterator](){throw o$2("Readable.asyncIterator")}iterator(e){throw o$2("Readable.iterator")}map(e,t){throw o$2("Readable.map")}filter(e,t){throw o$2("Readable.filter")}forEach(e,t){throw o$2("Readable.forEach")}reduce(e,t,r){throw o$2("Readable.reduce")}find(e,t){throw o$2("Readable.find")}findIndex(e,t){throw o$2("Readable.findIndex")}some(e,t){throw o$2("Readable.some")}toArray(e){throw o$2("Readable.toArray")}every(e,t){throw o$2("Readable.every")}flatMap(e,t){throw o$2("Readable.flatMap")}drop(e,t){throw o$2("Readable.drop")}take(e,t){throw o$2("Readable.take")}asIndexedPairs(e){throw o$2("Readable.asIndexedPairs")}};let l$1 = class l extends EventEmitter{__unenv__={};writable=true;writableEnded=false;writableFinished=false;writableHighWaterMark=0;writableLength=0;writableObjectMode=false;writableCorked=0;closed=false;errored=null;writableNeedDrain=false;destroyed=false;_data;_encoding="utf8";constructor(e){super();}pipe(e,t){return {}}_write(e,t,r){if(this.writableEnded){r&&r();return}if(this._data===void 0)this._data=e;else {const s=typeof this._data=="string"?Buffer$1.from(this._data,this._encoding||t||"utf8"):this._data,a=typeof e=="string"?Buffer$1.from(e,t||this._encoding||"utf8"):e;this._data=Buffer$1.concat([s,a]);}this._encoding=t,r&&r();}_writev(e,t){}_destroy(e,t){}_final(e){}write(e,t,r){const s=typeof t=="string"?this._encoding:"utf8",a=typeof t=="function"?t:typeof r=="function"?r:void 0;return this._write(e,s,a),true}setDefaultEncoding(e){return this}end(e,t,r){const s=typeof e=="function"?e:typeof t=="function"?t:typeof r=="function"?r:void 0;if(this.writableEnded)return s&&s(),this;const a=e===s?void 0:e;if(a){const u=t===s?void 0:t;this.write(a,u,s);}return this.writableEnded=true,this.writableFinished=true,this.emit("close"),this.emit("finish"),this}cork(){}uncork(){}destroy(e){return this.destroyed=true,delete this._data,this.removeAllListeners(),this}compose(e,t){throw new Error("Method not implemented.")}};const c$2=class c{allowHalfOpen=true;_destroy;constructor(e=new i$3,t=new l$1){Object.assign(this,e),Object.assign(this,t),this._destroy=g$1(e._destroy,t._destroy);}};function _$3(){return Object.assign(c$2.prototype,i$3.prototype),Object.assign(c$2.prototype,l$1.prototype),c$2}function g$1(...n){return function(...e){for(const t of n)t(...e);}}const m$2=_$3();let A$3 = class A extends m$2{__unenv__={};bufferSize=0;bytesRead=0;bytesWritten=0;connecting=false;destroyed=false;pending=false;localAddress="";localPort=0;remoteAddress="";remoteFamily="";remotePort=0;autoSelectFamilyAttemptedAddresses=[];readyState="readOnly";constructor(e){super();}write(e,t,r){return  false}connect(e,t,r){return this}end(e,t,r){return this}setEncoding(e){return this}pause(){return this}resume(){return this}setTimeout(e,t){return this}setNoDelay(e){return this}setKeepAlive(e,t){return this}address(){return {}}unref(){return this}ref(){return this}destroySoon(){this.destroy();}resetAndDestroy(){const e=new Error("ERR_SOCKET_CLOSED");return e.code="ERR_SOCKET_CLOSED",this.destroy(e),this}};let y$3 = class y extends i$3{aborted=false;httpVersion="1.1";httpVersionMajor=1;httpVersionMinor=1;complete=true;connection;socket;headers={};trailers={};method="GET";url="/";statusCode=200;statusMessage="";closed=false;errored=null;readable=false;constructor(e){super(),this.socket=this.connection=e||new A$3;}get rawHeaders(){const e=this.headers,t=[];for(const r in e)if(Array.isArray(e[r]))for(const s of e[r])t.push(r,s);else t.push(r,e[r]);return t}get rawTrailers(){return []}setTimeout(e,t){return this}get headersDistinct(){return p(this.headers)}get trailersDistinct(){return p(this.trailers)}};function p(n){const e={};for(const[t,r]of Object.entries(n))t&&(e[t]=(Array.isArray(r)?r:[r]).filter(Boolean));return e}let w$3 = class w extends l$1{statusCode=200;statusMessage="";upgrading=false;chunkedEncoding=false;shouldKeepAlive=false;useChunkedEncodingByDefault=false;sendDate=false;finished=false;headersSent=false;strictContentLength=false;connection=null;socket=null;req;_headers={};constructor(e){super(),this.req=e;}assignSocket(e){e._httpMessage=this,this.socket=e,this.connection=e,this.emit("socket",e),this._flush();}_flush(){this.flushHeaders();}detachSocket(e){}writeContinue(e){}writeHead(e,t,r){e&&(this.statusCode=e),typeof t=="string"&&(this.statusMessage=t,t=void 0);const s=r||t;if(s&&!Array.isArray(s))for(const a in s)this.setHeader(a,s[a]);return this.headersSent=true,this}writeProcessing(){}setTimeout(e,t){return this}appendHeader(e,t){e=e.toLowerCase();const r=this._headers[e],s=[...Array.isArray(r)?r:[r],...Array.isArray(t)?t:[t]].filter(Boolean);return this._headers[e]=s.length>1?s:s[0],this}setHeader(e,t){return this._headers[e.toLowerCase()]=t,this}setHeaders(e){for(const[t,r]of Object.entries(e))this.setHeader(t,r);return this}getHeader(e){return this._headers[e.toLowerCase()]}getHeaders(){return this._headers}getHeaderNames(){return Object.keys(this._headers)}hasHeader(e){return e.toLowerCase()in this._headers}removeHeader(e){delete this._headers[e.toLowerCase()];}addTrailers(e){}flushHeaders(){}writeEarlyHints(e,t){typeof t=="function"&&t();}};const E$1=(()=>{const n=function(){};return n.prototype=Object.create(null),n})();function R$5(n={}){const e=new E$1,t=Array.isArray(n)||H$5(n)?n:Object.entries(n);for(const[r,s]of t)if(s){if(e[r]===void 0){e[r]=s;continue}e[r]=[...Array.isArray(e[r])?e[r]:[e[r]],...Array.isArray(s)?s:[s]];}return e}function H$5(n){return typeof n?.entries=="function"}function S$4(n={}){if(n instanceof Headers)return n;const e=new Headers;for(const[t,r]of Object.entries(n))if(r!==void 0){if(Array.isArray(r)){for(const s of r)e.append(t,String(s));continue}e.set(t,String(r));}return e}const C$3=new Set([101,204,205,304]);async function b$4(n,e){const t=new y$3,r=new w$3(t);t.url=e.url?.toString()||"/";let s;if(!t.url.startsWith("/")){const d=new URL(t.url);s=d.host,t.url=d.pathname+d.search+d.hash;}t.method=e.method||"GET",t.headers=R$5(e.headers||{}),t.headers.host||(t.headers.host=e.host||s||"localhost"),t.connection.encrypted=t.connection.encrypted||e.protocol==="https",t.body=e.body||null,t.__unenv__=e.context,await n(t,r);let a=r._data;(C$3.has(r.statusCode)||t.method.toUpperCase()==="HEAD")&&(a=null,delete r._headers["content-length"]);const u={status:r.statusCode,statusText:r.statusMessage,headers:r._headers,body:a};return t.destroy(),r.destroy(),u}async function O$2(n,e,t={}){try{const r=await b$4(n,{url:e,...t});return new Response(r.body,{status:r.status,statusText:r.statusText,headers:S$4(r.headers)})}catch(r){return new Response(r.toString(),{status:Number.parseInt(r.statusCode||r.code)||500,statusText:r.statusText})}}
 
 function hasProp(obj, prop) {
   try {
@@ -1484,6 +1486,12 @@ function setCookie(event, name, value, serializeOptions = {}) {
   }
   event.node.res.appendHeader("set-cookie", newCookie);
 }
+function deleteCookie(event, name, serializeOptions) {
+  setCookie(event, name, "", {
+    ...serializeOptions,
+    maxAge: 0
+  });
+}
 function splitCookiesString(cookiesString) {
   if (Array.isArray(cookiesString)) {
     return cookiesString.flatMap((c) => splitCookiesString(c));
@@ -1619,6 +1627,12 @@ function setResponseHeader(event, name, value) {
   event.node.res.setHeader(name, value);
 }
 const setHeader = setResponseHeader;
+function appendResponseHeaders(event, headers) {
+  for (const [name, value] of Object.entries(headers)) {
+    appendResponseHeader(event, name, value);
+  }
+}
+const appendHeaders = appendResponseHeaders;
 function appendResponseHeader(event, name, value) {
   let current = event.node.res.getHeader(name);
   if (!current) {
@@ -1719,6 +1733,119 @@ function sendWebResponse(event, response) {
     return;
   }
   return sendStream(event, response.body);
+}
+
+function resolveCorsOptions(options = {}) {
+  const defaultOptions = {
+    origin: "*",
+    methods: "*",
+    allowHeaders: "*",
+    exposeHeaders: "*",
+    credentials: false,
+    maxAge: false,
+    preflight: {
+      statusCode: 204
+    }
+  };
+  return defu(options, defaultOptions);
+}
+function isPreflightRequest(event) {
+  const origin = getRequestHeader(event, "origin");
+  const accessControlRequestMethod = getRequestHeader(
+    event,
+    "access-control-request-method"
+  );
+  return event.method === "OPTIONS" && !!origin && !!accessControlRequestMethod;
+}
+function isCorsOriginAllowed(origin, options) {
+  const { origin: originOption } = options;
+  if (!origin || !originOption || originOption === "*" || originOption === "null") {
+    return true;
+  }
+  if (Array.isArray(originOption)) {
+    return originOption.some((_origin) => {
+      if (_origin instanceof RegExp) {
+        return _origin.test(origin);
+      }
+      return origin === _origin;
+    });
+  }
+  return originOption(origin);
+}
+function createOriginHeaders(event, options) {
+  const { origin: originOption } = options;
+  const origin = getRequestHeader(event, "origin");
+  if (!origin || !originOption || originOption === "*") {
+    return { "access-control-allow-origin": "*" };
+  }
+  if (typeof originOption === "string") {
+    return { "access-control-allow-origin": originOption, vary: "origin" };
+  }
+  return isCorsOriginAllowed(origin, options) ? { "access-control-allow-origin": origin, vary: "origin" } : {};
+}
+function createMethodsHeaders(options) {
+  const { methods } = options;
+  if (!methods) {
+    return {};
+  }
+  if (methods === "*") {
+    return { "access-control-allow-methods": "*" };
+  }
+  return methods.length > 0 ? { "access-control-allow-methods": methods.join(",") } : {};
+}
+function createCredentialsHeaders(options) {
+  const { credentials } = options;
+  if (credentials) {
+    return { "access-control-allow-credentials": "true" };
+  }
+  return {};
+}
+function createAllowHeaderHeaders(event, options) {
+  const { allowHeaders } = options;
+  if (!allowHeaders || allowHeaders === "*" || allowHeaders.length === 0) {
+    const header = getRequestHeader(event, "access-control-request-headers");
+    return header ? {
+      "access-control-allow-headers": header,
+      vary: "access-control-request-headers"
+    } : {};
+  }
+  return {
+    "access-control-allow-headers": allowHeaders.join(","),
+    vary: "access-control-request-headers"
+  };
+}
+function createExposeHeaders(options) {
+  const { exposeHeaders } = options;
+  if (!exposeHeaders) {
+    return {};
+  }
+  if (exposeHeaders === "*") {
+    return { "access-control-expose-headers": exposeHeaders };
+  }
+  return { "access-control-expose-headers": exposeHeaders.join(",") };
+}
+function appendCorsPreflightHeaders(event, options) {
+  appendHeaders(event, createOriginHeaders(event, options));
+  appendHeaders(event, createCredentialsHeaders(options));
+  appendHeaders(event, createExposeHeaders(options));
+  appendHeaders(event, createMethodsHeaders(options));
+  appendHeaders(event, createAllowHeaderHeaders(event, options));
+}
+function appendCorsHeaders(event, options) {
+  appendHeaders(event, createOriginHeaders(event, options));
+  appendHeaders(event, createCredentialsHeaders(options));
+  appendHeaders(event, createExposeHeaders(options));
+}
+
+function handleCors(event, options) {
+  const _options = resolveCorsOptions(options);
+  if (isPreflightRequest(event)) {
+    appendCorsPreflightHeaders(event, options);
+    sendNoContent(event, _options.preflight.statusCode);
+    return true;
+  }
+  appendCorsHeaders(event, options);
+  return false;
 }
 
 const PayloadMethods = /* @__PURE__ */ new Set(["PATCH", "POST", "PUT", "DELETE"]);
@@ -2796,7 +2923,7 @@ function createHooks() {
   return new Hookable();
 }
 
-const s$2=globalThis.Headers,i=globalThis.AbortController,l$1=globalThis.fetch||(()=>{throw new Error("[node-fetch-native] Failed to fetch: `globalThis.fetch` is not available!")});
+const s$4=globalThis.Headers,i$2=globalThis.AbortController,l=globalThis.fetch||(()=>{throw new Error("[node-fetch-native] Failed to fetch: `globalThis.fetch` is not available!")});
 
 class FetchError extends Error {
   constructor(message, opts) {
@@ -3130,7 +3257,7 @@ function createFetch(globalOptions = {}) {
 function createNodeFetch() {
   const useKeepAlive = JSON.parse(process.env.FETCH_KEEP_ALIVE || "false");
   if (!useKeepAlive) {
-    return l$1;
+    return l;
   }
   const agentOptions = { keepAlive: true };
   const httpAgent = new http.Agent(agentOptions);
@@ -3141,12 +3268,12 @@ function createNodeFetch() {
     }
   };
   return function nodeFetchWithKeepAlive(input, init) {
-    return l$1(input, { ...nodeFetchOptions, ...init });
+    return l(input, { ...nodeFetchOptions, ...init });
   };
 }
 const fetch = globalThis.fetch ? (...args) => globalThis.fetch(...args) : createNodeFetch();
-const Headers$1 = globalThis.Headers || s$2;
-const AbortController$1 = globalThis.AbortController || i;
+const Headers$1 = globalThis.Headers || s$4;
+const AbortController$1 = globalThis.AbortController || i$2;
 createFetch({ fetch, Headers: Headers$1, AbortController: AbortController$1 });
 
 function defineNitroErrorHandler(handler) {
@@ -3231,8 +3358,8 @@ async function errorHandler(error, event) {
   // H3 will handle fallback
 }
 
-const appConfig$1 = {"name":"vinxi","routers":[{"name":"public","type":"static","base":"/","dir":"./public","root":"C:\\Users\\Matteo\\Desktop\\Pulsix","order":0,"outDir":"C:/Users/Matteo/Desktop/Pulsix/.vinxi/build/public"},{"name":"ssr","type":"http","link":{"client":"client"},"handler":"src/entry-server.tsx","extensions":["js","jsx","ts","tsx"],"target":"server","root":"C:\\Users\\Matteo\\Desktop\\Pulsix","base":"/","outDir":"C:/Users/Matteo/Desktop/Pulsix/.vinxi/build/ssr","order":1},{"name":"client","type":"client","base":"/_build","handler":"src/entry-client.tsx","extensions":["js","jsx","ts","tsx"],"target":"browser","root":"C:\\Users\\Matteo\\Desktop\\Pulsix","outDir":"C:/Users/Matteo/Desktop/Pulsix/.vinxi/build/client","order":2},{"name":"server-fns","type":"http","base":"/_server","handler":"node_modules/.pnpm/@solidjs+start@1.1.3_@types_bf811de942ff2eef584d0e0e445f3ca9/node_modules/@solidjs/start/dist/runtime/server-handler.js","target":"server","root":"C:\\Users\\Matteo\\Desktop\\Pulsix","outDir":"C:/Users/Matteo/Desktop/Pulsix/.vinxi/build/server-fns","order":3}],"server":{"compressPublicAssets":{"brotli":true},"routeRules":{"/_build/assets/**":{"headers":{"cache-control":"public, immutable, max-age=31536000"}}},"experimental":{"asyncContext":true},"prerender":{}},"root":"C:\\Users\\Matteo\\Desktop\\Pulsix"};
-				const buildManifest = {"ssr":{"_ButtonSparkle-C8CRtCd0.css":{"file":"assets/ButtonSparkle-C8CRtCd0.css","src":"_ButtonSparkle-C8CRtCd0.css"},"_ButtonSparkle-DNpTyev3.js":{"file":"assets/ButtonSparkle-DNpTyev3.js","name":"ButtonSparkle","css":["assets/ButtonSparkle-C8CRtCd0.css"]},"_Card-BcrU3z9h.css":{"file":"assets/Card-BcrU3z9h.css","src":"_Card-BcrU3z9h.css"},"_Card.module-nMwE8ysR.js":{"file":"assets/Card.module-nMwE8ysR.js","name":"Card.module","css":["assets/Card-BcrU3z9h.css"]},"_Cursor-DUhhJVLJ.css":{"file":"assets/Cursor-DUhhJVLJ.css","src":"_Cursor-DUhhJVLJ.css"},"_Inputs-Bqq548qA.css":{"file":"assets/Inputs-Bqq548qA.css","src":"_Inputs-Bqq548qA.css"},"_Inputs-BxVpbjg0.js":{"file":"assets/Inputs-BxVpbjg0.js","name":"Inputs","imports":["_db.server-Cxzv6220.js","_action-DzH6FtPs.js"],"css":["assets/Inputs-Bqq548qA.css"]},"_Menu-CNxWw250.js":{"file":"assets/Menu-CNxWw250.js","name":"Menu","imports":["_components-eKl611cl.js"],"css":["assets/Menu-DSzeyodt.css"]},"_Menu-DSzeyodt.css":{"file":"assets/Menu-DSzeyodt.css","src":"_Menu-DSzeyodt.css"},"_Title-C8lsFfVd.js":{"file":"assets/Title-C8lsFfVd.js","name":"Title"},"_action-DzH6FtPs.js":{"file":"assets/action-DzH6FtPs.js","name":"action","imports":["_routing-DxIlI4R1.js"]},"_components-eKl611cl.js":{"file":"assets/components-eKl611cl.js","name":"components","imports":["_routing-DxIlI4R1.js"]},"_db.server-Cxzv6220.js":{"file":"assets/db.server-Cxzv6220.js","name":"db.server","imports":["_fetchEvent-Ce2Ui3zq.js"]},"_deleteWallet-CDUDB5HW.js":{"file":"assets/deleteWallet-CDUDB5HW.js","name":"deleteWallet","imports":["_db.server-Cxzv6220.js","_action-DzH6FtPs.js"],"css":["assets/deleteWallet-CHR-5aIQ.css"]},"_deleteWallet-CHR-5aIQ.css":{"file":"assets/deleteWallet-CHR-5aIQ.css","src":"_deleteWallet-CHR-5aIQ.css"},"_exchangeRates-B5IJmiQP.js":{"file":"assets/exchangeRates-B5IJmiQP.js","name":"exchangeRates","imports":["_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_Card.module-nMwE8ysR.js","_components-eKl611cl.js"],"css":["assets/exchangeRates-BMINihpv.css"]},"_exchangeRates-BMINihpv.css":{"file":"assets/exchangeRates-BMINihpv.css","src":"_exchangeRates-BMINihpv.css"},"_fetchEvent-Ce2Ui3zq.js":{"file":"assets/fetchEvent-Ce2Ui3zq.js","name":"fetchEvent"},"_icons-Bh8061KW.css":{"file":"assets/icons-Bh8061KW.css","src":"_icons-Bh8061KW.css"},"_icons-N8M97GAt.js":{"file":"assets/icons-N8M97GAt.js","name":"icons","css":["assets/icons-Bh8061KW.css"]},"_index-BUMPztWr.css":{"file":"assets/index-BUMPztWr.css","src":"_index-BUMPztWr.css"},"_index-Bep36fvr.js":{"file":"assets/index-Bep36fvr.js","name":"index"},"_index-C1h2BJ6l.css":{"file":"assets/index-C1h2BJ6l.css","src":"_index-C1h2BJ6l.css"},"_index-CI1g57kZ.js":{"file":"assets/index-CI1g57kZ.js","name":"index","imports":["_icons-N8M97GAt.js"]},"_index-DFJEjzPR.js":{"file":"assets/index-DFJEjzPR.js","name":"index","imports":["_db.server-Cxzv6220.js","_prova-BQfA7nlw.js","_index-DYZ-zTTq.js","_components-eKl611cl.js","_Inputs-BxVpbjg0.js","_deleteWallet-CDUDB5HW.js","_ButtonSparkle-DNpTyev3.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"]},"_index-DYZ-zTTq.js":{"file":"assets/index-DYZ-zTTq.js","name":"index","imports":["_exchangeRates-B5IJmiQP.js","_components-eKl611cl.js"]},"_index-Ky9zR5dV.css":{"file":"assets/index-Ky9zR5dV.css","src":"_index-Ky9zR5dV.css"},"_index-XVT8Ct04.js":{"file":"assets/index-XVT8Ct04.js","name":"index","imports":["_db.server-Cxzv6220.js"],"css":["assets/index-Ky9zR5dV.css"]},"_index.module-0iUivGU7.js":{"file":"assets/index.module-0iUivGU7.js","name":"index.module","css":["assets/index-BUMPztWr.css","assets/riv-VPAlW_cg.css"]},"_index.module-B9JvMj-k.js":{"file":"assets/index.module-B9JvMj-k.js","name":"index.module","css":["assets/index-C1h2BJ6l.css"]},"_otpInput-Jfxp9i2z.js":{"file":"assets/otpInput-Jfxp9i2z.js","name":"otpInput","imports":["_index-CI1g57kZ.js","_db.server-Cxzv6220.js","_action-DzH6FtPs.js","_Inputs-BxVpbjg0.js","_ButtonSparkle-DNpTyev3.js"],"css":["assets/otpInput-tBTztLmB.css"]},"_otpInput-tBTztLmB.css":{"file":"assets/otpInput-tBTztLmB.css","src":"_otpInput-tBTztLmB.css"},"_prova-BQfA7nlw.js":{"file":"assets/prova-BQfA7nlw.js","name":"prova","imports":["_components-eKl611cl.js"]},"_riv-VPAlW_cg.css":{"file":"assets/riv-VPAlW_cg.css","src":"_riv-VPAlW_cg.css"},"_routing-DxIlI4R1.js":{"file":"assets/routing-DxIlI4R1.js","name":"routing"},"node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx":{"file":"assets/index-WwoiZKEg.js","name":"index","src":"node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx","isDynamicEntry":true},"src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css":{"file":"index4.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-DNpTyev3.js","_Inputs-BxVpbjg0.js","_Menu-CNxWw250.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_action-DzH6FtPs.js","_routing-DxIlI4R1.js","_components-eKl611cl.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css":{"file":"index7.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-DNpTyev3.js","_Inputs-BxVpbjg0.js","_Title-C8lsFfVd.js","_index-CI1g57kZ.js","_index.module-B9JvMj-k.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_action-DzH6FtPs.js","_routing-DxIlI4R1.js","_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css":{"file":"index8.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-DNpTyev3.js","_Inputs-BxVpbjg0.js","_otpInput-Jfxp9i2z.js","_index-CI1g57kZ.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_action-DzH6FtPs.js","_routing-DxIlI4R1.js","_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css":{"file":"index9.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-Jfxp9i2z.js","_ButtonSparkle-DNpTyev3.js","_Inputs-BxVpbjg0.js","_index-CI1g57kZ.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_action-DzH6FtPs.js","_routing-DxIlI4R1.js","_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css":{"file":"sendOtp.js","name":"sendOtp","src":"src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-Jfxp9i2z.js","_Inputs-BxVpbjg0.js","_index-CI1g57kZ.js","_icons-N8M97GAt.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_action-DzH6FtPs.js","_routing-DxIlI4R1.js","_ButtonSparkle-DNpTyev3.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css":{"file":"index14.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css":{"file":"otpInput.js","name":"otpInput","src":"src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-Jfxp9i2z.js","_index-CI1g57kZ.js","_Inputs-BxVpbjg0.js","_action-DzH6FtPs.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_ButtonSparkle-DNpTyev3.js","_icons-N8M97GAt.js","_routing-DxIlI4R1.js"]},"src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css":{"file":"index5.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Menu-CNxWw250.js","_index-CI1g57kZ.js","_ButtonSparkle-DNpTyev3.js","_Inputs-BxVpbjg0.js","_Title-C8lsFfVd.js","_index.module-B9JvMj-k.js","_otpInput-Jfxp9i2z.js","_components-eKl611cl.js","_routing-DxIlI4R1.js","_icons-N8M97GAt.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_action-DzH6FtPs.js"]},"src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css":{"file":"Toggle.js","name":"Toggle","src":"src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_index.module-0iUivGU7.js"],"css":["assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css":{"file":"index2.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Menu-CNxWw250.js","_index.module-0iUivGU7.js","_ButtonSparkle-DNpTyev3.js","_routing-DxIlI4R1.js","_components-eKl611cl.js"],"css":["assets/index-Bn1gRDsI.css","assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css":{"file":"riv.js","name":"riv","src":"src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css":{"file":"index15.js","name":"index","src":"src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css":{"file":"index6.js","name":"index","src":"src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_index-XVT8Ct04.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js"],"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css":{"file":"_...slug_.js","name":"_...slug_","src":"src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Title-C8lsFfVd.js","_index-DFJEjzPR.js","_exchangeRates-B5IJmiQP.js","_prova-BQfA7nlw.js","_index-DYZ-zTTq.js","_index-XVT8Ct04.js","_deleteWallet-CDUDB5HW.js","_index-Bep36fvr.js","_routing-DxIlI4R1.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_components-eKl611cl.js","_Inputs-BxVpbjg0.js","_action-DzH6FtPs.js","_ButtonSparkle-DNpTyev3.js","_Card.module-nMwE8ysR.js"],"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css":{"file":"index10.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_prova-BQfA7nlw.js","_index-DYZ-zTTq.js","_components-eKl611cl.js","_exchangeRates-B5IJmiQP.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_Card.module-nMwE8ysR.js","_routing-DxIlI4R1.js"]},"src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css":{"file":"LazyLoadSpline.js","name":"LazyLoadSpline","src":"src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css":{"file":"index11.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css":{"file":"index13.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Inputs-BxVpbjg0.js","_deleteWallet-CDUDB5HW.js","_index-DYZ-zTTq.js","_ButtonSparkle-DNpTyev3.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_action-DzH6FtPs.js","_routing-DxIlI4R1.js","_exchangeRates-B5IJmiQP.js","_Card.module-nMwE8ysR.js","_components-eKl611cl.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"]},"src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css":{"file":"Card.js","name":"Card","src":"src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Card.module-nMwE8ysR.js","_components-eKl611cl.js","_routing-DxIlI4R1.js"]},"src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css":{"file":"index12.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_exchangeRates-B5IJmiQP.js","_components-eKl611cl.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_Card.module-nMwE8ysR.js","_routing-DxIlI4R1.js"]},"src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css":{"file":"index3.js","name":"index","src":"src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Title-C8lsFfVd.js","_index-DFJEjzPR.js","_exchangeRates-B5IJmiQP.js","_index-DYZ-zTTq.js","_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js","_prova-BQfA7nlw.js","_components-eKl611cl.js","_routing-DxIlI4R1.js","_Inputs-BxVpbjg0.js","_action-DzH6FtPs.js","_deleteWallet-CDUDB5HW.js","_ButtonSparkle-DNpTyev3.js","_Card.module-nMwE8ysR.js"]},"src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css":{"file":"getTransactions.js","name":"getTransactions","src":"src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js"]},"src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css":{"file":"deleteWallet.js","name":"deleteWallet","src":"src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_db.server-Cxzv6220.js","_fetchEvent-Ce2Ui3zq.js"]},"src/routes/UI/Cursor.tsx?pick=default&pick=$css":{"file":"Cursor.js","name":"Cursor","src":"src/routes/UI/Cursor.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/Cursor-DUhhJVLJ.css"]},"src/routes/UI/Waves.tsx?pick=default&pick=$css":{"file":"Waves.js","name":"Waves","src":"src/routes/UI/Waves.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/[...404].tsx?pick=default&pick=$css":{"file":"_...404_.js","name":"_...404_","src":"src/routes/[...404].tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-DNpTyev3.js","_Menu-CNxWw250.js","_components-eKl611cl.js","_routing-DxIlI4R1.js"],"css":["assets/_..-D39vbXZ9.css"]},"src/routes/index.tsx?pick=default&pick=$css":{"file":"index.js","name":"index","src":"src/routes/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_index-Bep36fvr.js"]},"virtual:$vinxi/handler/ssr":{"file":"ssr.js","name":"ssr","src":"virtual:$vinxi/handler/ssr","isEntry":true,"imports":["_fetchEvent-Ce2Ui3zq.js","_Menu-CNxWw250.js","_routing-DxIlI4R1.js","_action-DzH6FtPs.js","_components-eKl611cl.js"],"dynamicImports":["src/routes/index.tsx?pick=default&pick=$css","src/routes/index.tsx?pick=default&pick=$css","src/routes/[...404].tsx?pick=default&pick=$css","src/routes/[...404].tsx?pick=default&pick=$css","src/routes/UI/Cursor.tsx?pick=default&pick=$css","src/routes/UI/Cursor.tsx?pick=default&pick=$css","src/routes/UI/Waves.tsx?pick=default&pick=$css","src/routes/UI/Waves.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css"],"css":["assets/ssr-CZcrTF1W.css","assets/Cursor-DUhhJVLJ.css"]}},"client":{"_ButtonSparkle-C8CRtCd0.css":{"file":"assets/ButtonSparkle-C8CRtCd0.css","src":"_ButtonSparkle-C8CRtCd0.css"},"_ButtonSparkle-CX-W2frl.js":{"file":"assets/ButtonSparkle-CX-W2frl.js","name":"ButtonSparkle","imports":["_web-DcXN-p99.js"],"css":["assets/ButtonSparkle-C8CRtCd0.css"]},"_Card-BcrU3z9h.css":{"file":"assets/Card-BcrU3z9h.css","src":"_Card-BcrU3z9h.css"},"_Card.module-nMwE8ysR.js":{"file":"assets/Card.module-nMwE8ysR.js","name":"Card.module","css":["assets/Card-BcrU3z9h.css"]},"_Cursor-DUhhJVLJ.css":{"file":"assets/Cursor-DUhhJVLJ.css","src":"_Cursor-DUhhJVLJ.css"},"_Inputs-Bqq548qA.css":{"file":"assets/Inputs-Bqq548qA.css","src":"_Inputs-Bqq548qA.css"},"_Inputs-hvbb28Ka.js":{"file":"assets/Inputs-hvbb28Ka.js","name":"Inputs","imports":["_web-DcXN-p99.js","_ButtonSparkle-CX-W2frl.js","_server-runtime-6wq6LtAi.js","_action-CDr_hENZ.js"],"css":["assets/Inputs-Bqq548qA.css"]},"_Menu-DSzeyodt.css":{"file":"assets/Menu-DSzeyodt.css","src":"_Menu-DSzeyodt.css"},"_Menu-kyhemyOT.js":{"file":"assets/Menu-kyhemyOT.js","name":"Menu","imports":["_web-DcXN-p99.js","_components-BQhjVazl.js"],"css":["assets/Menu-DSzeyodt.css"]},"_Title-BAWdhi0q.js":{"file":"assets/Title-BAWdhi0q.js","name":"Title","imports":["_web-DcXN-p99.js"]},"_action-CDr_hENZ.js":{"file":"assets/action-CDr_hENZ.js","name":"action","imports":["_web-DcXN-p99.js","_routing-BUmn5GEU.js"]},"_components-BQhjVazl.js":{"file":"assets/components-BQhjVazl.js","name":"components","imports":["_web-DcXN-p99.js","_routing-BUmn5GEU.js"]},"_deleteWallet-CHR-5aIQ.css":{"file":"assets/deleteWallet-CHR-5aIQ.css","src":"_deleteWallet-CHR-5aIQ.css"},"_deleteWallet-Djn27Ww0.js":{"file":"assets/deleteWallet-Djn27Ww0.js","name":"deleteWallet","imports":["_server-runtime-6wq6LtAi.js","_action-CDr_hENZ.js"],"css":["assets/deleteWallet-CHR-5aIQ.css"]},"_exchangeRates-BMINihpv.css":{"file":"assets/exchangeRates-BMINihpv.css","src":"_exchangeRates-BMINihpv.css"},"_exchangeRates-DIwxOQun.js":{"file":"assets/exchangeRates-DIwxOQun.js","name":"exchangeRates","imports":["_server-runtime-6wq6LtAi.js","_web-DcXN-p99.js","_Card.module-nMwE8ysR.js","_components-BQhjVazl.js"],"css":["assets/exchangeRates-BMINihpv.css"]},"_howler-DGkKYxeN.js":{"file":"assets/howler-DGkKYxeN.js","name":"howler","isDynamicEntry":true},"_icons-Bh8061KW.css":{"file":"assets/icons-Bh8061KW.css","src":"_icons-Bh8061KW.css"},"_icons-ChlcGNuY.js":{"file":"assets/icons-ChlcGNuY.js","name":"icons","imports":["_web-DcXN-p99.js"],"css":["assets/icons-Bh8061KW.css"]},"_index-BUMPztWr.css":{"file":"assets/index-BUMPztWr.css","src":"_index-BUMPztWr.css"},"_index-C1h2BJ6l.css":{"file":"assets/index-C1h2BJ6l.css","src":"_index-C1h2BJ6l.css"},"_index-CH-czpgK.js":{"file":"assets/index-CH-czpgK.js","name":"index","imports":["_server-runtime-6wq6LtAi.js","_web-DcXN-p99.js","_prova-Dx2gmhDX.js","_index-DMf-fkG-.js","_components-BQhjVazl.js","_preload-helper-CM3UJVvY.js","_Inputs-hvbb28Ka.js","_deleteWallet-Djn27Ww0.js","_ButtonSparkle-CX-W2frl.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"]},"_index-D8rVyQy1.js":{"file":"assets/index-D8rVyQy1.js","name":"index"},"_index-DB7IFhIG.js":{"file":"assets/index-DB7IFhIG.js","name":"index","imports":["_web-DcXN-p99.js","_runtime-BmWp8cEw.js"]},"_index-DMf-fkG-.js":{"file":"assets/index-DMf-fkG-.js","name":"index","imports":["_web-DcXN-p99.js","_exchangeRates-DIwxOQun.js","_components-BQhjVazl.js"]},"_index-DcaoqgVt.js":{"file":"assets/index-DcaoqgVt.js","name":"index","imports":["_web-DcXN-p99.js","_icons-ChlcGNuY.js"]},"_index-DlIApr22.js":{"file":"assets/index-DlIApr22.js","name":"index","imports":["_server-runtime-6wq6LtAi.js","_web-DcXN-p99.js"],"css":["assets/index-Ky9zR5dV.css"]},"_index-Ky9zR5dV.css":{"file":"assets/index-Ky9zR5dV.css","src":"_index-Ky9zR5dV.css"},"_index.module-B9JvMj-k.js":{"file":"assets/index.module-B9JvMj-k.js","name":"index.module","css":["assets/index-C1h2BJ6l.css"]},"_index.module-DJUCNMRy.js":{"file":"assets/index.module-DJUCNMRy.js","name":"index.module","imports":["_preload-helper-CM3UJVvY.js","_web-DcXN-p99.js"],"dynamicImports":["_rive-D3j5nBow.js"],"css":["assets/index-BUMPztWr.css","assets/riv-VPAlW_cg.css"]},"_otpInput-DeXMA6XN.js":{"file":"assets/otpInput-DeXMA6XN.js","name":"otpInput","imports":["_web-DcXN-p99.js","_index-DcaoqgVt.js","_server-runtime-6wq6LtAi.js","_action-CDr_hENZ.js","_Inputs-hvbb28Ka.js","_ButtonSparkle-CX-W2frl.js"],"css":["assets/otpInput-tBTztLmB.css"]},"_otpInput-tBTztLmB.css":{"file":"assets/otpInput-tBTztLmB.css","src":"_otpInput-tBTztLmB.css"},"_preload-helper-CM3UJVvY.js":{"file":"assets/preload-helper-CM3UJVvY.js","name":"preload-helper"},"_prova-Dx2gmhDX.js":{"file":"assets/prova-Dx2gmhDX.js","name":"prova","imports":["_web-DcXN-p99.js","_components-BQhjVazl.js"]},"_riv-VPAlW_cg.css":{"file":"assets/riv-VPAlW_cg.css","src":"_riv-VPAlW_cg.css"},"_rive-D3j5nBow.js":{"file":"assets/rive-D3j5nBow.js","name":"rive","isDynamicEntry":true},"_routing-BUmn5GEU.js":{"file":"assets/routing-BUmn5GEU.js","name":"routing","imports":["_web-DcXN-p99.js"]},"_runtime-BmWp8cEw.js":{"file":"assets/runtime-BmWp8cEw.js","name":"runtime","imports":["_preload-helper-CM3UJVvY.js"],"dynamicImports":["node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/navmesh.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/physics.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/process.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/boolean.js","_howler-DGkKYxeN.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/opentype.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/ui.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/gaussian-splat-compression.js"]},"_server-runtime-6wq6LtAi.js":{"file":"assets/server-runtime-6wq6LtAi.js","name":"server-runtime"},"_web-DcXN-p99.js":{"file":"assets/web-DcXN-p99.js","name":"web"},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/boolean.js":{"file":"assets/boolean-CynEgfvK.js","name":"boolean","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/boolean.js","isDynamicEntry":true},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/gaussian-splat-compression.js":{"file":"assets/gaussian-splat-compression-CYQZ50o2.js","name":"gaussian-splat-compression","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/gaussian-splat-compression.js","isDynamicEntry":true},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/navmesh.js":{"file":"assets/navmesh-BFd9Mv4x.js","name":"navmesh","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/navmesh.js","isDynamicEntry":true},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/opentype.js":{"file":"assets/opentype-LDE648lb.js","name":"opentype","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/opentype.js","isDynamicEntry":true},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/physics.js":{"file":"assets/physics-BM4kW-A5.js","name":"physics","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/physics.js","isDynamicEntry":true},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/process.js":{"file":"assets/process-DLQUZ-E7.js","name":"process","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/process.js","isDynamicEntry":true},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/ui.js":{"file":"assets/ui-BRPadsgT.js","name":"ui","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/ui.js","isDynamicEntry":true},"node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx":{"file":"assets/index-BI0YgTAM.js","name":"index","src":"node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx","isDynamicEntry":true,"imports":["_web-DcXN-p99.js"]},"src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css":{"file":"assets/index-88vfUY6A.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_ButtonSparkle-CX-W2frl.js","_Inputs-hvbb28Ka.js","_Menu-kyhemyOT.js","_server-runtime-6wq6LtAi.js","_action-CDr_hENZ.js","_routing-BUmn5GEU.js","_components-BQhjVazl.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css":{"file":"assets/index-CIjphGrZ.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_ButtonSparkle-CX-W2frl.js","_Inputs-hvbb28Ka.js","_Title-BAWdhi0q.js","_index-DcaoqgVt.js","_index.module-B9JvMj-k.js","_server-runtime-6wq6LtAi.js","_action-CDr_hENZ.js","_routing-BUmn5GEU.js","_icons-ChlcGNuY.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css":{"file":"assets/index-C8JvlN6N.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_index-D8rVyQy1.js","_ButtonSparkle-CX-W2frl.js","_Inputs-hvbb28Ka.js","_otpInput-DeXMA6XN.js","_index-DcaoqgVt.js","_server-runtime-6wq6LtAi.js","_action-CDr_hENZ.js","_routing-BUmn5GEU.js","_icons-ChlcGNuY.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css":{"file":"assets/index-hJ-BwGgJ.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_otpInput-DeXMA6XN.js","_ButtonSparkle-CX-W2frl.js","_Inputs-hvbb28Ka.js","_index-DcaoqgVt.js","_server-runtime-6wq6LtAi.js","_action-CDr_hENZ.js","_routing-BUmn5GEU.js","_icons-ChlcGNuY.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css":{"file":"assets/sendOtp-CjQewLXM.js","name":"sendOtp","src":"src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-DeXMA6XN.js","_web-DcXN-p99.js","_Inputs-hvbb28Ka.js","_index-DcaoqgVt.js","_icons-ChlcGNuY.js","_server-runtime-6wq6LtAi.js","_action-CDr_hENZ.js","_routing-BUmn5GEU.js","_ButtonSparkle-CX-W2frl.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css":{"file":"assets/index-COvTVlLR.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_icons-ChlcGNuY.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css":{"file":"assets/otpInput-BLB8o3Md.js","name":"otpInput","src":"src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_otpInput-DeXMA6XN.js","_index-DcaoqgVt.js","_Inputs-hvbb28Ka.js","_action-CDr_hENZ.js","_server-runtime-6wq6LtAi.js","_ButtonSparkle-CX-W2frl.js","_icons-ChlcGNuY.js","_routing-BUmn5GEU.js"]},"src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css":{"file":"assets/index-De9y16RJ.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_Menu-kyhemyOT.js","_index-DcaoqgVt.js","_ButtonSparkle-CX-W2frl.js","_Inputs-hvbb28Ka.js","_Title-BAWdhi0q.js","_index.module-B9JvMj-k.js","_index-D8rVyQy1.js","_otpInput-DeXMA6XN.js","_components-BQhjVazl.js","_routing-BUmn5GEU.js","_icons-ChlcGNuY.js","_server-runtime-6wq6LtAi.js","_action-CDr_hENZ.js"]},"src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css":{"file":"assets/Toggle-BgaoKUuk.js","name":"Toggle","src":"src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_index.module-DJUCNMRy.js","_preload-helper-CM3UJVvY.js"],"css":["assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css":{"file":"assets/index-K3Oktdx6.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_Menu-kyhemyOT.js","_index.module-DJUCNMRy.js","_ButtonSparkle-CX-W2frl.js","_routing-BUmn5GEU.js","_components-BQhjVazl.js","_preload-helper-CM3UJVvY.js"],"css":["assets/index-Bn1gRDsI.css","assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css":{"file":"assets/riv-CrzKM9lR.js","name":"riv","src":"src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_preload-helper-CM3UJVvY.js","_web-DcXN-p99.js"],"dynamicImports":["_rive-D3j5nBow.js"],"css":["assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css":{"file":"assets/index-CeyMEmpq.js","name":"index","src":"src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js"],"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css":{"file":"assets/index-B9evPoF0.js","name":"index","src":"src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_index-DlIApr22.js","_server-runtime-6wq6LtAi.js"],"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css":{"file":"assets/_...slug_-D_Uu6UUA.js","name":"_...slug_","src":"src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_Title-BAWdhi0q.js","_index-CH-czpgK.js","_exchangeRates-DIwxOQun.js","_index-DMf-fkG-.js","_index-DlIApr22.js","_deleteWallet-Djn27Ww0.js","_index-DB7IFhIG.js","_routing-BUmn5GEU.js","_server-runtime-6wq6LtAi.js","_prova-Dx2gmhDX.js","_components-BQhjVazl.js","_preload-helper-CM3UJVvY.js","_Inputs-hvbb28Ka.js","_ButtonSparkle-CX-W2frl.js","_action-CDr_hENZ.js","_Card.module-nMwE8ysR.js","_runtime-BmWp8cEw.js"],"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css":{"file":"assets/index-Bb-RPvJO.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_prova-Dx2gmhDX.js","_index-DMf-fkG-.js","_components-BQhjVazl.js","_exchangeRates-DIwxOQun.js","_server-runtime-6wq6LtAi.js","_Card.module-nMwE8ysR.js","_routing-BUmn5GEU.js"]},"src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css":{"file":"assets/LazyLoadSpline-CHHaaTq7.js","name":"LazyLoadSpline","src":"src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js"]},"src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css":{"file":"assets/index-CORO8PuB.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_runtime-BmWp8cEw.js","_preload-helper-CM3UJVvY.js"]},"src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css":{"file":"assets/index-B4yOeCQX.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_preload-helper-CM3UJVvY.js","_web-DcXN-p99.js","_Inputs-hvbb28Ka.js","_deleteWallet-Djn27Ww0.js","_index-DMf-fkG-.js","_ButtonSparkle-CX-W2frl.js","_server-runtime-6wq6LtAi.js","_action-CDr_hENZ.js","_routing-BUmn5GEU.js","_exchangeRates-DIwxOQun.js","_Card.module-nMwE8ysR.js","_components-BQhjVazl.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"]},"src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css":{"file":"assets/Card-DUNVX3H7.js","name":"Card","src":"src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_Card.module-nMwE8ysR.js","_components-BQhjVazl.js","_routing-BUmn5GEU.js"]},"src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css":{"file":"assets/index-CWSqypye.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_exchangeRates-DIwxOQun.js","_components-BQhjVazl.js","_server-runtime-6wq6LtAi.js","_Card.module-nMwE8ysR.js","_routing-BUmn5GEU.js"]},"src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css":{"file":"assets/index-BQI8r8OJ.js","name":"index","src":"src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_Title-BAWdhi0q.js","_index-CH-czpgK.js","_exchangeRates-DIwxOQun.js","_index-DMf-fkG-.js","_server-runtime-6wq6LtAi.js","_prova-Dx2gmhDX.js","_components-BQhjVazl.js","_routing-BUmn5GEU.js","_preload-helper-CM3UJVvY.js","_Inputs-hvbb28Ka.js","_ButtonSparkle-CX-W2frl.js","_action-CDr_hENZ.js","_deleteWallet-Djn27Ww0.js","_Card.module-nMwE8ysR.js"]},"src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css":{"file":"assets/getTransactions-0ox0yA0f.js","name":"getTransactions","src":"src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_server-runtime-6wq6LtAi.js"]},"src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css":{"file":"assets/deleteWallet-DfLb0_b2.js","name":"deleteWallet","src":"src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_server-runtime-6wq6LtAi.js"]},"src/routes/UI/Cursor.tsx?pick=default&pick=$css":{"file":"assets/Cursor-DPOt0gbm.js","name":"Cursor","src":"src/routes/UI/Cursor.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js"],"css":["assets/Cursor-DUhhJVLJ.css"]},"src/routes/UI/Waves.tsx?pick=default&pick=$css":{"file":"assets/Waves-CQ3GUdkf.js","name":"Waves","src":"src/routes/UI/Waves.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js"]},"src/routes/[...404].tsx?pick=default&pick=$css":{"file":"assets/_...404_-BOKr2Rfp.js","name":"_...404_","src":"src/routes/[...404].tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_ButtonSparkle-CX-W2frl.js","_Menu-kyhemyOT.js","_components-BQhjVazl.js","_routing-BUmn5GEU.js"],"css":["assets/_..-D39vbXZ9.css"]},"src/routes/index.tsx?pick=default&pick=$css":{"file":"assets/index-D5Hanbsc.js","name":"index","src":"src/routes/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DcXN-p99.js","_index-DB7IFhIG.js","_runtime-BmWp8cEw.js","_preload-helper-CM3UJVvY.js"]},"virtual:$vinxi/handler/client":{"file":"assets/client-yC3zgFCw.js","name":"client","src":"virtual:$vinxi/handler/client","isEntry":true,"imports":["_web-DcXN-p99.js","_preload-helper-CM3UJVvY.js","_Menu-kyhemyOT.js","_routing-BUmn5GEU.js","_action-CDr_hENZ.js","_components-BQhjVazl.js"],"dynamicImports":["src/routes/index.tsx?pick=default&pick=$css","src/routes/[...404].tsx?pick=default&pick=$css","src/routes/UI/Cursor.tsx?pick=default&pick=$css","src/routes/UI/Waves.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css"],"css":["assets/client-CZcrTF1W.css","assets/Cursor-DUhhJVLJ.css"]}},"server-fns":{"_ButtonSparkle-C8CRtCd0.css":{"file":"assets/ButtonSparkle-C8CRtCd0.css","src":"_ButtonSparkle-C8CRtCd0.css"},"_ButtonSparkle-DNpTyev3.js":{"file":"assets/ButtonSparkle-DNpTyev3.js","name":"ButtonSparkle","css":["assets/ButtonSparkle-C8CRtCd0.css"]},"_Card-BcrU3z9h.css":{"file":"assets/Card-BcrU3z9h.css","src":"_Card-BcrU3z9h.css"},"_Card.module-nMwE8ysR.js":{"file":"assets/Card.module-nMwE8ysR.js","name":"Card.module","css":["assets/Card-BcrU3z9h.css"]},"_Cursor-DUhhJVLJ.css":{"file":"assets/Cursor-DUhhJVLJ.css","src":"_Cursor-DUhhJVLJ.css"},"_Inputs-Bqq548qA.css":{"file":"assets/Inputs-Bqq548qA.css","src":"_Inputs-Bqq548qA.css"},"_Inputs-CEYxPBfP.js":{"file":"assets/Inputs-CEYxPBfP.js","name":"Inputs","imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_action-BVKOmiKt.js"],"css":["assets/Inputs-Bqq548qA.css"]},"_Menu-DSzeyodt.css":{"file":"assets/Menu-DSzeyodt.css","src":"_Menu-DSzeyodt.css"},"_Menu-OQmUNT5t.js":{"file":"assets/Menu-OQmUNT5t.js","name":"Menu","imports":["_components-CJF4pMQg.js"],"css":["assets/Menu-DSzeyodt.css"]},"_Title-C8lsFfVd.js":{"file":"assets/Title-C8lsFfVd.js","name":"Title"},"_action-BVKOmiKt.js":{"file":"assets/action-BVKOmiKt.js","name":"action","imports":["_routing-BSDkuvr3.js"]},"_components-CJF4pMQg.js":{"file":"assets/components-CJF4pMQg.js","name":"components","imports":["_routing-BSDkuvr3.js"]},"_db.server-BYnrqg0d.js":{"file":"assets/db.server-BYnrqg0d.js","name":"db.server"},"_deleteWallet-CHR-5aIQ.css":{"file":"assets/deleteWallet-CHR-5aIQ.css","src":"_deleteWallet-CHR-5aIQ.css"},"_deleteWallet-D6_HIjzQ.js":{"file":"assets/deleteWallet-D6_HIjzQ.js","name":"deleteWallet","imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_action-BVKOmiKt.js"],"css":["assets/deleteWallet-CHR-5aIQ.css"]},"_exchangeRates-BMINihpv.css":{"file":"assets/exchangeRates-BMINihpv.css","src":"_exchangeRates-BMINihpv.css"},"_exchangeRates-ChMJm5Xh.js":{"file":"assets/exchangeRates-ChMJm5Xh.js","name":"exchangeRates","imports":["_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_Card.module-nMwE8ysR.js","_components-CJF4pMQg.js","_db.server-BYnrqg0d.js"],"css":["assets/exchangeRates-BMINihpv.css"]},"_fetchEvent-1KlzQMFw.js":{"file":"assets/fetchEvent-1KlzQMFw.js","name":"fetchEvent"},"_icons-Bh8061KW.css":{"file":"assets/icons-Bh8061KW.css","src":"_icons-Bh8061KW.css"},"_icons-N8M97GAt.js":{"file":"assets/icons-N8M97GAt.js","name":"icons","css":["assets/icons-Bh8061KW.css"]},"_index-2Np-G_nR.js":{"file":"assets/index-2Np-G_nR.js","name":"index","imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js"],"css":["assets/index-Ky9zR5dV.css"]},"_index-B54VJo2T.js":{"file":"assets/index-B54VJo2T.js","name":"index","imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_prova-UkNyxD49.js","_index-CM2EfUOf.js","_components-CJF4pMQg.js","_Inputs-CEYxPBfP.js","_deleteWallet-D6_HIjzQ.js","_ButtonSparkle-DNpTyev3.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"]},"_index-BUMPztWr.css":{"file":"assets/index-BUMPztWr.css","src":"_index-BUMPztWr.css"},"_index-Bep36fvr.js":{"file":"assets/index-Bep36fvr.js","name":"index"},"_index-C1h2BJ6l.css":{"file":"assets/index-C1h2BJ6l.css","src":"_index-C1h2BJ6l.css"},"_index-CI1g57kZ.js":{"file":"assets/index-CI1g57kZ.js","name":"index","imports":["_icons-N8M97GAt.js"]},"_index-CM2EfUOf.js":{"file":"assets/index-CM2EfUOf.js","name":"index","imports":["_exchangeRates-ChMJm5Xh.js","_components-CJF4pMQg.js"]},"_index-Ky9zR5dV.css":{"file":"assets/index-Ky9zR5dV.css","src":"_index-Ky9zR5dV.css"},"_index.module-0iUivGU7.js":{"file":"assets/index.module-0iUivGU7.js","name":"index.module","css":["assets/index-BUMPztWr.css","assets/riv-VPAlW_cg.css"]},"_index.module-B9JvMj-k.js":{"file":"assets/index.module-B9JvMj-k.js","name":"index.module","css":["assets/index-C1h2BJ6l.css"]},"_otpInput-Dlb7jUEo.js":{"file":"assets/otpInput-Dlb7jUEo.js","name":"otpInput","imports":["_index-CI1g57kZ.js","_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_action-BVKOmiKt.js","_Inputs-CEYxPBfP.js","_ButtonSparkle-DNpTyev3.js"],"css":["assets/otpInput-tBTztLmB.css"]},"_otpInput-tBTztLmB.css":{"file":"assets/otpInput-tBTztLmB.css","src":"_otpInput-tBTztLmB.css"},"_prova-UkNyxD49.js":{"file":"assets/prova-UkNyxD49.js","name":"prova","imports":["_components-CJF4pMQg.js"]},"_riv-VPAlW_cg.css":{"file":"assets/riv-VPAlW_cg.css","src":"_riv-VPAlW_cg.css"},"_routing-BSDkuvr3.js":{"file":"assets/routing-BSDkuvr3.js","name":"routing"},"_server-fns-ptihYXL4.js":{"file":"assets/server-fns-ptihYXL4.js","name":"server-fns","imports":["_fetchEvent-1KlzQMFw.js"],"dynamicImports":["src/routes/index.tsx?pick=default&pick=$css","src/routes/index.tsx?pick=default&pick=$css","src/routes/[...404].tsx?pick=default&pick=$css","src/routes/[...404].tsx?pick=default&pick=$css","src/routes/UI/Cursor.tsx?pick=default&pick=$css","src/routes/UI/Cursor.tsx?pick=default&pick=$css","src/routes/UI/Waves.tsx?pick=default&pick=$css","src/routes/UI/Waves.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","src/routes/API/Wallets/deleteWallet.ts?tsr-directive-use-server=","src/routes/API/Wallets/Wallet/getTransactions.ts?tsr-directive-use-server=","src/routes/API/Auth/login/loginUser.ts?tsr-directive-use-server=","src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=","src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=","src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=","src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=","src/Server/auth.server.ts?tsr-directive-use-server=","src/Server/auth.server.ts?tsr-directive-use-server=","src/Server/auth.server.ts?tsr-directive-use-server=","src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=","src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=","src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=","src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=","src/routes/API/Wallets/getWallet.ts?tsr-directive-use-server=","src/routes/API/Wallets/setWallet.ts?tsr-directive-use-server=","src/routes/API/Auth/registration/createUser.ts?tsr-directive-use-server=","src/routes/API/Auth/registration/credentials/usernameAlreadyexist.ts?tsr-directive-use-server=","src/routes/API/Auth/registration/phone/phoneAlreadyexist.ts?tsr-directive-use-server=","src/routes/API/Auth/registration/email/emailAlreadyexist.ts?tsr-directive-use-server=","src/app.tsx"]},"_server-fns-runtime-4T1EILgx.js":{"file":"assets/server-fns-runtime-4T1EILgx.js","name":"server-fns-runtime","imports":["_fetchEvent-1KlzQMFw.js"]},"node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx":{"file":"assets/index-WwoiZKEg.js","name":"index","src":"node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx","isDynamicEntry":true},"src/Server/auth.server.ts?tsr-directive-use-server=":{"file":"assets/auth.server-DMy-hh56.js","name":"auth.server","src":"src/Server/auth.server.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js"]},"src/app.tsx":{"file":"assets/app-DLO7lzbB.js","name":"app","src":"src/app.tsx","isDynamicEntry":true,"imports":["_server-fns-ptihYXL4.js","_Menu-OQmUNT5t.js","_routing-BSDkuvr3.js","_action-BVKOmiKt.js","_fetchEvent-1KlzQMFw.js","_components-CJF4pMQg.js"],"css":["assets/app-CZcrTF1W.css","assets/Cursor-DUhhJVLJ.css"]},"src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css":{"file":"index4.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-DNpTyev3.js","_Inputs-CEYxPBfP.js","_Menu-OQmUNT5t.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_db.server-BYnrqg0d.js","_action-BVKOmiKt.js","_routing-BSDkuvr3.js","_components-CJF4pMQg.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css":{"file":"index7.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-DNpTyev3.js","_Inputs-CEYxPBfP.js","_Title-C8lsFfVd.js","_index-CI1g57kZ.js","_index.module-B9JvMj-k.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_db.server-BYnrqg0d.js","_action-BVKOmiKt.js","_routing-BSDkuvr3.js","_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css":{"file":"index8.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-DNpTyev3.js","_Inputs-CEYxPBfP.js","_otpInput-Dlb7jUEo.js","_index-CI1g57kZ.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_db.server-BYnrqg0d.js","_action-BVKOmiKt.js","_routing-BSDkuvr3.js","_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css":{"file":"index9.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-Dlb7jUEo.js","_ButtonSparkle-DNpTyev3.js","_Inputs-CEYxPBfP.js","_index-CI1g57kZ.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_db.server-BYnrqg0d.js","_action-BVKOmiKt.js","_routing-BSDkuvr3.js","_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css":{"file":"sendOtp.js","name":"sendOtp","src":"src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-Dlb7jUEo.js","_Inputs-CEYxPBfP.js","_index-CI1g57kZ.js","_icons-N8M97GAt.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_db.server-BYnrqg0d.js","_action-BVKOmiKt.js","_routing-BSDkuvr3.js","_ButtonSparkle-DNpTyev3.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css":{"file":"index14.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css":{"file":"otpInput.js","name":"otpInput","src":"src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-Dlb7jUEo.js","_index-CI1g57kZ.js","_Inputs-CEYxPBfP.js","_action-BVKOmiKt.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_db.server-BYnrqg0d.js","_ButtonSparkle-DNpTyev3.js","_icons-N8M97GAt.js","_routing-BSDkuvr3.js"]},"src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css":{"file":"index5.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Menu-OQmUNT5t.js","_index-CI1g57kZ.js","_ButtonSparkle-DNpTyev3.js","_Inputs-CEYxPBfP.js","_Title-C8lsFfVd.js","_index.module-B9JvMj-k.js","_otpInput-Dlb7jUEo.js","_components-CJF4pMQg.js","_routing-BSDkuvr3.js","_icons-N8M97GAt.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_db.server-BYnrqg0d.js","_action-BVKOmiKt.js"]},"src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css":{"file":"Toggle.js","name":"Toggle","src":"src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_index.module-0iUivGU7.js"],"css":["assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css":{"file":"index2.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Menu-OQmUNT5t.js","_index.module-0iUivGU7.js","_ButtonSparkle-DNpTyev3.js","_routing-BSDkuvr3.js","_components-CJF4pMQg.js"],"css":["assets/index-Bn1gRDsI.css","assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css":{"file":"riv.js","name":"riv","src":"src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css":{"file":"index15.js","name":"index","src":"src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css":{"file":"index6.js","name":"index","src":"src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_index-2Np-G_nR.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_db.server-BYnrqg0d.js"],"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css":{"file":"_...slug_.js","name":"_...slug_","src":"src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Title-C8lsFfVd.js","_index-B54VJo2T.js","_exchangeRates-ChMJm5Xh.js","_prova-UkNyxD49.js","_index-CM2EfUOf.js","_index-2Np-G_nR.js","_deleteWallet-D6_HIjzQ.js","_index-Bep36fvr.js","_routing-BSDkuvr3.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_db.server-BYnrqg0d.js","_components-CJF4pMQg.js","_Inputs-CEYxPBfP.js","_action-BVKOmiKt.js","_ButtonSparkle-DNpTyev3.js","_Card.module-nMwE8ysR.js"],"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css":{"file":"index10.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_prova-UkNyxD49.js","_index-CM2EfUOf.js","_components-CJF4pMQg.js","_exchangeRates-ChMJm5Xh.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_Card.module-nMwE8ysR.js","_db.server-BYnrqg0d.js","_routing-BSDkuvr3.js"]},"src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css":{"file":"LazyLoadSpline.js","name":"LazyLoadSpline","src":"src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css":{"file":"index11.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css":{"file":"index13.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Inputs-CEYxPBfP.js","_deleteWallet-D6_HIjzQ.js","_index-CM2EfUOf.js","_ButtonSparkle-DNpTyev3.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_db.server-BYnrqg0d.js","_action-BVKOmiKt.js","_routing-BSDkuvr3.js","_exchangeRates-ChMJm5Xh.js","_Card.module-nMwE8ysR.js","_components-CJF4pMQg.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"]},"src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css":{"file":"Card.js","name":"Card","src":"src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Card.module-nMwE8ysR.js","_components-CJF4pMQg.js","_routing-BSDkuvr3.js"]},"src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css":{"file":"index12.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_exchangeRates-ChMJm5Xh.js","_components-CJF4pMQg.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_Card.module-nMwE8ysR.js","_db.server-BYnrqg0d.js","_routing-BSDkuvr3.js"]},"src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css":{"file":"index3.js","name":"index","src":"src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Title-C8lsFfVd.js","_index-B54VJo2T.js","_exchangeRates-ChMJm5Xh.js","_index-CM2EfUOf.js","_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_db.server-BYnrqg0d.js","_prova-UkNyxD49.js","_components-CJF4pMQg.js","_routing-BSDkuvr3.js","_Inputs-CEYxPBfP.js","_action-BVKOmiKt.js","_deleteWallet-D6_HIjzQ.js","_ButtonSparkle-DNpTyev3.js","_Card.module-nMwE8ysR.js"]},"src/routes/API/Auth/login/loginUser.ts?tsr-directive-use-server=":{"file":"assets/loginUser-lOKuXLaT.js","name":"loginUser","src":"src/routes/API/Auth/login/loginUser.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_fetchEvent-1KlzQMFw.js","_db.server-BYnrqg0d.js"]},"src/routes/API/Auth/registration/createUser.ts?tsr-directive-use-server=":{"file":"assets/createUser-B8OMM0Mu.js","name":"createUser","src":"src/routes/API/Auth/registration/createUser.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_fetchEvent-1KlzQMFw.js"]},"src/routes/API/Auth/registration/credentials/usernameAlreadyexist.ts?tsr-directive-use-server=":{"file":"assets/usernameAlreadyexist-DlESc_vE.js","name":"usernameAlreadyexist","src":"src/routes/API/Auth/registration/credentials/usernameAlreadyexist.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_fetchEvent-1KlzQMFw.js"]},"src/routes/API/Auth/registration/email/emailAlreadyexist.ts?tsr-directive-use-server=":{"file":"assets/emailAlreadyexist-BASsf-Xu.js","name":"emailAlreadyexist","src":"src/routes/API/Auth/registration/email/emailAlreadyexist.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_fetchEvent-1KlzQMFw.js"]},"src/routes/API/Auth/registration/phone/phoneAlreadyexist.ts?tsr-directive-use-server=":{"file":"assets/phoneAlreadyexist-bH2ki4sU.js","name":"phoneAlreadyexist","src":"src/routes/API/Auth/registration/phone/phoneAlreadyexist.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_fetchEvent-1KlzQMFw.js"]},"src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css":{"file":"getTransactions.js","name":"getTransactions","src":"src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_fetchEvent-1KlzQMFw.js"]},"src/routes/API/Wallets/Wallet/getTransactions.ts?tsr-directive-use-server=":{"file":"assets/getTransactions-B7wMQXy1.js","name":"getTransactions","src":"src/routes/API/Wallets/Wallet/getTransactions.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_fetchEvent-1KlzQMFw.js"]},"src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css":{"file":"deleteWallet.js","name":"deleteWallet","src":"src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_fetchEvent-1KlzQMFw.js"]},"src/routes/API/Wallets/deleteWallet.ts?tsr-directive-use-server=":{"file":"assets/deleteWallet-DfS0S0n9.js","name":"deleteWallet","src":"src/routes/API/Wallets/deleteWallet.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_fetchEvent-1KlzQMFw.js"]},"src/routes/API/Wallets/getWallet.ts?tsr-directive-use-server=":{"file":"assets/getWallet-VD3qZcEm.js","name":"getWallet","src":"src/routes/API/Wallets/getWallet.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_fetchEvent-1KlzQMFw.js"]},"src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=":{"file":"assets/getWallets.server-CbIIGRZN.js","name":"getWallets.server","src":"src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_fetchEvent-1KlzQMFw.js"]},"src/routes/API/Wallets/setWallet.ts?tsr-directive-use-server=":{"file":"assets/setWallet-BkA1dzP6.js","name":"setWallet","src":"src/routes/API/Wallets/setWallet.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_fetchEvent-1KlzQMFw.js"]},"src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=":{"file":"assets/exchangeRates-Dp8OcCeR.js","name":"exchangeRates","src":"src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-4T1EILgx.js","_db.server-BYnrqg0d.js","_fetchEvent-1KlzQMFw.js"]},"src/routes/UI/Cursor.tsx?pick=default&pick=$css":{"file":"Cursor.js","name":"Cursor","src":"src/routes/UI/Cursor.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/Cursor-DUhhJVLJ.css"]},"src/routes/UI/Waves.tsx?pick=default&pick=$css":{"file":"Waves.js","name":"Waves","src":"src/routes/UI/Waves.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/[...404].tsx?pick=default&pick=$css":{"file":"_...404_.js","name":"_...404_","src":"src/routes/[...404].tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-DNpTyev3.js","_Menu-OQmUNT5t.js","_components-CJF4pMQg.js","_routing-BSDkuvr3.js"],"css":["assets/_..-D39vbXZ9.css"]},"src/routes/index.tsx?pick=default&pick=$css":{"file":"index.js","name":"index","src":"src/routes/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_index-Bep36fvr.js"]},"virtual:$vinxi/handler/server-fns":{"file":"server-fns.js","name":"server-fns","src":"virtual:$vinxi/handler/server-fns","isEntry":true,"imports":["_server-fns-ptihYXL4.js","_fetchEvent-1KlzQMFw.js"]}}};
+const appConfig$1 = {"name":"vinxi","routers":[{"name":"public","type":"static","base":"/","dir":"./public","root":"C:\\Users\\Matteo\\Desktop\\Pulsix","order":0,"outDir":"C:/Users/Matteo/Desktop/Pulsix/.vinxi/build/public"},{"name":"ssr","type":"http","link":{"client":"client"},"handler":"src/entry-server.tsx","middleware":"src/server/middleware/auth.ts","extensions":["js","jsx","ts","tsx"],"target":"server","root":"C:\\Users\\Matteo\\Desktop\\Pulsix","base":"/","outDir":"C:/Users/Matteo/Desktop/Pulsix/.vinxi/build/ssr","order":1},{"name":"client","type":"client","base":"/_build","handler":"src/entry-client.tsx","extensions":["js","jsx","ts","tsx"],"target":"browser","root":"C:\\Users\\Matteo\\Desktop\\Pulsix","outDir":"C:/Users/Matteo/Desktop/Pulsix/.vinxi/build/client","order":2},{"name":"server-fns","type":"http","base":"/_server","handler":"node_modules/.pnpm/@solidjs+start@1.1.3_@types_c357166e5d63bf088ab6dbdd23b49415/node_modules/@solidjs/start/dist/runtime/server-handler.js","middleware":"src/server/middleware/auth.ts","target":"server","root":"C:\\Users\\Matteo\\Desktop\\Pulsix","outDir":"C:/Users/Matteo/Desktop/Pulsix/.vinxi/build/server-fns","order":3}],"server":{"compressPublicAssets":{"brotli":true},"routeRules":{"/_build/assets/**":{"headers":{"cache-control":"public, immutable, max-age=31536000"}}},"experimental":{"asyncContext":true},"preset":"node","prerender":{"crawlLinks":true}},"root":"C:\\Users\\Matteo\\Desktop\\Pulsix"};
+				const buildManifest = {"ssr":{"_ButtonSparkle-BxHzGCPC.js":{"file":"assets/ButtonSparkle-BxHzGCPC.js","name":"ButtonSparkle","css":["assets/ButtonSparkle-DtI3gbzT.css"]},"_ButtonSparkle-DtI3gbzT.css":{"file":"assets/ButtonSparkle-DtI3gbzT.css","src":"_ButtonSparkle-DtI3gbzT.css"},"_Card-BcrU3z9h.css":{"file":"assets/Card-BcrU3z9h.css","src":"_Card-BcrU3z9h.css"},"_Card.module-nMwE8ysR.js":{"file":"assets/Card.module-nMwE8ysR.js","name":"Card.module","css":["assets/Card-BcrU3z9h.css"]},"_Cursor-6qc4Ma5i.js":{"file":"assets/Cursor-6qc4Ma5i.js","name":"Cursor","css":["assets/Cursor-DUhhJVLJ.css"]},"_Cursor-DUhhJVLJ.css":{"file":"assets/Cursor-DUhhJVLJ.css","src":"_Cursor-DUhhJVLJ.css"},"_Inputs-CUihbr1a.css":{"file":"assets/Inputs-CUihbr1a.css","src":"_Inputs-CUihbr1a.css"},"_Inputs-D1T1pLkj.js":{"file":"assets/Inputs-D1T1pLkj.js","name":"Inputs","imports":["_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js"],"css":["assets/Inputs-CUihbr1a.css"]},"_Menu-CWXr7U88.js":{"file":"assets/Menu-CWXr7U88.js","name":"Menu","imports":["_components-DHKGOKg1.js"],"css":["assets/Menu-DSzeyodt.css"]},"_Menu-DSzeyodt.css":{"file":"assets/Menu-DSzeyodt.css","src":"_Menu-DSzeyodt.css"},"_Title-C8lsFfVd.js":{"file":"assets/Title-C8lsFfVd.js","name":"Title"},"_action-BR9kmesq.js":{"file":"assets/action-BR9kmesq.js","name":"action","imports":["_routing-BRXp7sqN.js"]},"_auth-BeHg-fWi.js":{"file":"assets/auth-BeHg-fWi.js","name":"auth"},"_auth.server-ChqlnWrh.js":{"file":"assets/auth.server-ChqlnWrh.js","name":"auth.server","imports":["_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js"]},"_components-DHKGOKg1.js":{"file":"assets/components-DHKGOKg1.js","name":"components","imports":["_routing-BRXp7sqN.js"]},"_context-5bbmmXgY.js":{"file":"assets/context-5bbmmXgY.js","name":"context"},"_context-XUFMQc9R.js":{"file":"assets/context-XUFMQc9R.js","name":"context"},"_db.server-CDeyn5Z_.js":{"file":"assets/db.server-CDeyn5Z_.js","name":"db.server"},"_deleteWallet-Bheg3455.css":{"file":"assets/deleteWallet-Bheg3455.css","src":"_deleteWallet-Bheg3455.css"},"_deleteWallet-Cgff9KFR.js":{"file":"assets/deleteWallet-Cgff9KFR.js","name":"deleteWallet","imports":["_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js"],"css":["assets/deleteWallet-Bheg3455.css"]},"_exchangeRates-BGrzYQig.js":{"file":"assets/exchangeRates-BGrzYQig.js","name":"exchangeRates","imports":["_Card.module-nMwE8ysR.js","_components-DHKGOKg1.js","_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js"],"css":["assets/exchangeRates-BMINihpv.css"]},"_exchangeRates-BMINihpv.css":{"file":"assets/exchangeRates-BMINihpv.css","src":"_exchangeRates-BMINihpv.css"},"_fetchEvent-9EzSf9d7.js":{"file":"assets/fetchEvent-9EzSf9d7.js","name":"fetchEvent"},"_getWallets.server-C5R6kBVO.js":{"file":"assets/getWallets.server-C5R6kBVO.js","name":"getWallets.server","imports":["_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js"]},"_icons-Bh8061KW.css":{"file":"assets/icons-Bh8061KW.css","src":"_icons-Bh8061KW.css"},"_icons-N8M97GAt.js":{"file":"assets/icons-N8M97GAt.js","name":"icons","css":["assets/icons-Bh8061KW.css"]},"_index-0U8vmGbf.js":{"file":"assets/index-0U8vmGbf.js","name":"index","imports":["_prova-B1NEQR2_.js","_index-D0aODT57.js","_components-DHKGOKg1.js","_Inputs-D1T1pLkj.js","_deleteWallet-Cgff9KFR.js","_ButtonSparkle-BxHzGCPC.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"],"css":["assets/index-DoUIxqk_.css"]},"_index-B8s1itkY.js":{"file":"assets/index-B8s1itkY.js","name":"index","css":["assets/index-CXQF54bi.css"]},"_index-BQH3GIDW.js":{"file":"assets/index-BQH3GIDW.js","name":"index","imports":["_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js"],"css":["assets/index-Ky9zR5dV.css"]},"_index-BUMPztWr.css":{"file":"assets/index-BUMPztWr.css","src":"_index-BUMPztWr.css"},"_index-C1h2BJ6l.css":{"file":"assets/index-C1h2BJ6l.css","src":"_index-C1h2BJ6l.css"},"_index-CI1g57kZ.js":{"file":"assets/index-CI1g57kZ.js","name":"index","imports":["_icons-N8M97GAt.js"]},"_index-CXQF54bi.css":{"file":"assets/index-CXQF54bi.css","src":"_index-CXQF54bi.css"},"_index-ClXKiMUD.js":{"file":"assets/index-ClXKiMUD.js","name":"index"},"_index-D0aODT57.js":{"file":"assets/index-D0aODT57.js","name":"index","imports":["_exchangeRates-BGrzYQig.js","_auth.server-ChqlnWrh.js","_components-DHKGOKg1.js"]},"_index-DoUIxqk_.css":{"file":"assets/index-DoUIxqk_.css","src":"_index-DoUIxqk_.css"},"_index-Ky9zR5dV.css":{"file":"assets/index-Ky9zR5dV.css","src":"_index-Ky9zR5dV.css"},"_index.module-0iUivGU7.js":{"file":"assets/index.module-0iUivGU7.js","name":"index.module","css":["assets/index-BUMPztWr.css","assets/riv-VPAlW_cg.css"]},"_index.module-B9JvMj-k.js":{"file":"assets/index.module-B9JvMj-k.js","name":"index.module","css":["assets/index-C1h2BJ6l.css"]},"_otpInput-DH-dkh0p.js":{"file":"assets/otpInput-DH-dkh0p.js","name":"otpInput","imports":["_index-CI1g57kZ.js","_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_Inputs-D1T1pLkj.js","_ButtonSparkle-BxHzGCPC.js"],"css":["assets/otpInput-tBTztLmB.css"]},"_otpInput-tBTztLmB.css":{"file":"assets/otpInput-tBTztLmB.css","src":"_otpInput-tBTztLmB.css"},"_pathWallets-Cb2AeUiP.js":{"file":"assets/pathWallets-Cb2AeUiP.js","name":"pathWallets","imports":["_Inputs-D1T1pLkj.js","_getWallets.server-C5R6kBVO.js","_auth.server-ChqlnWrh.js"]},"_prova-B1NEQR2_.js":{"file":"assets/prova-B1NEQR2_.js","name":"prova","imports":["_components-DHKGOKg1.js"]},"_response-CbUr9JDj.js":{"file":"assets/response-CbUr9JDj.js","name":"response"},"_riv-VPAlW_cg.css":{"file":"assets/riv-VPAlW_cg.css","src":"_riv-VPAlW_cg.css"},"_routing-BRXp7sqN.js":{"file":"assets/routing-BRXp7sqN.js","name":"routing"},"_server-fns-runtime-C3tiYEg6.js":{"file":"assets/server-fns-runtime-C3tiYEg6.js","name":"server-fns-runtime","imports":["_fetchEvent-9EzSf9d7.js"]},"_utils-CmG_3rtr.js":{"file":"assets/utils-CmG_3rtr.js","name":"utils","imports":["_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js"]},"node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx":{"file":"assets/index-WwoiZKEg.js","name":"index","src":"node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx","isDynamicEntry":true},"src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css":{"file":"index4.js","name":"index","src":"src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_Inputs-D1T1pLkj.js","_Menu-CWXr7U88.js","_auth-BeHg-fWi.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_routing-BRXp7sqN.js","_components-DHKGOKg1.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css":{"file":"index24.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_context-5bbmmXgY.js","_ButtonSparkle-BxHzGCPC.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css":{"file":"index26.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/index-CXQF54bi.css"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css":{"file":"index25.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_auth-BeHg-fWi.js","_ButtonSparkle-BxHzGCPC.js","_context-5bbmmXgY.js","_index-B8s1itkY.js","_Inputs-D1T1pLkj.js","_pathWallets-Cb2AeUiP.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_routing-BRXp7sqN.js","_getWallets.server-C5R6kBVO.js","_auth.server-ChqlnWrh.js"],"css":["assets/index-CXQF54bi.css"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css":{"file":"index18.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_context-5bbmmXgY.js","_auth-BeHg-fWi.js","_ButtonSparkle-BxHzGCPC.js","_index-B8s1itkY.js","_Inputs-D1T1pLkj.js","_pathWallets-Cb2AeUiP.js","_Menu-CWXr7U88.js","_index-ClXKiMUD.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_routing-BRXp7sqN.js","_getWallets.server-C5R6kBVO.js","_auth.server-ChqlnWrh.js","_components-DHKGOKg1.js"],"css":["assets/index-CXQF54bi.css"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css":{"file":"index23.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_auth-BeHg-fWi.js","_context-5bbmmXgY.js","_ButtonSparkle-BxHzGCPC.js","_index-ClXKiMUD.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css":{"file":"index19.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_context-XUFMQc9R.js","_ButtonSparkle-BxHzGCPC.js","_auth-BeHg-fWi.js","_Menu-CWXr7U88.js","_pathWallets-Cb2AeUiP.js","_components-DHKGOKg1.js","_routing-BRXp7sqN.js","_Inputs-D1T1pLkj.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_getWallets.server-C5R6kBVO.js","_auth.server-ChqlnWrh.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css":{"file":"mapper.js","name":"mapper","src":"src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_auth-BeHg-fWi.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css":{"file":"preview.js","name":"preview","src":"src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_context-XUFMQc9R.js","_ButtonSparkle-BxHzGCPC.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css":{"file":"uploadFile2.js","name":"uploadFile","src":"src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_auth-BeHg-fWi.js","_context-XUFMQc9R.js"]},"src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css":{"file":"index5.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_Inputs-D1T1pLkj.js","_Menu-CWXr7U88.js","_auth-BeHg-fWi.js","_pathWallets-Cb2AeUiP.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_routing-BRXp7sqN.js","_components-DHKGOKg1.js","_getWallets.server-C5R6kBVO.js","_auth.server-ChqlnWrh.js"]},"src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css":{"file":"pathWallets.js","name":"pathWallets","src":"src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Inputs-D1T1pLkj.js","_getWallets.server-C5R6kBVO.js","_auth.server-ChqlnWrh.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_routing-BRXp7sqN.js"]},"src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css":{"file":"index6.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_Inputs-D1T1pLkj.js","_Menu-CWXr7U88.js","_auth-BeHg-fWi.js","_routing-BRXp7sqN.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_components-DHKGOKg1.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css":{"file":"index10.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_Inputs-D1T1pLkj.js","_Title-C8lsFfVd.js","_index-CI1g57kZ.js","_index.module-B9JvMj-k.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_routing-BRXp7sqN.js","_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css":{"file":"index11.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_Inputs-D1T1pLkj.js","_otpInput-DH-dkh0p.js","_index-CI1g57kZ.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_routing-BRXp7sqN.js","_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css":{"file":"index12.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-DH-dkh0p.js","_ButtonSparkle-BxHzGCPC.js","_Inputs-D1T1pLkj.js","_index-CI1g57kZ.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_routing-BRXp7sqN.js","_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css":{"file":"sendOtp.js","name":"sendOtp","src":"src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-DH-dkh0p.js","_Inputs-D1T1pLkj.js","_index-CI1g57kZ.js","_icons-N8M97GAt.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_routing-BRXp7sqN.js","_ButtonSparkle-BxHzGCPC.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css":{"file":"index20.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css":{"file":"otpInput.js","name":"otpInput","src":"src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-DH-dkh0p.js","_index-CI1g57kZ.js","_Inputs-D1T1pLkj.js","_action-BR9kmesq.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_ButtonSparkle-BxHzGCPC.js","_icons-N8M97GAt.js","_routing-BRXp7sqN.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css":{"file":"index21.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css":{"file":"index7.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Menu-CWXr7U88.js","_index-CI1g57kZ.js","_ButtonSparkle-BxHzGCPC.js","_Inputs-D1T1pLkj.js","_Title-C8lsFfVd.js","_index.module-B9JvMj-k.js","_otpInput-DH-dkh0p.js","_Cursor-6qc4Ma5i.js","_components-DHKGOKg1.js","_routing-BRXp7sqN.js","_icons-N8M97GAt.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js"],"css":["assets/Cursor-DUhhJVLJ.css"]},"src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css":{"file":"Toggle.js","name":"Toggle","src":"src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_index.module-0iUivGU7.js"],"css":["assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css":{"file":"index2.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Menu-CWXr7U88.js","_index.module-0iUivGU7.js","_ButtonSparkle-BxHzGCPC.js","_routing-BRXp7sqN.js","_components-DHKGOKg1.js"],"css":["assets/index-DgiZenf7.css","assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css":{"file":"riv.js","name":"riv","src":"src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css":{"file":"index22.js","name":"index","src":"src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css":{"file":"index8.js","name":"index","src":"src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_index-BQH3GIDW.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js"],"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css":{"file":"_...slug_.js","name":"_...slug_","src":"src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Title-C8lsFfVd.js","_getWallets.server-C5R6kBVO.js","_auth.server-ChqlnWrh.js","_prova-B1NEQR2_.js","_index-D0aODT57.js","_exchangeRates-BGrzYQig.js","_index-0U8vmGbf.js","_index-BQH3GIDW.js","_deleteWallet-Cgff9KFR.js","_routing-BRXp7sqN.js","_Inputs-D1T1pLkj.js","_ButtonSparkle-BxHzGCPC.js","_auth-BeHg-fWi.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_components-DHKGOKg1.js","_Card.module-nMwE8ysR.js","_action-BR9kmesq.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"],"css":["assets/index-DoUIxqk_.css","assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css":{"file":"index14.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_prova-B1NEQR2_.js","_index-D0aODT57.js","_components-DHKGOKg1.js","_exchangeRates-BGrzYQig.js","_Card.module-nMwE8ysR.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_auth.server-ChqlnWrh.js","_routing-BRXp7sqN.js"]},"src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css":{"file":"index15.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_routing-BRXp7sqN.js"]},"src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css":{"file":"preLoader.js","name":"preLoader","src":"src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css":{"file":"index17.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Inputs-D1T1pLkj.js","_deleteWallet-Cgff9KFR.js","_index-D0aODT57.js","_ButtonSparkle-BxHzGCPC.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_routing-BRXp7sqN.js","_exchangeRates-BGrzYQig.js","_Card.module-nMwE8ysR.js","_components-DHKGOKg1.js","_auth.server-ChqlnWrh.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"],"css":["assets/index-DoUIxqk_.css"]},"src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css":{"file":"index13.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Inputs-D1T1pLkj.js","_index-D0aODT57.js","_ButtonSparkle-BxHzGCPC.js","_auth-BeHg-fWi.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_action-BR9kmesq.js","_routing-BRXp7sqN.js","_exchangeRates-BGrzYQig.js","_Card.module-nMwE8ysR.js","_components-DHKGOKg1.js","_auth.server-ChqlnWrh.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"],"css":["assets/index-DoUIxqk_.css"]},"src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css":{"file":"Card.js","name":"Card","src":"src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Card.module-nMwE8ysR.js","_components-DHKGOKg1.js","_routing-BRXp7sqN.js"]},"src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css":{"file":"index16.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_exchangeRates-BGrzYQig.js","_auth.server-ChqlnWrh.js","_components-DHKGOKg1.js","_Card.module-nMwE8ysR.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_routing-BRXp7sqN.js"]},"src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css":{"file":"index3.js","name":"index","src":"src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Title-C8lsFfVd.js","_getWallets.server-C5R6kBVO.js","_auth.server-ChqlnWrh.js","_index-0U8vmGbf.js","_index-D0aODT57.js","_exchangeRates-BGrzYQig.js","_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_prova-B1NEQR2_.js","_components-DHKGOKg1.js","_routing-BRXp7sqN.js","_Inputs-D1T1pLkj.js","_action-BR9kmesq.js","_deleteWallet-Cgff9KFR.js","_ButtonSparkle-BxHzGCPC.js","_Card.module-nMwE8ysR.js"],"css":["assets/index-DoUIxqk_.css"]},"src/routes/API/Auth/login/index.ts?pick=POST":{"file":"index9.js","name":"index","src":"src/routes/API/Auth/login/index.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_utils-CmG_3rtr.js","_response-CbUr9JDj.js","_server-fns-runtime-C3tiYEg6.js"]},"src/routes/API/Auth/logout.ts?pick=POST":{"file":"logout.js","name":"logout","src":"src/routes/API/Auth/logout.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_auth.server-ChqlnWrh.js","_response-CbUr9JDj.js","_server-fns-runtime-C3tiYEg6.js"]},"src/routes/API/Auth/refresh.ts?pick=POST":{"file":"refresh.js","name":"refresh","src":"src/routes/API/Auth/refresh.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_utils-CmG_3rtr.js","_response-CbUr9JDj.js","_server-fns-runtime-C3tiYEg6.js"]},"src/routes/API/Wallets/Wallet/addTransaction.ts?pick=POST":{"file":"addTransaction2.js","name":"addTransaction","src":"src/routes/API/Wallets/Wallet/addTransaction.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js","_auth.server-ChqlnWrh.js","_response-CbUr9JDj.js","_fetchEvent-9EzSf9d7.js"]},"src/routes/API/Wallets/Wallet/addTransactionByFile/addTransactions.ts?pick=POST":{"file":"addTransactions.js","name":"addTransactions","src":"src/routes/API/Wallets/Wallet/addTransactionByFile/addTransactions.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js","_response-CbUr9JDj.js","_fetchEvent-9EzSf9d7.js"]},"src/routes/API/Wallets/Wallet/addTransactionByFile/uploadFile.ts?pick=POST":{"file":"uploadFile.js","name":"uploadFile","src":"src/routes/API/Wallets/Wallet/addTransactionByFile/uploadFile.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-C3tiYEg6.js","_fetchEvent-9EzSf9d7.js"]},"src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css":{"file":"getTransactions.js","name":"getTransactions","src":"src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js","_fetchEvent-9EzSf9d7.js"]},"src/routes/API/Wallets/addWallet.ts?pick=POST":{"file":"addWallet.js","name":"addWallet","src":"src/routes/API/Wallets/addWallet.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js","_response-CbUr9JDj.js","_fetchEvent-9EzSf9d7.js"]},"src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css":{"file":"deleteWallet.js","name":"deleteWallet","src":"src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js","_fetchEvent-9EzSf9d7.js"]},"src/routes/API/lib/addTransaction.ts?pick=POST":{"file":"addTransaction.js","name":"addTransaction","src":"src/routes/API/lib/addTransaction.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-C3tiYEg6.js","_db.server-CDeyn5Z_.js","_response-CbUr9JDj.js","_fetchEvent-9EzSf9d7.js"]},"src/routes/API/lib/getWalletsPaths.ts?pick=POST":{"file":"getWalletsPaths.js","name":"getWalletsPaths","src":"src/routes/API/lib/getWalletsPaths.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-C3tiYEg6.js","_auth.server-ChqlnWrh.js","_getWallets.server-C5R6kBVO.js","_response-CbUr9JDj.js","_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js"]},"src/routes/API/prova.ts?pick=POST":{"file":"prova.js","name":"prova","src":"src/routes/API/prova.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-C3tiYEg6.js","_response-CbUr9JDj.js","_fetchEvent-9EzSf9d7.js"]},"src/routes/UI/Cursor.tsx?pick=default&pick=$css":{"file":"Cursor.js","name":"Cursor","src":"src/routes/UI/Cursor.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/Cursor-DUhhJVLJ.css"]},"src/routes/UI/Loading.tsx?pick=default&pick=$css":{"file":"Loading.js","name":"Loading","src":"src/routes/UI/Loading.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/UI/Waves.tsx?pick=default&pick=$css":{"file":"Waves.js","name":"Waves","src":"src/routes/UI/Waves.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/[...404].tsx?pick=default&pick=$css":{"file":"_...404_.js","name":"_...404_","src":"src/routes/[...404].tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_Menu-CWXr7U88.js","_components-DHKGOKg1.js","_routing-BRXp7sqN.js"],"css":["assets/_..-D39vbXZ9.css"]},"src/routes/index.tsx?pick=default&pick=$css":{"file":"index.js","name":"index","src":"src/routes/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Menu-CWXr7U88.js","_components-DHKGOKg1.js","_routing-BRXp7sqN.js"]},"virtual:$vinxi/handler/ssr":{"file":"ssr.js","name":"ssr","src":"virtual:$vinxi/handler/ssr","isEntry":true,"imports":["_fetchEvent-9EzSf9d7.js","_db.server-CDeyn5Z_.js","_response-CbUr9JDj.js","_Menu-CWXr7U88.js","_Cursor-6qc4Ma5i.js","_auth-BeHg-fWi.js","_routing-BRXp7sqN.js","_action-BR9kmesq.js","_components-DHKGOKg1.js"],"dynamicImports":["src/routes/index.tsx?pick=default&pick=$css","src/routes/index.tsx?pick=default&pick=$css","src/routes/[...404].tsx?pick=default&pick=$css","src/routes/[...404].tsx?pick=default&pick=$css","src/routes/API/prova.ts?pick=POST","src/routes/API/prova.ts?pick=POST","src/routes/UI/Cursor.tsx?pick=default&pick=$css","src/routes/UI/Cursor.tsx?pick=default&pick=$css","src/routes/UI/Loading.tsx?pick=default&pick=$css","src/routes/UI/Loading.tsx?pick=default&pick=$css","src/routes/UI/Waves.tsx?pick=default&pick=$css","src/routes/UI/Waves.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","src/routes/API/Auth/logout.ts?pick=POST","src/routes/API/Auth/logout.ts?pick=POST","src/routes/API/Auth/refresh.ts?pick=POST","src/routes/API/Auth/refresh.ts?pick=POST","src/routes/API/lib/addTransaction.ts?pick=POST","src/routes/API/lib/addTransaction.ts?pick=POST","src/routes/API/lib/getWalletsPaths.ts?pick=POST","src/routes/API/lib/getWalletsPaths.ts?pick=POST","src/routes/API/Wallets/addWallet.ts?pick=POST","src/routes/API/Wallets/addWallet.ts?pick=POST","src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","src/routes/API/Auth/login/index.ts?pick=POST","src/routes/API/Auth/login/index.ts?pick=POST","src/routes/API/Wallets/Wallet/addTransaction.ts?pick=POST","src/routes/API/Wallets/Wallet/addTransaction.ts?pick=POST","src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","src/routes/API/Wallets/Wallet/addTransactionByFile/addTransactions.ts?pick=POST","src/routes/API/Wallets/Wallet/addTransactionByFile/addTransactions.ts?pick=POST","src/routes/API/Wallets/Wallet/addTransactionByFile/uploadFile.ts?pick=POST","src/routes/API/Wallets/Wallet/addTransactionByFile/uploadFile.ts?pick=POST","src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css"],"css":["assets/ssr-DNeOnZgp.css","assets/Cursor-DUhhJVLJ.css"]}},"client":{"_ButtonSparkle-B8MvXRxa.js":{"file":"assets/ButtonSparkle-B8MvXRxa.js","name":"ButtonSparkle","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_store-EkIb7068.js"],"css":["assets/ButtonSparkle-DtI3gbzT.css"]},"_ButtonSparkle-DtI3gbzT.css":{"file":"assets/ButtonSparkle-DtI3gbzT.css","src":"_ButtonSparkle-DtI3gbzT.css"},"_Card-BcrU3z9h.css":{"file":"assets/Card-BcrU3z9h.css","src":"_Card-BcrU3z9h.css"},"_Card.module-nMwE8ysR.js":{"file":"assets/Card.module-nMwE8ysR.js","name":"Card.module","css":["assets/Card-BcrU3z9h.css"]},"_Cursor-DO_Peo8w.js":{"file":"assets/Cursor-DO_Peo8w.js","name":"Cursor","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js"],"css":["assets/Cursor-DUhhJVLJ.css"]},"_Cursor-DUhhJVLJ.css":{"file":"assets/Cursor-DUhhJVLJ.css","src":"_Cursor-DUhhJVLJ.css"},"_Inputs-CUihbr1a.css":{"file":"assets/Inputs-CUihbr1a.css","src":"_Inputs-CUihbr1a.css"},"_Inputs-DcqJwVVk.js":{"file":"assets/Inputs-DcqJwVVk.js","name":"Inputs","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_store-EkIb7068.js","_server-runtime-G1njbCYf.js","_action-Dtdjs7R9.js"],"css":["assets/Inputs-CUihbr1a.css"]},"_Menu-CJHi8x7g.js":{"file":"assets/Menu-CJHi8x7g.js","name":"Menu","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_components-BSHtZ-Zq.js"],"css":["assets/Menu-DSzeyodt.css"]},"_Menu-DSzeyodt.css":{"file":"assets/Menu-DSzeyodt.css","src":"_Menu-DSzeyodt.css"},"_Title-CrVuX5YX.js":{"file":"assets/Title-CrVuX5YX.js","name":"Title","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js"]},"_action-Dtdjs7R9.js":{"file":"assets/action-Dtdjs7R9.js","name":"action","imports":["_solid-DuWri35y.js","_routing-CrKy3yVb.js"]},"_auth-B7ef8sb9.js":{"file":"assets/auth-B7ef8sb9.js","name":"auth","imports":["_solid-DuWri35y.js","_store-EkIb7068.js","_index-Ckjqp3wL.js"]},"_auth.server-BY2lFEoQ.js":{"file":"assets/auth.server-BY2lFEoQ.js","name":"auth.server","imports":["_server-runtime-G1njbCYf.js"]},"_components-BSHtZ-Zq.js":{"file":"assets/components-BSHtZ-Zq.js","name":"components","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_routing-CrKy3yVb.js"]},"_context-DGrJV8BX.js":{"file":"assets/context-DGrJV8BX.js","name":"context","imports":["_store-EkIb7068.js"]},"_context-DTlNXViu.js":{"file":"assets/context-DTlNXViu.js","name":"context","imports":["_store-EkIb7068.js"]},"_deleteWallet-Bheg3455.css":{"file":"assets/deleteWallet-Bheg3455.css","src":"_deleteWallet-Bheg3455.css"},"_deleteWallet-DZXYhnFv.js":{"file":"assets/deleteWallet-DZXYhnFv.js","name":"deleteWallet","imports":["_server-runtime-G1njbCYf.js","_action-Dtdjs7R9.js"],"css":["assets/deleteWallet-Bheg3455.css"]},"_exchangeRates-BMINihpv.css":{"file":"assets/exchangeRates-BMINihpv.css","src":"_exchangeRates-BMINihpv.css"},"_exchangeRates-BrUJ_eQB.js":{"file":"assets/exchangeRates-BrUJ_eQB.js","name":"exchangeRates","imports":["_web-DpIebe6J.js","_Card.module-nMwE8ysR.js","_solid-DuWri35y.js","_components-BSHtZ-Zq.js","_server-runtime-G1njbCYf.js"],"css":["assets/exchangeRates-BMINihpv.css"]},"_getWallets.server-rCnpGkki.js":{"file":"assets/getWallets.server-rCnpGkki.js","name":"getWallets.server","imports":["_server-runtime-G1njbCYf.js"]},"_howler-DGkKYxeN.js":{"file":"assets/howler-DGkKYxeN.js","name":"howler","isDynamicEntry":true},"_icons-Bh8061KW.css":{"file":"assets/icons-Bh8061KW.css","src":"_icons-Bh8061KW.css"},"_icons-DnmAahPX.js":{"file":"assets/icons-DnmAahPX.js","name":"icons","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js"],"css":["assets/icons-Bh8061KW.css"]},"_index-2EPzZQ-a.js":{"file":"assets/index-2EPzZQ-a.js","name":"index","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_exchangeRates-BrUJ_eQB.js","_auth.server-BY2lFEoQ.js","_components-BSHtZ-Zq.js"]},"_index-BAMY2Nnw.js":{"file":"assets/index-BAMY2Nnw.js","name":"index"},"_index-BRALuBVh.js":{"file":"assets/index-BRALuBVh.js","name":"index","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js"],"css":["assets/index-CXQF54bi.css"]},"_index-BUMPztWr.css":{"file":"assets/index-BUMPztWr.css","src":"_index-BUMPztWr.css"},"_index-BbP3371Q.js":{"file":"assets/index-BbP3371Q.js","name":"index"},"_index-BfCmSeNt.js":{"file":"assets/index-BfCmSeNt.js","name":"index","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_icons-DnmAahPX.js"]},"_index-C1h2BJ6l.css":{"file":"assets/index-C1h2BJ6l.css","src":"_index-C1h2BJ6l.css"},"_index-CXQF54bi.css":{"file":"assets/index-CXQF54bi.css","src":"_index-CXQF54bi.css"},"_index-CgqXENQe.js":{"file":"assets/index-CgqXENQe.js","name":"index"},"_index-Ckjqp3wL.js":{"file":"assets/index-Ckjqp3wL.js","name":"index","imports":["_index-BbP3371Q.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js"]},"_index-ClXKiMUD.js":{"file":"assets/index-ClXKiMUD.js","name":"index"},"_index-DMu-c7m6.js":{"file":"assets/index-DMu-c7m6.js","name":"index","imports":["_server-runtime-G1njbCYf.js","_web-DpIebe6J.js","_solid-DuWri35y.js"],"css":["assets/index-Ky9zR5dV.css"]},"_index-DlIjekMf.js":{"file":"assets/index-DlIjekMf.js","name":"index","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_prova-m-C6m0c_.js","_index-2EPzZQ-a.js","_components-BSHtZ-Zq.js","_preload-helper-CM3UJVvY.js","_Inputs-DcqJwVVk.js","_deleteWallet-DZXYhnFv.js","_ButtonSparkle-B8MvXRxa.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"],"css":["assets/index-DoUIxqk_.css"]},"_index-DoUIxqk_.css":{"file":"assets/index-DoUIxqk_.css","src":"_index-DoUIxqk_.css"},"_index-Ky9zR5dV.css":{"file":"assets/index-Ky9zR5dV.css","src":"_index-Ky9zR5dV.css"},"_index.module-B9JvMj-k.js":{"file":"assets/index.module-B9JvMj-k.js","name":"index.module","css":["assets/index-C1h2BJ6l.css"]},"_index.module-CDuGKsjp.js":{"file":"assets/index.module-CDuGKsjp.js","name":"index.module","imports":["_preload-helper-CM3UJVvY.js","_web-DpIebe6J.js","_solid-DuWri35y.js"],"dynamicImports":["_rive-D3j5nBow.js"],"css":["assets/index-BUMPztWr.css","assets/riv-VPAlW_cg.css"]},"_otpInput-BXc_Jx1f.js":{"file":"assets/otpInput-BXc_Jx1f.js","name":"otpInput","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_index-BfCmSeNt.js","_server-runtime-G1njbCYf.js","_action-Dtdjs7R9.js","_index-BbP3371Q.js","_index-BAMY2Nnw.js","_Inputs-DcqJwVVk.js","_ButtonSparkle-B8MvXRxa.js"],"css":["assets/otpInput-tBTztLmB.css"]},"_otpInput-tBTztLmB.css":{"file":"assets/otpInput-tBTztLmB.css","src":"_otpInput-tBTztLmB.css"},"_pathWallets-V9UfGynM.js":{"file":"assets/pathWallets-V9UfGynM.js","name":"pathWallets","imports":["_solid-DuWri35y.js","_Inputs-DcqJwVVk.js","_getWallets.server-rCnpGkki.js","_auth.server-BY2lFEoQ.js"]},"_preload-helper-CM3UJVvY.js":{"file":"assets/preload-helper-CM3UJVvY.js","name":"preload-helper"},"_prova-m-C6m0c_.js":{"file":"assets/prova-m-C6m0c_.js","name":"prova","imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_components-BSHtZ-Zq.js"]},"_riv-VPAlW_cg.css":{"file":"assets/riv-VPAlW_cg.css","src":"_riv-VPAlW_cg.css"},"_rive-D3j5nBow.js":{"file":"assets/rive-D3j5nBow.js","name":"rive","isDynamicEntry":true},"_routing-CrKy3yVb.js":{"file":"assets/routing-CrKy3yVb.js","name":"routing","imports":["_solid-DuWri35y.js","_web-DpIebe6J.js"]},"_server-runtime-G1njbCYf.js":{"file":"assets/server-runtime-G1njbCYf.js","name":"server-runtime","imports":["_index-BbP3371Q.js"]},"_solid-DuWri35y.js":{"file":"assets/solid-DuWri35y.js","name":"solid"},"_store-EkIb7068.js":{"file":"assets/store-EkIb7068.js","name":"store","imports":["_solid-DuWri35y.js"]},"_web-DpIebe6J.js":{"file":"assets/web-DpIebe6J.js","name":"web","imports":["_solid-DuWri35y.js"]},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/boolean.js":{"file":"assets/boolean-CynEgfvK.js","name":"boolean","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/boolean.js","isDynamicEntry":true},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/gaussian-splat-compression.js":{"file":"assets/gaussian-splat-compression-CYQZ50o2.js","name":"gaussian-splat-compression","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/gaussian-splat-compression.js","isDynamicEntry":true},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/navmesh.js":{"file":"assets/navmesh-BFd9Mv4x.js","name":"navmesh","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/navmesh.js","isDynamicEntry":true},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/opentype.js":{"file":"assets/opentype-Cqw9bO2A.js","name":"opentype","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/opentype.js","isDynamicEntry":true,"imports":["_index-CgqXENQe.js"]},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/physics.js":{"file":"assets/physics-BM4kW-A5.js","name":"physics","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/physics.js","isDynamicEntry":true},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/process.js":{"file":"assets/process-DLQUZ-E7.js","name":"process","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/process.js","isDynamicEntry":true},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/runtime.js":{"file":"assets/runtime-DddzEQ-t.js","name":"runtime","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/runtime.js","isDynamicEntry":true,"imports":["_preload-helper-CM3UJVvY.js","_index-BbP3371Q.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js"],"dynamicImports":["node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/navmesh.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/physics.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/process.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/boolean.js","_howler-DGkKYxeN.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/opentype.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/ui.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/gaussian-splat-compression.js"]},"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/ui.js":{"file":"assets/ui-BkqLVz6I.js","name":"ui","src":"node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/ui.js","isDynamicEntry":true,"imports":["_index-BAMY2Nnw.js","_index-BbP3371Q.js"]},"node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx":{"file":"assets/index-CUsCLhUq.js","name":"index","src":"node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx","isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js"]},"node_modules/.pnpm/pulsix@1.0.5/node_modules/pulsix/dist/index.mjs":{"file":"assets/index-Bgm9oum8.js","name":"index","src":"node_modules/.pnpm/pulsix@1.0.5/node_modules/pulsix/dist/index.mjs","isDynamicEntry":true},"src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css":{"file":"assets/index-zMTDNupI.js","name":"index","src":"src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_ButtonSparkle-B8MvXRxa.js","_Inputs-DcqJwVVk.js","_Menu-CJHi8x7g.js","_auth-B7ef8sb9.js","_store-EkIb7068.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_action-Dtdjs7R9.js","_routing-CrKy3yVb.js","_components-BSHtZ-Zq.js","_index-Ckjqp3wL.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css":{"file":"assets/index-D-O5xXRO.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_context-DTlNXViu.js","_ButtonSparkle-B8MvXRxa.js","_store-EkIb7068.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css":{"file":"assets/index-BW8DZTAt.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js"],"css":["assets/index-CXQF54bi.css"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css":{"file":"assets/index-BpAElWHd.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_auth-B7ef8sb9.js","_ButtonSparkle-B8MvXRxa.js","_context-DTlNXViu.js","_index-BRALuBVh.js","_Inputs-DcqJwVVk.js","_pathWallets-V9UfGynM.js","_store-EkIb7068.js","_index-Ckjqp3wL.js","_index-BbP3371Q.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js","_server-runtime-G1njbCYf.js","_action-Dtdjs7R9.js","_routing-CrKy3yVb.js","_getWallets.server-rCnpGkki.js","_auth.server-BY2lFEoQ.js"],"css":["assets/index-CXQF54bi.css"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css":{"file":"assets/index-D2XrvAPe.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_context-DTlNXViu.js","_auth-B7ef8sb9.js","_ButtonSparkle-B8MvXRxa.js","_index-BRALuBVh.js","_Inputs-DcqJwVVk.js","_pathWallets-V9UfGynM.js","_Menu-CJHi8x7g.js","_index-ClXKiMUD.js","_store-EkIb7068.js","_index-Ckjqp3wL.js","_index-BbP3371Q.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js","_server-runtime-G1njbCYf.js","_action-Dtdjs7R9.js","_routing-CrKy3yVb.js","_getWallets.server-rCnpGkki.js","_auth.server-BY2lFEoQ.js","_components-BSHtZ-Zq.js"],"css":["assets/index-CXQF54bi.css"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css":{"file":"assets/index-CqIoCKR7.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_auth-B7ef8sb9.js","_context-DTlNXViu.js","_ButtonSparkle-B8MvXRxa.js","_index-ClXKiMUD.js","_store-EkIb7068.js","_index-Ckjqp3wL.js","_index-BbP3371Q.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css":{"file":"assets/index-DRPEoOjA.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_context-DGrJV8BX.js","_ButtonSparkle-B8MvXRxa.js","_auth-B7ef8sb9.js","_Menu-CJHi8x7g.js","_pathWallets-V9UfGynM.js","_store-EkIb7068.js","_index-Ckjqp3wL.js","_index-BbP3371Q.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js","_components-BSHtZ-Zq.js","_routing-CrKy3yVb.js","_Inputs-DcqJwVVk.js","_server-runtime-G1njbCYf.js","_action-Dtdjs7R9.js","_getWallets.server-rCnpGkki.js","_auth.server-BY2lFEoQ.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css":{"file":"assets/mapper-kaoi3FZI.js","name":"mapper","src":"src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_ButtonSparkle-B8MvXRxa.js","_auth-B7ef8sb9.js","_store-EkIb7068.js","_index-Ckjqp3wL.js","_index-BbP3371Q.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css":{"file":"assets/preview-BRVtXxkA.js","name":"preview","src":"src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_context-DGrJV8BX.js","_ButtonSparkle-B8MvXRxa.js","_store-EkIb7068.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css":{"file":"assets/uploadFile-e91vKR2f.js","name":"uploadFile","src":"src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_ButtonSparkle-B8MvXRxa.js","_auth-B7ef8sb9.js","_context-DGrJV8BX.js","_store-EkIb7068.js","_index-Ckjqp3wL.js","_index-BbP3371Q.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js"]},"src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css":{"file":"assets/index-Cpvdl1_Z.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_ButtonSparkle-B8MvXRxa.js","_Inputs-DcqJwVVk.js","_Menu-CJHi8x7g.js","_auth-B7ef8sb9.js","_pathWallets-V9UfGynM.js","_store-EkIb7068.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_action-Dtdjs7R9.js","_routing-CrKy3yVb.js","_components-BSHtZ-Zq.js","_index-Ckjqp3wL.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js","_getWallets.server-rCnpGkki.js","_auth.server-BY2lFEoQ.js"]},"src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css":{"file":"assets/pathWallets-D-WeUJvi.js","name":"pathWallets","src":"src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_solid-DuWri35y.js","_Inputs-DcqJwVVk.js","_getWallets.server-rCnpGkki.js","_auth.server-BY2lFEoQ.js","_web-DpIebe6J.js","_store-EkIb7068.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_action-Dtdjs7R9.js","_routing-CrKy3yVb.js"]},"src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css":{"file":"assets/index-mWsjIETT.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_ButtonSparkle-B8MvXRxa.js","_Inputs-DcqJwVVk.js","_Menu-CJHi8x7g.js","_auth-B7ef8sb9.js","_routing-CrKy3yVb.js","_store-EkIb7068.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_action-Dtdjs7R9.js","_components-BSHtZ-Zq.js","_index-Ckjqp3wL.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css":{"file":"assets/index-up4Kgwa4.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_ButtonSparkle-B8MvXRxa.js","_Inputs-DcqJwVVk.js","_Title-CrVuX5YX.js","_index-BfCmSeNt.js","_index.module-B9JvMj-k.js","_store-EkIb7068.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_action-Dtdjs7R9.js","_routing-CrKy3yVb.js","_icons-DnmAahPX.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css":{"file":"assets/index-ByKdYTe1.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_index-Ckjqp3wL.js","_solid-DuWri35y.js","_ButtonSparkle-B8MvXRxa.js","_Inputs-DcqJwVVk.js","_otpInput-BXc_Jx1f.js","_index-BfCmSeNt.js","_index-BbP3371Q.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js","_store-EkIb7068.js","_server-runtime-G1njbCYf.js","_action-Dtdjs7R9.js","_routing-CrKy3yVb.js","_icons-DnmAahPX.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css":{"file":"assets/index-CU71wIRV.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_otpInput-BXc_Jx1f.js","_solid-DuWri35y.js","_ButtonSparkle-B8MvXRxa.js","_Inputs-DcqJwVVk.js","_index-BfCmSeNt.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_action-Dtdjs7R9.js","_routing-CrKy3yVb.js","_index-BAMY2Nnw.js","_store-EkIb7068.js","_icons-DnmAahPX.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css":{"file":"assets/sendOtp-B16Bte8J.js","name":"sendOtp","src":"src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-BXc_Jx1f.js","_solid-DuWri35y.js","_Inputs-DcqJwVVk.js","_web-DpIebe6J.js","_index-BfCmSeNt.js","_icons-DnmAahPX.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_action-Dtdjs7R9.js","_routing-CrKy3yVb.js","_index-BAMY2Nnw.js","_ButtonSparkle-B8MvXRxa.js","_store-EkIb7068.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css":{"file":"assets/index-Bw6v0jkr.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_icons-DnmAahPX.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css":{"file":"assets/otpInput-DgJmMvXt.js","name":"otpInput","src":"src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_otpInput-BXc_Jx1f.js","_index-BfCmSeNt.js","_Inputs-DcqJwVVk.js","_action-Dtdjs7R9.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_index-BAMY2Nnw.js","_ButtonSparkle-B8MvXRxa.js","_store-EkIb7068.js","_icons-DnmAahPX.js","_routing-CrKy3yVb.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css":{"file":"assets/index-P9OTGdMZ.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js"]},"src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css":{"file":"assets/index-DfP9MmXu.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_Menu-CJHi8x7g.js","_index-BfCmSeNt.js","_ButtonSparkle-B8MvXRxa.js","_Inputs-DcqJwVVk.js","_Title-CrVuX5YX.js","_index.module-B9JvMj-k.js","_index-Ckjqp3wL.js","_otpInput-BXc_Jx1f.js","_Cursor-DO_Peo8w.js","_components-BSHtZ-Zq.js","_routing-CrKy3yVb.js","_icons-DnmAahPX.js","_store-EkIb7068.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_action-Dtdjs7R9.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js"],"css":["assets/Cursor-DUhhJVLJ.css"]},"src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css":{"file":"assets/Toggle-BGJW_lEq.js","name":"Toggle","src":"src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_index.module-CDuGKsjp.js","_solid-DuWri35y.js","_preload-helper-CM3UJVvY.js"],"css":["assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css":{"file":"assets/index-A-Vt54g-.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_Menu-CJHi8x7g.js","_index.module-CDuGKsjp.js","_ButtonSparkle-B8MvXRxa.js","_routing-CrKy3yVb.js","_components-BSHtZ-Zq.js","_preload-helper-CM3UJVvY.js","_store-EkIb7068.js"],"css":["assets/index-DgiZenf7.css","assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css":{"file":"assets/riv-DDjZvLrC.js","name":"riv","src":"src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_preload-helper-CM3UJVvY.js","_web-DpIebe6J.js","_solid-DuWri35y.js"],"dynamicImports":["_rive-D3j5nBow.js"],"css":["assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css":{"file":"assets/index-BjjMb_tW.js","name":"index","src":"src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js"],"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css":{"file":"assets/index-CT-ACOGi.js","name":"index","src":"src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_index-DMu-c7m6.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js"],"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css":{"file":"assets/_...slug_-91RaIqCy.js","name":"_...slug_","src":"src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_Title-CrVuX5YX.js","_getWallets.server-rCnpGkki.js","_auth.server-BY2lFEoQ.js","_index-DlIjekMf.js","_index-2EPzZQ-a.js","_exchangeRates-BrUJ_eQB.js","_index-DMu-c7m6.js","_deleteWallet-DZXYhnFv.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/runtime.js","_routing-CrKy3yVb.js","_preload-helper-CM3UJVvY.js","_Inputs-DcqJwVVk.js","_ButtonSparkle-B8MvXRxa.js","_auth-B7ef8sb9.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_prova-m-C6m0c_.js","_components-BSHtZ-Zq.js","_Card.module-nMwE8ysR.js","_action-Dtdjs7R9.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js","_store-EkIb7068.js","_index-Ckjqp3wL.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"],"css":["assets/index-DoUIxqk_.css","assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css":{"file":"assets/index-DzzmI9Kt.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_prova-m-C6m0c_.js","_index-2EPzZQ-a.js","_components-BSHtZ-Zq.js","_exchangeRates-BrUJ_eQB.js","_Card.module-nMwE8ysR.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_auth.server-BY2lFEoQ.js","_routing-CrKy3yVb.js"]},"src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css":{"file":"assets/index-C94uOdMp.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/runtime.js","_index-2EPzZQ-a.js","_routing-CrKy3yVb.js","_preload-helper-CM3UJVvY.js","_index-BbP3371Q.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js","_exchangeRates-BrUJ_eQB.js","_Card.module-nMwE8ysR.js","_components-BSHtZ-Zq.js","_server-runtime-G1njbCYf.js","_auth.server-BY2lFEoQ.js"]},"src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css":{"file":"assets/preLoader-Bq1ReClI.js","name":"preLoader","src":"src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_preload-helper-CM3UJVvY.js","_solid-DuWri35y.js"],"dynamicImports":["node_modules/.pnpm/@splinetool+runtime@1.9.82/node_modules/@splinetool/runtime/build/runtime.js"]},"src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css":{"file":"assets/index-msd---qR.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_preload-helper-CM3UJVvY.js","_web-DpIebe6J.js","_solid-DuWri35y.js","_Inputs-DcqJwVVk.js","_deleteWallet-DZXYhnFv.js","_index-2EPzZQ-a.js","_ButtonSparkle-B8MvXRxa.js","_store-EkIb7068.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_action-Dtdjs7R9.js","_routing-CrKy3yVb.js","_exchangeRates-BrUJ_eQB.js","_Card.module-nMwE8ysR.js","_components-BSHtZ-Zq.js","_auth.server-BY2lFEoQ.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"],"css":["assets/index-DoUIxqk_.css"]},"src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css":{"file":"assets/index-vlmjMqrb.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_preload-helper-CM3UJVvY.js","_web-DpIebe6J.js","_solid-DuWri35y.js","_Inputs-DcqJwVVk.js","_index-2EPzZQ-a.js","_ButtonSparkle-B8MvXRxa.js","_auth-B7ef8sb9.js","_store-EkIb7068.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_action-Dtdjs7R9.js","_routing-CrKy3yVb.js","_exchangeRates-BrUJ_eQB.js","_Card.module-nMwE8ysR.js","_components-BSHtZ-Zq.js","_auth.server-BY2lFEoQ.js","_index-Ckjqp3wL.js","_index-BAMY2Nnw.js","_index-CgqXENQe.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"],"css":["assets/index-DoUIxqk_.css"]},"src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css":{"file":"assets/Card-hkPR8m6t.js","name":"Card","src":"src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_Card.module-nMwE8ysR.js","_solid-DuWri35y.js","_components-BSHtZ-Zq.js","_routing-CrKy3yVb.js"]},"src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css":{"file":"assets/index-DcotjcWv.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_exchangeRates-BrUJ_eQB.js","_auth.server-BY2lFEoQ.js","_components-BSHtZ-Zq.js","_Card.module-nMwE8ysR.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_routing-CrKy3yVb.js"]},"src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css":{"file":"assets/index-FfPpJL1_.js","name":"index","src":"src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_Title-CrVuX5YX.js","_getWallets.server-rCnpGkki.js","_auth.server-BY2lFEoQ.js","_index-DlIjekMf.js","_index-2EPzZQ-a.js","_exchangeRates-BrUJ_eQB.js","_server-runtime-G1njbCYf.js","_index-BbP3371Q.js","_prova-m-C6m0c_.js","_components-BSHtZ-Zq.js","_routing-CrKy3yVb.js","_preload-helper-CM3UJVvY.js","_Inputs-DcqJwVVk.js","_store-EkIb7068.js","_action-Dtdjs7R9.js","_deleteWallet-DZXYhnFv.js","_ButtonSparkle-B8MvXRxa.js","_Card.module-nMwE8ysR.js"],"css":["assets/index-DoUIxqk_.css"]},"src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css":{"file":"assets/getTransactions-DceW4eCM.js","name":"getTransactions","src":"src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_server-runtime-G1njbCYf.js","_index-BbP3371Q.js"]},"src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css":{"file":"assets/deleteWallet-D4hbtBo7.js","name":"deleteWallet","src":"src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_server-runtime-G1njbCYf.js","_index-BbP3371Q.js"]},"src/routes/UI/Cursor.tsx?pick=default&pick=$css":{"file":"assets/Cursor-hw9lxiE9.js","name":"Cursor","src":"src/routes/UI/Cursor.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js"],"css":["assets/Cursor-DUhhJVLJ.css"]},"src/routes/UI/Loading.tsx?pick=default&pick=$css":{"file":"assets/Loading-BigulQgg.js","name":"Loading","src":"src/routes/UI/Loading.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js"]},"src/routes/UI/Waves.tsx?pick=default&pick=$css":{"file":"assets/Waves-Be4yV-lU.js","name":"Waves","src":"src/routes/UI/Waves.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js"]},"src/routes/[...404].tsx?pick=default&pick=$css":{"file":"assets/_...404_-C9nr4AF5.js","name":"_...404_","src":"src/routes/[...404].tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_ButtonSparkle-B8MvXRxa.js","_Menu-CJHi8x7g.js","_store-EkIb7068.js","_components-BSHtZ-Zq.js","_routing-CrKy3yVb.js"],"css":["assets/_..-D39vbXZ9.css"]},"src/routes/index.tsx?pick=default&pick=$css":{"file":"assets/index-CiNBbJAO.js","name":"index","src":"src/routes/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_web-DpIebe6J.js","_solid-DuWri35y.js","_preload-helper-CM3UJVvY.js","_Menu-CJHi8x7g.js","_components-BSHtZ-Zq.js","_routing-CrKy3yVb.js"],"dynamicImports":["node_modules/.pnpm/pulsix@1.0.5/node_modules/pulsix/dist/index.mjs"]},"virtual:$vinxi/handler/client":{"file":"assets/client-BvgNNfPt.js","name":"client","src":"virtual:$vinxi/handler/client","isEntry":true,"imports":["_index-BAMY2Nnw.js","_web-DpIebe6J.js","_solid-DuWri35y.js","_preload-helper-CM3UJVvY.js","_Menu-CJHi8x7g.js","_Cursor-DO_Peo8w.js","_auth-B7ef8sb9.js","_routing-CrKy3yVb.js","_action-Dtdjs7R9.js","node_modules/.pnpm/pulsix@1.0.5/node_modules/pulsix/dist/index.mjs","_components-BSHtZ-Zq.js","_store-EkIb7068.js","_index-Ckjqp3wL.js","_index-BbP3371Q.js","_index-CgqXENQe.js"],"dynamicImports":["src/routes/index.tsx?pick=default&pick=$css","src/routes/[...404].tsx?pick=default&pick=$css","src/routes/UI/Cursor.tsx?pick=default&pick=$css","src/routes/UI/Loading.tsx?pick=default&pick=$css","src/routes/UI/Waves.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css"],"css":["assets/client-DNeOnZgp.css","assets/Cursor-DUhhJVLJ.css"]}},"server-fns":{"_ButtonSparkle-BxHzGCPC.js":{"file":"assets/ButtonSparkle-BxHzGCPC.js","name":"ButtonSparkle","css":["assets/ButtonSparkle-DtI3gbzT.css"]},"_ButtonSparkle-DtI3gbzT.css":{"file":"assets/ButtonSparkle-DtI3gbzT.css","src":"_ButtonSparkle-DtI3gbzT.css"},"_Card-BcrU3z9h.css":{"file":"assets/Card-BcrU3z9h.css","src":"_Card-BcrU3z9h.css"},"_Card.module-nMwE8ysR.js":{"file":"assets/Card.module-nMwE8ysR.js","name":"Card.module","css":["assets/Card-BcrU3z9h.css"]},"_Cursor-6qc4Ma5i.js":{"file":"assets/Cursor-6qc4Ma5i.js","name":"Cursor","css":["assets/Cursor-DUhhJVLJ.css"]},"_Cursor-DUhhJVLJ.css":{"file":"assets/Cursor-DUhhJVLJ.css","src":"_Cursor-DUhhJVLJ.css"},"_Inputs-CUihbr1a.css":{"file":"assets/Inputs-CUihbr1a.css","src":"_Inputs-CUihbr1a.css"},"_Inputs-Cq_fgt2H.js":{"file":"assets/Inputs-Cq_fgt2H.js","name":"Inputs","imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js"],"css":["assets/Inputs-CUihbr1a.css"]},"_Menu-B3jw0GIl.js":{"file":"assets/Menu-B3jw0GIl.js","name":"Menu","imports":["_components-Bjb1kgqQ.js"],"css":["assets/Menu-DSzeyodt.css"]},"_Menu-DSzeyodt.css":{"file":"assets/Menu-DSzeyodt.css","src":"_Menu-DSzeyodt.css"},"_Title-C8lsFfVd.js":{"file":"assets/Title-C8lsFfVd.js","name":"Title"},"_action-CiKOD-Zz.js":{"file":"assets/action-CiKOD-Zz.js","name":"action","imports":["_routing-Th2JWmJV.js"]},"_auth-BeHg-fWi.js":{"file":"assets/auth-BeHg-fWi.js","name":"auth"},"_auth.server-QlO-zn0G.js":{"file":"assets/auth.server-QlO-zn0G.js","name":"auth.server","imports":["_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js"]},"_components-Bjb1kgqQ.js":{"file":"assets/components-Bjb1kgqQ.js","name":"components","imports":["_routing-Th2JWmJV.js"]},"_context-5bbmmXgY.js":{"file":"assets/context-5bbmmXgY.js","name":"context"},"_context-XUFMQc9R.js":{"file":"assets/context-XUFMQc9R.js","name":"context"},"_db.server-CDeyn5Z_.js":{"file":"assets/db.server-CDeyn5Z_.js","name":"db.server"},"_deleteWallet-Bheg3455.css":{"file":"assets/deleteWallet-Bheg3455.css","src":"_deleteWallet-Bheg3455.css"},"_deleteWallet-DdSpVRBs.js":{"file":"assets/deleteWallet-DdSpVRBs.js","name":"deleteWallet","imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js"],"css":["assets/deleteWallet-Bheg3455.css"]},"_exchangeRates-BMINihpv.css":{"file":"assets/exchangeRates-BMINihpv.css","src":"_exchangeRates-BMINihpv.css"},"_exchangeRates-Ds1olZ18.js":{"file":"assets/exchangeRates-Ds1olZ18.js","name":"exchangeRates","imports":["_Card.module-nMwE8ysR.js","_components-Bjb1kgqQ.js","_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js"],"css":["assets/exchangeRates-BMINihpv.css"]},"_fetchEvent-BW7O4Ysp.js":{"file":"assets/fetchEvent-BW7O4Ysp.js","name":"fetchEvent"},"_getWallets.server-DFLq-knu.js":{"file":"assets/getWallets.server-DFLq-knu.js","name":"getWallets.server","imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js"]},"_icons-Bh8061KW.css":{"file":"assets/icons-Bh8061KW.css","src":"_icons-Bh8061KW.css"},"_icons-N8M97GAt.js":{"file":"assets/icons-N8M97GAt.js","name":"icons","css":["assets/icons-Bh8061KW.css"]},"_index-B8s1itkY.js":{"file":"assets/index-B8s1itkY.js","name":"index","css":["assets/index-CXQF54bi.css"]},"_index-BUMPztWr.css":{"file":"assets/index-BUMPztWr.css","src":"_index-BUMPztWr.css"},"_index-C1h2BJ6l.css":{"file":"assets/index-C1h2BJ6l.css","src":"_index-C1h2BJ6l.css"},"_index-CI1g57kZ.js":{"file":"assets/index-CI1g57kZ.js","name":"index","imports":["_icons-N8M97GAt.js"]},"_index-CXQF54bi.css":{"file":"assets/index-CXQF54bi.css","src":"_index-CXQF54bi.css"},"_index-C_IFjkFj.js":{"file":"assets/index-C_IFjkFj.js","name":"index","imports":["_prova-BDuT1_bg.js","_index-D_2WSMiS.js","_components-Bjb1kgqQ.js","_Inputs-Cq_fgt2H.js","_deleteWallet-DdSpVRBs.js","_ButtonSparkle-BxHzGCPC.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"],"css":["assets/index-DoUIxqk_.css"]},"_index-ClXKiMUD.js":{"file":"assets/index-ClXKiMUD.js","name":"index"},"_index-D_2WSMiS.js":{"file":"assets/index-D_2WSMiS.js","name":"index","imports":["_exchangeRates-Ds1olZ18.js","_auth.server-QlO-zn0G.js","_components-Bjb1kgqQ.js"]},"_index-DoUIxqk_.css":{"file":"assets/index-DoUIxqk_.css","src":"_index-DoUIxqk_.css"},"_index-F84g_HFF.js":{"file":"assets/index-F84g_HFF.js","name":"index","imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js"],"css":["assets/index-Ky9zR5dV.css"]},"_index-Ky9zR5dV.css":{"file":"assets/index-Ky9zR5dV.css","src":"_index-Ky9zR5dV.css"},"_index.module-0iUivGU7.js":{"file":"assets/index.module-0iUivGU7.js","name":"index.module","css":["assets/index-BUMPztWr.css","assets/riv-VPAlW_cg.css"]},"_index.module-B9JvMj-k.js":{"file":"assets/index.module-B9JvMj-k.js","name":"index.module","css":["assets/index-C1h2BJ6l.css"]},"_otpInput-gt68IOgQ.js":{"file":"assets/otpInput-gt68IOgQ.js","name":"otpInput","imports":["_index-CI1g57kZ.js","_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_Inputs-Cq_fgt2H.js","_ButtonSparkle-BxHzGCPC.js"],"css":["assets/otpInput-tBTztLmB.css"]},"_otpInput-tBTztLmB.css":{"file":"assets/otpInput-tBTztLmB.css","src":"_otpInput-tBTztLmB.css"},"_pathWallets-DBFK87xo.js":{"file":"assets/pathWallets-DBFK87xo.js","name":"pathWallets","imports":["_Inputs-Cq_fgt2H.js","_getWallets.server-DFLq-knu.js","_auth.server-QlO-zn0G.js"]},"_prova-BDuT1_bg.js":{"file":"assets/prova-BDuT1_bg.js","name":"prova","imports":["_components-Bjb1kgqQ.js"]},"_response-CbUr9JDj.js":{"file":"assets/response-CbUr9JDj.js","name":"response"},"_riv-VPAlW_cg.css":{"file":"assets/riv-VPAlW_cg.css","src":"_riv-VPAlW_cg.css"},"_routing-Th2JWmJV.js":{"file":"assets/routing-Th2JWmJV.js","name":"routing"},"_server-fns-BehjaVV7.js":{"file":"assets/server-fns-BehjaVV7.js","name":"server-fns","imports":["_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_response-CbUr9JDj.js"],"dynamicImports":["src/routes/index.tsx?pick=default&pick=$css","src/routes/index.tsx?pick=default&pick=$css","src/routes/[...404].tsx?pick=default&pick=$css","src/routes/[...404].tsx?pick=default&pick=$css","src/routes/API/prova.ts?pick=POST","src/routes/API/prova.ts?pick=POST","src/routes/UI/Cursor.tsx?pick=default&pick=$css","src/routes/UI/Cursor.tsx?pick=default&pick=$css","src/routes/UI/Loading.tsx?pick=default&pick=$css","src/routes/UI/Loading.tsx?pick=default&pick=$css","src/routes/UI/Waves.tsx?pick=default&pick=$css","src/routes/UI/Waves.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","src/routes/API/Auth/logout.ts?pick=POST","src/routes/API/Auth/logout.ts?pick=POST","src/routes/API/Auth/refresh.ts?pick=POST","src/routes/API/Auth/refresh.ts?pick=POST","src/routes/API/lib/addTransaction.ts?pick=POST","src/routes/API/lib/addTransaction.ts?pick=POST","src/routes/API/lib/getWalletsPaths.ts?pick=POST","src/routes/API/lib/getWalletsPaths.ts?pick=POST","src/routes/API/Wallets/addWallet.ts?pick=POST","src/routes/API/Wallets/addWallet.ts?pick=POST","src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","src/routes/API/Auth/login/index.ts?pick=POST","src/routes/API/Auth/login/index.ts?pick=POST","src/routes/API/Wallets/Wallet/addTransaction.ts?pick=POST","src/routes/API/Wallets/Wallet/addTransaction.ts?pick=POST","src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","src/routes/API/Wallets/Wallet/addTransactionByFile/addTransactions.ts?pick=POST","src/routes/API/Wallets/Wallet/addTransactionByFile/addTransactions.ts?pick=POST","src/routes/API/Wallets/Wallet/addTransactionByFile/uploadFile.ts?pick=POST","src/routes/API/Wallets/Wallet/addTransactionByFile/uploadFile.ts?pick=POST","src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css","src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css","src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css","src/routes/API/Wallets/deleteWallet.ts?tsr-directive-use-server=","src/routes/API/Wallets/Wallet/getTransactions.ts?tsr-directive-use-server=","src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=","src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=","src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=","src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=","src/server/auth.server.ts?tsr-directive-use-server=","src/server/auth.server.ts?tsr-directive-use-server=","src/server/auth.server.ts?tsr-directive-use-server=","src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=","src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=","src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=","src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=","src/routes/API/Wallets/getWallet.ts?tsr-directive-use-server=","src/routes/API/Auth/registration/createUser.ts?tsr-directive-use-server=","src/routes/API/Wallets/setWallet.ts?tsr-directive-use-server=","src/routes/API/Auth/registration/credentials/usernameAlreadyexist.ts?tsr-directive-use-server=","src/routes/API/Auth/registration/phone/phoneAlreadyexist.ts?tsr-directive-use-server=","src/routes/API/Auth/registration/email/emailAlreadyexist.ts?tsr-directive-use-server=","src/app.tsx"]},"_server-fns-runtime-DEO2-sKc.js":{"file":"assets/server-fns-runtime-DEO2-sKc.js","name":"server-fns-runtime","imports":["_fetchEvent-BW7O4Ysp.js"]},"_utils-Be6c5Kfn.js":{"file":"assets/utils-Be6c5Kfn.js","name":"utils","imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js"]},"node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx":{"file":"assets/index-WwoiZKEg.js","name":"index","src":"node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx","isDynamicEntry":true},"src/app.tsx":{"file":"assets/app-DedkBFsa.js","name":"app","src":"src/app.tsx","isDynamicEntry":true,"imports":["_server-fns-BehjaVV7.js","_Menu-B3jw0GIl.js","_Cursor-6qc4Ma5i.js","_auth-BeHg-fWi.js","_routing-Th2JWmJV.js","_action-CiKOD-Zz.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_response-CbUr9JDj.js","_components-Bjb1kgqQ.js"],"css":["assets/app-DNeOnZgp.css","assets/Cursor-DUhhJVLJ.css"]},"src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css":{"file":"index4.js","name":"index","src":"src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_Inputs-Cq_fgt2H.js","_Menu-B3jw0GIl.js","_auth-BeHg-fWi.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_routing-Th2JWmJV.js","_components-Bjb1kgqQ.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css":{"file":"index24.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_context-5bbmmXgY.js","_ButtonSparkle-BxHzGCPC.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css":{"file":"index26.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/index-CXQF54bi.css"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css":{"file":"index25.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_auth-BeHg-fWi.js","_ButtonSparkle-BxHzGCPC.js","_context-5bbmmXgY.js","_index-B8s1itkY.js","_Inputs-Cq_fgt2H.js","_pathWallets-DBFK87xo.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_routing-Th2JWmJV.js","_getWallets.server-DFLq-knu.js","_auth.server-QlO-zn0G.js"],"css":["assets/index-CXQF54bi.css"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css":{"file":"index18.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_context-5bbmmXgY.js","_auth-BeHg-fWi.js","_ButtonSparkle-BxHzGCPC.js","_index-B8s1itkY.js","_Inputs-Cq_fgt2H.js","_pathWallets-DBFK87xo.js","_Menu-B3jw0GIl.js","_index-ClXKiMUD.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_routing-Th2JWmJV.js","_getWallets.server-DFLq-knu.js","_auth.server-QlO-zn0G.js","_components-Bjb1kgqQ.js"],"css":["assets/index-CXQF54bi.css"]},"src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css":{"file":"index23.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_auth-BeHg-fWi.js","_context-5bbmmXgY.js","_ButtonSparkle-BxHzGCPC.js","_index-ClXKiMUD.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css":{"file":"index19.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_context-XUFMQc9R.js","_ButtonSparkle-BxHzGCPC.js","_auth-BeHg-fWi.js","_Menu-B3jw0GIl.js","_pathWallets-DBFK87xo.js","_components-Bjb1kgqQ.js","_routing-Th2JWmJV.js","_Inputs-Cq_fgt2H.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_getWallets.server-DFLq-knu.js","_auth.server-QlO-zn0G.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css":{"file":"mapper.js","name":"mapper","src":"src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_auth-BeHg-fWi.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css":{"file":"preview.js","name":"preview","src":"src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_context-XUFMQc9R.js","_ButtonSparkle-BxHzGCPC.js"]},"src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css":{"file":"uploadFile2.js","name":"uploadFile","src":"src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_auth-BeHg-fWi.js","_context-XUFMQc9R.js"]},"src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css":{"file":"index5.js","name":"index","src":"src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_Inputs-Cq_fgt2H.js","_Menu-B3jw0GIl.js","_auth-BeHg-fWi.js","_pathWallets-DBFK87xo.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_routing-Th2JWmJV.js","_components-Bjb1kgqQ.js","_getWallets.server-DFLq-knu.js","_auth.server-QlO-zn0G.js"]},"src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css":{"file":"pathWallets.js","name":"pathWallets","src":"src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Inputs-Cq_fgt2H.js","_getWallets.server-DFLq-knu.js","_auth.server-QlO-zn0G.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_routing-Th2JWmJV.js"]},"src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css":{"file":"index6.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_Inputs-Cq_fgt2H.js","_Menu-B3jw0GIl.js","_auth-BeHg-fWi.js","_routing-Th2JWmJV.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_components-Bjb1kgqQ.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css":{"file":"index10.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_Inputs-Cq_fgt2H.js","_Title-C8lsFfVd.js","_index-CI1g57kZ.js","_index.module-B9JvMj-k.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_routing-Th2JWmJV.js","_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css":{"file":"index11.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_Inputs-Cq_fgt2H.js","_otpInput-gt68IOgQ.js","_index-CI1g57kZ.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_routing-Th2JWmJV.js","_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css":{"file":"index12.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-gt68IOgQ.js","_ButtonSparkle-BxHzGCPC.js","_Inputs-Cq_fgt2H.js","_index-CI1g57kZ.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_routing-Th2JWmJV.js","_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css":{"file":"sendOtp.js","name":"sendOtp","src":"src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-gt68IOgQ.js","_Inputs-Cq_fgt2H.js","_index-CI1g57kZ.js","_icons-N8M97GAt.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_routing-Th2JWmJV.js","_ButtonSparkle-BxHzGCPC.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css":{"file":"index20.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_icons-N8M97GAt.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css":{"file":"otpInput.js","name":"otpInput","src":"src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_otpInput-gt68IOgQ.js","_index-CI1g57kZ.js","_Inputs-Cq_fgt2H.js","_action-CiKOD-Zz.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_ButtonSparkle-BxHzGCPC.js","_icons-N8M97GAt.js","_routing-Th2JWmJV.js"]},"src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css":{"file":"index21.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css":{"file":"index7.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Menu-B3jw0GIl.js","_index-CI1g57kZ.js","_ButtonSparkle-BxHzGCPC.js","_Inputs-Cq_fgt2H.js","_Title-C8lsFfVd.js","_index.module-B9JvMj-k.js","_otpInput-gt68IOgQ.js","_Cursor-6qc4Ma5i.js","_components-Bjb1kgqQ.js","_routing-Th2JWmJV.js","_icons-N8M97GAt.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js"],"css":["assets/Cursor-DUhhJVLJ.css"]},"src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css":{"file":"Toggle.js","name":"Toggle","src":"src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_index.module-0iUivGU7.js"],"css":["assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css":{"file":"index2.js","name":"index","src":"src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Menu-B3jw0GIl.js","_index.module-0iUivGU7.js","_ButtonSparkle-BxHzGCPC.js","_routing-Th2JWmJV.js","_components-Bjb1kgqQ.js"],"css":["assets/index-DgiZenf7.css","assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css":{"file":"riv.js","name":"riv","src":"src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/riv-VPAlW_cg.css"]},"src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css":{"file":"index22.js","name":"index","src":"src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css":{"file":"index8.js","name":"index","src":"src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_index-F84g_HFF.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js"],"css":["assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css":{"file":"_...slug_.js","name":"_...slug_","src":"src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Title-C8lsFfVd.js","_getWallets.server-DFLq-knu.js","_auth.server-QlO-zn0G.js","_prova-BDuT1_bg.js","_index-D_2WSMiS.js","_exchangeRates-Ds1olZ18.js","_index-C_IFjkFj.js","_index-F84g_HFF.js","_deleteWallet-DdSpVRBs.js","_routing-Th2JWmJV.js","_Inputs-Cq_fgt2H.js","_ButtonSparkle-BxHzGCPC.js","_auth-BeHg-fWi.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_components-Bjb1kgqQ.js","_Card.module-nMwE8ysR.js","_action-CiKOD-Zz.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"],"css":["assets/index-DoUIxqk_.css","assets/index-Ky9zR5dV.css"]},"src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css":{"file":"index14.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_prova-BDuT1_bg.js","_index-D_2WSMiS.js","_components-Bjb1kgqQ.js","_exchangeRates-Ds1olZ18.js","_Card.module-nMwE8ysR.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_auth.server-QlO-zn0G.js","_routing-Th2JWmJV.js"]},"src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css":{"file":"index15.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_routing-Th2JWmJV.js"]},"src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css":{"file":"preLoader.js","name":"preLoader","src":"src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css":{"file":"index17.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Inputs-Cq_fgt2H.js","_deleteWallet-DdSpVRBs.js","_index-D_2WSMiS.js","_ButtonSparkle-BxHzGCPC.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_routing-Th2JWmJV.js","_exchangeRates-Ds1olZ18.js","_Card.module-nMwE8ysR.js","_components-Bjb1kgqQ.js","_auth.server-QlO-zn0G.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"],"css":["assets/index-DoUIxqk_.css"]},"src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css":{"file":"index13.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Inputs-Cq_fgt2H.js","_index-D_2WSMiS.js","_ButtonSparkle-BxHzGCPC.js","_auth-BeHg-fWi.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_action-CiKOD-Zz.js","_routing-Th2JWmJV.js","_exchangeRates-Ds1olZ18.js","_Card.module-nMwE8ysR.js","_components-Bjb1kgqQ.js","_auth.server-QlO-zn0G.js"],"dynamicImports":["node_modules/.pnpm/@thednp+solid-color-picker@0.0.13_solid-js@1.9.5/node_modules/@thednp/solid-color-picker/dist/index.jsx"],"css":["assets/index-DoUIxqk_.css"]},"src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css":{"file":"Card.js","name":"Card","src":"src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Card.module-nMwE8ysR.js","_components-Bjb1kgqQ.js","_routing-Th2JWmJV.js"]},"src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css":{"file":"index16.js","name":"index","src":"src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_exchangeRates-Ds1olZ18.js","_auth.server-QlO-zn0G.js","_components-Bjb1kgqQ.js","_Card.module-nMwE8ysR.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_routing-Th2JWmJV.js"]},"src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css":{"file":"index3.js","name":"index","src":"src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Title-C8lsFfVd.js","_getWallets.server-DFLq-knu.js","_auth.server-QlO-zn0G.js","_index-C_IFjkFj.js","_index-D_2WSMiS.js","_exchangeRates-Ds1olZ18.js","_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_prova-BDuT1_bg.js","_components-Bjb1kgqQ.js","_routing-Th2JWmJV.js","_Inputs-Cq_fgt2H.js","_action-CiKOD-Zz.js","_deleteWallet-DdSpVRBs.js","_ButtonSparkle-BxHzGCPC.js","_Card.module-nMwE8ysR.js"],"css":["assets/index-DoUIxqk_.css"]},"src/routes/API/Auth/login/index.ts?pick=POST":{"file":"index9.js","name":"index","src":"src/routes/API/Auth/login/index.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_utils-Be6c5Kfn.js","_response-CbUr9JDj.js","_server-fns-runtime-DEO2-sKc.js"]},"src/routes/API/Auth/logout.ts?pick=POST":{"file":"logout.js","name":"logout","src":"src/routes/API/Auth/logout.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_auth.server-QlO-zn0G.js","_response-CbUr9JDj.js","_server-fns-runtime-DEO2-sKc.js"]},"src/routes/API/Auth/refresh.ts?pick=POST":{"file":"refresh.js","name":"refresh","src":"src/routes/API/Auth/refresh.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_utils-Be6c5Kfn.js","_response-CbUr9JDj.js","_server-fns-runtime-DEO2-sKc.js"]},"src/routes/API/Auth/registration/createUser.ts?tsr-directive-use-server=":{"file":"assets/createUser-CqiEsOu_.js","name":"createUser","src":"src/routes/API/Auth/registration/createUser.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Auth/registration/credentials/usernameAlreadyexist.ts?tsr-directive-use-server=":{"file":"assets/usernameAlreadyexist-CUMQy92F.js","name":"usernameAlreadyexist","src":"src/routes/API/Auth/registration/credentials/usernameAlreadyexist.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Auth/registration/email/emailAlreadyexist.ts?tsr-directive-use-server=":{"file":"assets/emailAlreadyexist-BoJ37vKf.js","name":"emailAlreadyexist","src":"src/routes/API/Auth/registration/email/emailAlreadyexist.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Auth/registration/phone/phoneAlreadyexist.ts?tsr-directive-use-server=":{"file":"assets/phoneAlreadyexist-BFvINIFk.js","name":"phoneAlreadyexist","src":"src/routes/API/Auth/registration/phone/phoneAlreadyexist.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Wallets/Wallet/addTransaction.ts?pick=POST":{"file":"addTransaction2.js","name":"addTransaction","src":"src/routes/API/Wallets/Wallet/addTransaction.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_auth.server-QlO-zn0G.js","_response-CbUr9JDj.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Wallets/Wallet/addTransactionByFile/addTransactions.ts?pick=POST":{"file":"addTransactions.js","name":"addTransactions","src":"src/routes/API/Wallets/Wallet/addTransactionByFile/addTransactions.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_response-CbUr9JDj.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Wallets/Wallet/addTransactionByFile/uploadFile.ts?pick=POST":{"file":"uploadFile.js","name":"uploadFile","src":"src/routes/API/Wallets/Wallet/addTransactionByFile/uploadFile.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css":{"file":"getTransactions.js","name":"getTransactions","src":"src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Wallets/Wallet/getTransactions.ts?tsr-directive-use-server=":{"file":"assets/getTransactions-Cr4f694O.js","name":"getTransactions","src":"src/routes/API/Wallets/Wallet/getTransactions.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Wallets/addWallet.ts?pick=POST":{"file":"addWallet.js","name":"addWallet","src":"src/routes/API/Wallets/addWallet.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_response-CbUr9JDj.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css":{"file":"deleteWallet.js","name":"deleteWallet","src":"src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Wallets/deleteWallet.ts?tsr-directive-use-server=":{"file":"assets/deleteWallet-jK3sXpn2.js","name":"deleteWallet","src":"src/routes/API/Wallets/deleteWallet.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Wallets/getWallet.ts?tsr-directive-use-server=":{"file":"assets/getWallet-CFmvrtny.js","name":"getWallet","src":"src/routes/API/Wallets/getWallet.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=":{"file":"assets/getWallets.server-Ddr8BrzP.js","name":"getWallets.server","src":"src/routes/API/Wallets/getWallets.server.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/Wallets/setWallet.ts?tsr-directive-use-server=":{"file":"assets/setWallet-LYtwpUnS.js","name":"setWallet","src":"src/routes/API/Wallets/setWallet.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=":{"file":"assets/exchangeRates-BoUYCRuj.js","name":"exchangeRates","src":"src/routes/API/exchangeRates/exchangeRates.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/lib/addTransaction.ts?pick=POST":{"file":"addTransaction.js","name":"addTransaction","src":"src/routes/API/lib/addTransaction.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_db.server-CDeyn5Z_.js","_response-CbUr9JDj.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/API/lib/getWalletsPaths.ts?pick=POST":{"file":"getWalletsPaths.js","name":"getWalletsPaths","src":"src/routes/API/lib/getWalletsPaths.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_auth.server-QlO-zn0G.js","_getWallets.server-DFLq-knu.js","_response-CbUr9JDj.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js"]},"src/routes/API/prova.ts?pick=POST":{"file":"prova.js","name":"prova","src":"src/routes/API/prova.ts?pick=POST","isEntry":true,"isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_response-CbUr9JDj.js","_fetchEvent-BW7O4Ysp.js"]},"src/routes/UI/Cursor.tsx?pick=default&pick=$css":{"file":"Cursor.js","name":"Cursor","src":"src/routes/UI/Cursor.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"css":["assets/Cursor-DUhhJVLJ.css"]},"src/routes/UI/Loading.tsx?pick=default&pick=$css":{"file":"Loading.js","name":"Loading","src":"src/routes/UI/Loading.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/UI/Waves.tsx?pick=default&pick=$css":{"file":"Waves.js","name":"Waves","src":"src/routes/UI/Waves.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true},"src/routes/[...404].tsx?pick=default&pick=$css":{"file":"_...404_.js","name":"_...404_","src":"src/routes/[...404].tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_ButtonSparkle-BxHzGCPC.js","_Menu-B3jw0GIl.js","_components-Bjb1kgqQ.js","_routing-Th2JWmJV.js"],"css":["assets/_..-D39vbXZ9.css"]},"src/routes/index.tsx?pick=default&pick=$css":{"file":"index.js","name":"index","src":"src/routes/index.tsx?pick=default&pick=$css","isEntry":true,"isDynamicEntry":true,"imports":["_Menu-B3jw0GIl.js","_components-Bjb1kgqQ.js","_routing-Th2JWmJV.js"]},"src/server/auth.server.ts?tsr-directive-use-server=":{"file":"assets/auth.server-F_zbwjhE.js","name":"auth.server","src":"src/server/auth.server.ts?tsr-directive-use-server=","isDynamicEntry":true,"imports":["_server-fns-runtime-DEO2-sKc.js","_fetchEvent-BW7O4Ysp.js"]},"virtual:$vinxi/handler/server-fns":{"file":"server-fns.js","name":"server-fns","src":"virtual:$vinxi/handler/server-fns","isEntry":true,"imports":["_server-fns-BehjaVV7.js","_fetchEvent-BW7O4Ysp.js","_db.server-CDeyn5Z_.js","_response-CbUr9JDj.js"]}}};
 
 				const routeManifest = {"ssr":{},"client":{},"server-fns":{}};
 
@@ -3491,3203 +3618,10 @@ plugin,
 app
 ];
 
-const assets$1 = {
-  "/index.html": {
-    "type": "text/html; charset=utf-8",
-    "etag": "\"af28-Rg1sGZM1QsjpeqrHyR2MsTw6Ogo\"",
-    "mtime": "2025-04-12T15:15:13.350Z",
-    "size": 44840,
-    "path": "../public/index.html"
-  },
-  "/index.html.br": {
-    "type": "text/html; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"a16-0jCEkPa/gekfCxLo+TD0tJzkv3Q\"",
-    "mtime": "2025-04-12T15:15:13.450Z",
-    "size": 2582,
-    "path": "../public/index.html.br"
-  },
-  "/index.html.gz": {
-    "type": "text/html; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"c6c-SdufXjnXSsoGpVKfZo/sM+Kf07Y\"",
-    "mtime": "2025-04-12T15:15:13.408Z",
-    "size": 3180,
-    "path": "../public/index.html.gz"
-  },
-  "/logo.png": {
-    "type": "image/png",
-    "etag": "\"42799-FEHDFk5YBHIlck5tEzZIyNjlQeE\"",
-    "mtime": "2025-03-26T19:44:32.344Z",
-    "size": 272281,
-    "path": "../public/logo.png"
-  },
-  "/Icons/Dashboard.svg": {
-    "type": "image/svg+xml",
-    "etag": "\"3b5-o984ujsA5YS9gLdCt2inpgdEbMw\"",
-    "mtime": "2025-03-07T21:50:23.428Z",
-    "size": 949,
-    "path": "../public/Icons/Dashboard.svg"
-  },
-  "/Icons/delete.png": {
-    "type": "image/png",
-    "etag": "\"216-zLmMxdCNy0KmgI3lO9dcE4Gl8Pg\"",
-    "mtime": "2025-04-07T12:47:01.897Z",
-    "size": 534,
-    "path": "../public/Icons/delete.png"
-  },
-  "/Icons/edit.png": {
-    "type": "image/png",
-    "etag": "\"226-2IfurRUurrp4wntfwbuj53vMqL4\"",
-    "mtime": "2025-04-07T12:47:01.898Z",
-    "size": 550,
-    "path": "../public/Icons/edit.png"
-  },
-  "/LoginRegistration/index.html": {
-    "type": "text/html; charset=utf-8",
-    "etag": "\"aece-Mw6Ze3QU5jL7BsTu3O+dGYzNq2Y\"",
-    "mtime": "2025-04-12T15:15:13.378Z",
-    "size": 44750,
-    "path": "../public/LoginRegistration/index.html"
-  },
-  "/LoginRegistration/index.html.br": {
-    "type": "text/html; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"a02-8L7BlomD1ljO6pp8JwKTkFdHaPA\"",
-    "mtime": "2025-04-12T15:15:13.448Z",
-    "size": 2562,
-    "path": "../public/LoginRegistration/index.html.br"
-  },
-  "/LoginRegistration/index.html.gz": {
-    "type": "text/html; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"c19-MiZU8cfT43UmYkxiDBwgANC4D7c\"",
-    "mtime": "2025-04-12T15:15:13.408Z",
-    "size": 3097,
-    "path": "../public/LoginRegistration/index.html.gz"
-  },
-  "/assets/action-DzH6FtPs.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"815-g+UuACj04SOSd95ADdq7P0BgUKk\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 2069,
-    "path": "../public/assets/action-DzH6FtPs.js.br"
-  },
-  "/assets/action-DzH6FtPs.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"8ea-v5SFO6GfC1O7Ize9FSEbNTpJVXk\"",
-    "mtime": "2025-04-12T15:14:55.557Z",
-    "size": 2282,
-    "path": "../public/assets/action-DzH6FtPs.js.gz"
-  },
-  "/assets/ButtonSparkle-C8CRtCd0.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"10fa-0BUBUY2KaBooDDfxflmxDZXj8xE\"",
-    "mtime": "2025-04-12T15:14:23.085Z",
-    "size": 4346,
-    "path": "../public/assets/ButtonSparkle-C8CRtCd0.css"
-  },
-  "/assets/ButtonSparkle-C8CRtCd0.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"4f0-eo0y9i2/+nc2UH0pq1pwHoLFTVk\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 1264,
-    "path": "../public/assets/ButtonSparkle-C8CRtCd0.css.br"
-  },
-  "/assets/ButtonSparkle-C8CRtCd0.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"5b1-4I9y4effx5fawJJfKqw0pN8QUcU\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 1457,
-    "path": "../public/assets/ButtonSparkle-C8CRtCd0.css.gz"
-  },
-  "/assets/ButtonSparkle-DNpTyev3.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"323-syEyUo/C+tELCd0CZThFlJRE3nE\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 803,
-    "path": "../public/assets/ButtonSparkle-DNpTyev3.js.br"
-  },
-  "/assets/ButtonSparkle-DNpTyev3.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"3a7-poOR9/emhHLdSESz/QvdIpLKgmE\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 935,
-    "path": "../public/assets/ButtonSparkle-DNpTyev3.js.gz"
-  },
-  "/assets/Card-BcrU3z9h.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"f0-L8S4eH4QuXus4A26i2WE0HVv6iU\"",
-    "mtime": "2025-04-12T15:14:23.088Z",
-    "size": 240,
-    "path": "../public/assets/Card-BcrU3z9h.css"
-  },
-  "/assets/Cursor-DUhhJVLJ.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"71f-z5m+w2kQQQxzF/2oVUabE0Nw4qg\"",
-    "mtime": "2025-04-12T15:14:23.084Z",
-    "size": 1823,
-    "path": "../public/assets/Cursor-DUhhJVLJ.css"
-  },
-  "/assets/Cursor-DUhhJVLJ.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"1f5-z3MUflhbmOHXrDl7L9quvhScDb0\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 501,
-    "path": "../public/assets/Cursor-DUhhJVLJ.css.br"
-  },
-  "/assets/Cursor-DUhhJVLJ.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"24c-qrXtHdYiWUmIWRwPTjKABl9R2og\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 588,
-    "path": "../public/assets/Cursor-DUhhJVLJ.css.gz"
-  },
-  "/assets/deleteWallet-CDUDB5HW.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2c8-/xRyF2qN3Obj1LCY3KomSZiKUnc\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 712,
-    "path": "../public/assets/deleteWallet-CDUDB5HW.js.br"
-  },
-  "/assets/deleteWallet-CDUDB5HW.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"329-Cifqrd7DYbGkAj8NHhi6evpUCB8\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 809,
-    "path": "../public/assets/deleteWallet-CDUDB5HW.js.gz"
-  },
-  "/assets/deleteWallet-CHR-5aIQ.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"24ec-pB0gU0RlZF/Qbzhi4KapFQp6D+U\"",
-    "mtime": "2025-04-12T15:14:23.084Z",
-    "size": 9452,
-    "path": "../public/assets/deleteWallet-CHR-5aIQ.css"
-  },
-  "/assets/deleteWallet-CHR-5aIQ.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"7fa-qPKh2HQsMESo0L1iKYI/ICxRcd4\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 2042,
-    "path": "../public/assets/deleteWallet-CHR-5aIQ.css.br"
-  },
-  "/assets/deleteWallet-CHR-5aIQ.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"929-pXaMaE5UVYJzdF8yhV00copbbwQ\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 2345,
-    "path": "../public/assets/deleteWallet-CHR-5aIQ.css.gz"
-  },
-  "/assets/exchangeRates-B5IJmiQP.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"b61-2eTBgWKw3PukgeMUmR911yPMAzY\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 2913,
-    "path": "../public/assets/exchangeRates-B5IJmiQP.js.br"
-  },
-  "/assets/exchangeRates-B5IJmiQP.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"c9d-sZweCPT7qvaITENwqs4FnLow4xI\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 3229,
-    "path": "../public/assets/exchangeRates-B5IJmiQP.js.gz"
-  },
-  "/assets/exchangeRates-BMINihpv.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"83-KzxKptaFVo7ktiNGDy58ufA10u8\"",
-    "mtime": "2025-04-12T15:14:23.085Z",
-    "size": 131,
-    "path": "../public/assets/exchangeRates-BMINihpv.css"
-  },
-  "/assets/fetchEvent-Ce2Ui3zq.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"5f5-bfgR5WfQmpniuPHuj8TE4gREH9Y\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 1525,
-    "path": "../public/assets/fetchEvent-Ce2Ui3zq.js.br"
-  },
-  "/assets/fetchEvent-Ce2Ui3zq.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"6a4-HNYeOaBCIFaUqE8h4vPBjA6U1Jw\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 1700,
-    "path": "../public/assets/fetchEvent-Ce2Ui3zq.js.gz"
-  },
-  "/assets/icons-Bh8061KW.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"2121-o/aZ5SHM/A7BCoclYc5YhiEjCoo\"",
-    "mtime": "2025-04-12T15:14:23.086Z",
-    "size": 8481,
-    "path": "../public/assets/icons-Bh8061KW.css"
-  },
-  "/assets/icons-Bh8061KW.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"71c-jm/DTUo4zCvWcPTYD0yiN5bCuAg\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 1820,
-    "path": "../public/assets/icons-Bh8061KW.css.br"
-  },
-  "/assets/icons-Bh8061KW.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"818-/0kwbJh3cYfA8GcWIbMNmcAZnVQ\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 2072,
-    "path": "../public/assets/icons-Bh8061KW.css.gz"
-  },
-  "/assets/icons-N8M97GAt.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2dd-kKI/4nhY/aUHpxMLLD0d1CgtF8k\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 733,
-    "path": "../public/assets/icons-N8M97GAt.js.br"
-  },
-  "/assets/icons-N8M97GAt.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"33b-hpvS+fDTmsO2pWTtmKZ6HLI5F9s\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 827,
-    "path": "../public/assets/icons-N8M97GAt.js.gz"
-  },
-  "/assets/index-Bep36fvr.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"54a-/ZVZ+KPdNwoYsQLTIaXA52Qqy20\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 1354,
-    "path": "../public/assets/index-Bep36fvr.js.br"
-  },
-  "/assets/index-Bep36fvr.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"629-qBVBMfL4KNb+gbOVSzCrjMPvJXw\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 1577,
-    "path": "../public/assets/index-Bep36fvr.js.gz"
-  },
-  "/assets/index-Bn1gRDsI.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"1ce-Zk1OExjcn8O4Mn8k5LFv4/S789M\"",
-    "mtime": "2025-04-12T15:14:23.084Z",
-    "size": 462,
-    "path": "../public/assets/index-Bn1gRDsI.css"
-  },
-  "/assets/index-BUMPztWr.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"1e3-U6YW/anMhgfaWI37M2oAC3zT0U8\"",
-    "mtime": "2025-04-12T15:14:23.084Z",
-    "size": 483,
-    "path": "../public/assets/index-BUMPztWr.css"
-  },
-  "/assets/index-C1h2BJ6l.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"fc-IdF95Ew7kpLK8x8UIamF/bkH/F8\"",
-    "mtime": "2025-04-12T15:14:23.084Z",
-    "size": 252,
-    "path": "../public/assets/index-C1h2BJ6l.css"
-  },
-  "/assets/index-CI1g57kZ.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2b6-YieB8XhoH2I1wmytIqnFRNF0rLk\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 694,
-    "path": "../public/assets/index-CI1g57kZ.js.br"
-  },
-  "/assets/index-CI1g57kZ.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"32f-i9A6pyqfTOfcU90zagJxJsd2zio\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 815,
-    "path": "../public/assets/index-CI1g57kZ.js.gz"
-  },
-  "/assets/index-DFJEjzPR.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"e89-69vO5ckkTxtwHaXt2qbYBy93V3w\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 3721,
-    "path": "../public/assets/index-DFJEjzPR.js.br"
-  },
-  "/assets/index-DFJEjzPR.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"1031-D4t6JGhw0y2ilC9ThwIdodQUNQg\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 4145,
-    "path": "../public/assets/index-DFJEjzPR.js.gz"
-  },
-  "/assets/index-DYZ-zTTq.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"4e3-KgU3hnzYfeIw+0rwOuBKDudjKc4\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 1251,
-    "path": "../public/assets/index-DYZ-zTTq.js.br"
-  },
-  "/assets/index-DYZ-zTTq.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"5b9-SjMH5vKUr2b0V5G/ltprelSVRS0\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 1465,
-    "path": "../public/assets/index-DYZ-zTTq.js.gz"
-  },
-  "/assets/index-Ky9zR5dV.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"275-YocJd4VF6I9gUSSBMIiuWFc6Yaw\"",
-    "mtime": "2025-04-12T15:14:23.089Z",
-    "size": 629,
-    "path": "../public/assets/index-Ky9zR5dV.css"
-  },
-  "/assets/index-WwoiZKEg.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"4d06-hvthFnYPoMAmSBN/IgrOQYhpSAc\"",
-    "mtime": "2025-04-12T15:14:55.576Z",
-    "size": 19718,
-    "path": "../public/assets/index-WwoiZKEg.js.br"
-  },
-  "/assets/index-WwoiZKEg.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"5b59-ZFTpbgtZAgW/hYmVqBec0BAiSm0\"",
-    "mtime": "2025-04-12T15:14:55.576Z",
-    "size": 23385,
-    "path": "../public/assets/index-WwoiZKEg.js.gz"
-  },
-  "/assets/index-XVT8Ct04.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"35e-sKa9pZi84ZiJu2TjPY7LmMSzG/o\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 862,
-    "path": "../public/assets/index-XVT8Ct04.js.br"
-  },
-  "/assets/index-XVT8Ct04.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"3fe-XT2B9UKHWgpt2IectEaGMNrEdDk\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 1022,
-    "path": "../public/assets/index-XVT8Ct04.js.gz"
-  },
-  "/assets/Inputs-Bqq548qA.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"cac-5xUbqIysRq8KE3AOoV/cNoIabV0\"",
-    "mtime": "2025-04-12T15:14:23.085Z",
-    "size": 3244,
-    "path": "../public/assets/Inputs-Bqq548qA.css"
-  },
-  "/assets/Inputs-Bqq548qA.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"3c1-Ray3nts1Bwyo6sYthtbayyZbpCg\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 961,
-    "path": "../public/assets/Inputs-Bqq548qA.css.br"
-  },
-  "/assets/Inputs-Bqq548qA.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"459-DoNxJCc+CJjJIOlW5HKj9K9vBR0\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 1113,
-    "path": "../public/assets/Inputs-Bqq548qA.css.gz"
-  },
-  "/assets/Inputs-BxVpbjg0.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"a90-mTfLepSctctZu9qSfm8x7DEaOdY\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 2704,
-    "path": "../public/assets/Inputs-BxVpbjg0.js.br"
-  },
-  "/assets/Inputs-BxVpbjg0.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"c2e-48HaAfK8Fz3DBqVG+hb8mkuu+UI\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 3118,
-    "path": "../public/assets/Inputs-BxVpbjg0.js.gz"
-  },
-  "/assets/Menu-CNxWw250.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"3cc-uCNbRVKq5xqCdiG6H8d7U/c1OBQ\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 972,
-    "path": "../public/assets/Menu-CNxWw250.js.br"
-  },
-  "/assets/Menu-CNxWw250.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"441-4HWzLuEcqzazg6xoG1E4yi5XEkY\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 1089,
-    "path": "../public/assets/Menu-CNxWw250.js.gz"
-  },
-  "/assets/Menu-DSzeyodt.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"406-yXxJ7F5KIwI5YF6g5rdOrJ9UDNw\"",
-    "mtime": "2025-04-12T15:14:23.084Z",
-    "size": 1030,
-    "path": "../public/assets/Menu-DSzeyodt.css"
-  },
-  "/assets/Menu-DSzeyodt.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"169-hS7escrmswjNhFq5i/vIm4s7Y+c\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 361,
-    "path": "../public/assets/Menu-DSzeyodt.css.br"
-  },
-  "/assets/Menu-DSzeyodt.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"1c7-rIHpHvCKxxnv/ble8qHPJ+Qp4lc\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 455,
-    "path": "../public/assets/Menu-DSzeyodt.css.gz"
-  },
-  "/assets/otpInput-Jfxp9i2z.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"8a1-rwWoeJ7q/eGpYSDcDDMUlVjuTcQ\"",
-    "mtime": "2025-04-12T15:14:55.559Z",
-    "size": 2209,
-    "path": "../public/assets/otpInput-Jfxp9i2z.js.br"
-  },
-  "/assets/otpInput-Jfxp9i2z.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"9f8-O/4qTQmswxOdwYxoz2JwB3ycrS0\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 2552,
-    "path": "../public/assets/otpInput-Jfxp9i2z.js.gz"
-  },
-  "/assets/otpInput-tBTztLmB.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"30e-BRU62CsVY4iiAFz59isIZdKOAGI\"",
-    "mtime": "2025-04-12T15:14:23.085Z",
-    "size": 782,
-    "path": "../public/assets/otpInput-tBTztLmB.css"
-  },
-  "/assets/prova-BQfA7nlw.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"24d-pjhsDyH2WJVNqSyEIwsmzb1xpu0\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 589,
-    "path": "../public/assets/prova-BQfA7nlw.js.br"
-  },
-  "/assets/prova-BQfA7nlw.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"2a2-WRun/3l2QaNOBTnSFxgWQhvDuxM\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 674,
-    "path": "../public/assets/prova-BQfA7nlw.js.gz"
-  },
-  "/assets/riv-VPAlW_cg.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"55-HKRxB0OLEvqM0460qByGA52sIg0\"",
-    "mtime": "2025-04-12T15:14:23.086Z",
-    "size": 85,
-    "path": "../public/assets/riv-VPAlW_cg.css"
-  },
-  "/assets/routing-DxIlI4R1.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"d24-o7QMWB0ZmLaJE5bHDFk3Ccfh0gs\"",
-    "mtime": "2025-04-12T15:14:55.559Z",
-    "size": 3364,
-    "path": "../public/assets/routing-DxIlI4R1.js.br"
-  },
-  "/assets/routing-DxIlI4R1.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"e79-OdhHKQP3lSVSdxwMM3Hs4nOo+BU\"",
-    "mtime": "2025-04-12T15:14:55.558Z",
-    "size": 3705,
-    "path": "../public/assets/routing-DxIlI4R1.js.gz"
-  },
-  "/assets/ssr-CZcrTF1W.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"3c81-zvqDEmGg5mdKWb68ekPIr/RsNkQ\"",
-    "mtime": "2025-04-12T15:14:23.083Z",
-    "size": 15489,
-    "path": "../public/assets/ssr-CZcrTF1W.css"
-  },
-  "/assets/ssr-CZcrTF1W.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"d98-8M3lvkko9YSgTm2k9dkY5EYf0ZA\"",
-    "mtime": "2025-04-12T15:14:55.559Z",
-    "size": 3480,
-    "path": "../public/assets/ssr-CZcrTF1W.css.br"
-  },
-  "/assets/ssr-CZcrTF1W.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"fc2-K7yNTbs+ZfhWiWHZO/F4NZ8tZkQ\"",
-    "mtime": "2025-04-12T15:14:55.559Z",
-    "size": 4034,
-    "path": "../public/assets/ssr-CZcrTF1W.css.gz"
-  },
-  "/assets/Title-C8lsFfVd.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"643-3HyVvbzpRltAqieGqnicjGpgHuc\"",
-    "mtime": "2025-04-12T15:14:55.559Z",
-    "size": 1603,
-    "path": "../public/assets/Title-C8lsFfVd.js.br"
-  },
-  "/assets/Title-C8lsFfVd.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"744-iNA492Miha74EKdRHlKcK07xQCw\"",
-    "mtime": "2025-04-12T15:14:55.559Z",
-    "size": 1860,
-    "path": "../public/assets/Title-C8lsFfVd.js.gz"
-  },
-  "/assets/_..-D39vbXZ9.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"44ea-Hv6m+tmEfbb+wzixrawKm67P9YE\"",
-    "mtime": "2025-04-12T15:14:23.085Z",
-    "size": 17642,
-    "path": "../public/assets/_..-D39vbXZ9.css"
-  },
-  "/assets/_..-D39vbXZ9.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"861-0donVGTyqHLQzOZdP6KKEZ6C4QU\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 2145,
-    "path": "../public/assets/_..-D39vbXZ9.css.br"
-  },
-  "/assets/_..-D39vbXZ9.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"ace-e+MM8TTmRp6yvUSfIgjDFSAg/v8\"",
-    "mtime": "2025-04-12T15:14:55.559Z",
-    "size": 2766,
-    "path": "../public/assets/_..-D39vbXZ9.css.gz"
-  },
-  "/rivs/Bell.riv": {
-    "type": "text/plain; charset=utf-8",
-    "etag": "\"c9d-UFgKDsRQezSk1ksOyLUpL1VcIyQ\"",
-    "mtime": "2025-03-14T17:25:54.365Z",
-    "size": 3229,
-    "path": "../public/rivs/Bell.riv"
-  },
-  "/rivs/Bell.riv.br": {
-    "type": "text/plain; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"421-6PXLC/hJmNwTHhHv4jahutvFd4E\"",
-    "mtime": "2025-04-12T15:14:55.559Z",
-    "size": 1057,
-    "path": "../public/rivs/Bell.riv.br"
-  },
-  "/rivs/Bell.riv.gz": {
-    "type": "text/plain; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"4bf-aI/uTQdeag1ohL+EaJyuWm32sW4\"",
-    "mtime": "2025-04-12T15:14:55.559Z",
-    "size": 1215,
-    "path": "../public/rivs/Bell.riv.gz"
-  },
-  "/rivs/LoginRegistration.riv": {
-    "type": "text/plain; charset=utf-8",
-    "etag": "\"388a81-hjzPy3r11UJ4XIVtVi6SAG2stb8\"",
-    "mtime": "2025-03-16T11:04:46.313Z",
-    "size": 3705473,
-    "path": "../public/rivs/LoginRegistration.riv"
-  },
-  "/rivs/LoginRegistration.riv.br": {
-    "type": "text/plain; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2a02dd-7eg4Sp5APJl7nhgdYLkBP4/3P00\"",
-    "mtime": "2025-04-12T15:15:04.640Z",
-    "size": 2753245,
-    "path": "../public/rivs/LoginRegistration.riv.br"
-  },
-  "/rivs/LoginRegistration.riv.gz": {
-    "type": "text/plain; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"2cd749-jEyBkYllxtdZXFT60c9IN8VLHNI\"",
-    "mtime": "2025-04-12T15:14:55.915Z",
-    "size": 2938697,
-    "path": "../public/rivs/LoginRegistration.riv.gz"
-  },
-  "/_build/manifest.webmanifest": {
-    "type": "application/manifest+json",
-    "etag": "\"184-k7h7JvwbvTsxCalXdIuA34cdVjk\"",
-    "mtime": "2025-04-12T15:14:43.406Z",
-    "size": 388,
-    "path": "../public/_build/manifest.webmanifest"
-  },
-  "/_build/registerSW.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"94-cci5Bilset1FDW+Y3OFpEe4JMyM\"",
-    "mtime": "2025-04-12T15:14:43.406Z",
-    "size": 148,
-    "path": "../public/_build/registerSW.js"
-  },
-  "/_build/sw.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"15e5-xguJSULGJK0iuh6buui8+lHLpTQ\"",
-    "mtime": "2025-04-12T15:14:46.881Z",
-    "size": 5605,
-    "path": "../public/_build/sw.js"
-  },
-  "/_build/sw.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"649-MYI1uDD3p+UAq2EfuQxwL4wPBxk\"",
-    "mtime": "2025-04-12T15:14:55.559Z",
-    "size": 1609,
-    "path": "../public/_build/sw.js.br"
-  },
-  "/_build/sw.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"70c-sf1gvguwJyJCIw9ZmovoGZkIYkc\"",
-    "mtime": "2025-04-12T15:14:55.559Z",
-    "size": 1804,
-    "path": "../public/_build/sw.js.gz"
-  },
-  "/_build/workbox-4dbe5713.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"5561-L2Mj6Eevtm5xcg9gk3jmmeFJizg\"",
-    "mtime": "2025-04-12T15:14:46.886Z",
-    "size": 21857,
-    "path": "../public/_build/workbox-4dbe5713.js"
-  },
-  "/_build/workbox-4dbe5713.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"1a42-Vs2ql9j8jFRekJ+ztLj8V8zRGYc\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 6722,
-    "path": "../public/_build/workbox-4dbe5713.js.br"
-  },
-  "/_build/workbox-4dbe5713.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"1cf9-uRckBon8zH45Pg6iZYE5jGbRbeU\"",
-    "mtime": "2025-04-12T15:14:55.559Z",
-    "size": 7417,
-    "path": "../public/_build/workbox-4dbe5713.js.gz"
-  },
-  "/Fonts/PPPierSans/PPPierSans-Bold.otf": {
-    "type": "font/otf",
-    "etag": "\"6e80-VR2vVogOcoDkMkj/5nYjXJY9Mw8\"",
-    "mtime": "2025-03-07T09:06:56.000Z",
-    "size": 28288,
-    "path": "../public/Fonts/PPPierSans/PPPierSans-Bold.otf"
-  },
-  "/Fonts/PPPierSans/PPPierSans-Bold.otf.br": {
-    "type": "font/otf",
-    "encoding": "br",
-    "etag": "\"45fb-d3Gf20qGPcds9t94bplr5an1eX4\"",
-    "mtime": "2025-04-12T15:14:55.579Z",
-    "size": 17915,
-    "path": "../public/Fonts/PPPierSans/PPPierSans-Bold.otf.br"
-  },
-  "/Fonts/PPPierSans/PPPierSans-Bold.otf.gz": {
-    "type": "font/otf",
-    "encoding": "gzip",
-    "etag": "\"4f23-03l4Wvg7vHaQMAo694zFeaFme2c\"",
-    "mtime": "2025-04-12T15:14:55.576Z",
-    "size": 20259,
-    "path": "../public/Fonts/PPPierSans/PPPierSans-Bold.otf.gz"
-  },
-  "/Fonts/PPPierSans/PPPierSans-BoldItalic.otf": {
-    "type": "font/otf",
-    "etag": "\"6dd0-qGt8wq0u/B8jKOvd95U3mO9Vf8c\"",
-    "mtime": "2025-03-07T09:06:55.000Z",
-    "size": 28112,
-    "path": "../public/Fonts/PPPierSans/PPPierSans-BoldItalic.otf"
-  },
-  "/Fonts/PPPierSans/PPPierSans-BoldItalic.otf.br": {
-    "type": "font/otf",
-    "encoding": "br",
-    "etag": "\"466f-1pyG0wJkw3j8mCnEpFkcV6VLjL4\"",
-    "mtime": "2025-04-12T15:14:55.577Z",
-    "size": 18031,
-    "path": "../public/Fonts/PPPierSans/PPPierSans-BoldItalic.otf.br"
-  },
-  "/Fonts/PPPierSans/PPPierSans-BoldItalic.otf.gz": {
-    "type": "font/otf",
-    "encoding": "gzip",
-    "etag": "\"4f54-bvWyPFh2LPiq5tq84cYm6F9NKEw\"",
-    "mtime": "2025-04-12T15:14:55.576Z",
-    "size": 20308,
-    "path": "../public/Fonts/PPPierSans/PPPierSans-BoldItalic.otf.gz"
-  },
-  "/Fonts/PPPierSans/PPPierSans-Italic.otf": {
-    "type": "font/otf",
-    "etag": "\"6b24-OpnzkjulTux8wrnlg2Lqoo8YLGs\"",
-    "mtime": "2025-03-07T09:06:55.000Z",
-    "size": 27428,
-    "path": "../public/Fonts/PPPierSans/PPPierSans-Italic.otf"
-  },
-  "/Fonts/PPPierSans/PPPierSans-Italic.otf.br": {
-    "type": "font/otf",
-    "encoding": "br",
-    "etag": "\"4554-1PGpiCaXCStoB5g14wDy+hl/Oqk\"",
-    "mtime": "2025-04-12T15:14:55.576Z",
-    "size": 17748,
-    "path": "../public/Fonts/PPPierSans/PPPierSans-Italic.otf.br"
-  },
-  "/Fonts/PPPierSans/PPPierSans-Italic.otf.gz": {
-    "type": "font/otf",
-    "encoding": "gzip",
-    "etag": "\"4df2-5YoLSipgbHI2dJ+1/wdrCtW2SRM\"",
-    "mtime": "2025-04-12T15:14:55.577Z",
-    "size": 19954,
-    "path": "../public/Fonts/PPPierSans/PPPierSans-Italic.otf.gz"
-  },
-  "/Fonts/PPPierSans/PPPierSans-Regular.otf": {
-    "type": "font/otf",
-    "etag": "\"6da4-NmfVvofF990KDm4zZYYBhLZ5roI\"",
-    "mtime": "2025-03-07T09:06:55.000Z",
-    "size": 28068,
-    "path": "../public/Fonts/PPPierSans/PPPierSans-Regular.otf"
-  },
-  "/Fonts/PPPierSans/PPPierSans-Regular.otf.br": {
-    "type": "font/otf",
-    "encoding": "br",
-    "etag": "\"44f4-StqcWCwnVjgHUCs2fyQPDnkKSNk\"",
-    "mtime": "2025-04-12T15:14:55.579Z",
-    "size": 17652,
-    "path": "../public/Fonts/PPPierSans/PPPierSans-Regular.otf.br"
-  },
-  "/Fonts/PPPierSans/PPPierSans-Regular.otf.gz": {
-    "type": "font/otf",
-    "encoding": "gzip",
-    "etag": "\"4dbb-XLF+QoFR9VJT6a1XteM0mpSITDY\"",
-    "mtime": "2025-04-12T15:14:55.579Z",
-    "size": 19899,
-    "path": "../public/Fonts/PPPierSans/PPPierSans-Regular.otf.gz"
-  },
-  "/img/wallets/backCardHolder.png": {
-    "type": "image/png",
-    "etag": "\"1e4ad-Tm5by5HCvoRAC9GpAKSbDx9ZSd0\"",
-    "mtime": "2025-04-04T20:34:42.787Z",
-    "size": 124077,
-    "path": "../public/img/wallets/backCardHolder.png"
-  },
-  "/img/wallets/frontCardHolder.png": {
-    "type": "image/png",
-    "etag": "\"150cc-I19lrrRd6rgQHVi9QVuLLZAQHPw\"",
-    "mtime": "2025-04-04T20:33:35.644Z",
-    "size": 86220,
-    "path": "../public/img/wallets/frontCardHolder.png"
-  },
-  "/_build/.vite/manifest.json": {
-    "type": "application/json",
-    "etag": "\"6b7b-RTgXOsrMIZotHFWXurNbrE5aiSo\"",
-    "mtime": "2025-04-12T15:14:43.406Z",
-    "size": 27515,
-    "path": "../public/_build/.vite/manifest.json"
-  },
-  "/_build/.vite/manifest.json.br": {
-    "type": "application/json",
-    "encoding": "br",
-    "etag": "\"9ef-Ymss349QbTR8seOs1egXjuHFTa4\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 2543,
-    "path": "../public/_build/.vite/manifest.json.br"
-  },
-  "/_build/.vite/manifest.json.gz": {
-    "type": "application/json",
-    "encoding": "gzip",
-    "etag": "\"b0d-o5UT+Rdph2qgdwYGnxGLfRDY+a4\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 2829,
-    "path": "../public/_build/.vite/manifest.json.gz"
-  },
-  "/_server/assets/action-BVKOmiKt.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"815-1cRUc+JhIYMSZMz2AKTHigv4esI\"",
-    "mtime": "2025-04-12T15:14:55.560Z",
-    "size": 2069,
-    "path": "../public/_server/assets/action-BVKOmiKt.js.br"
-  },
-  "/_server/assets/action-BVKOmiKt.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"8e9-whFrSBwmwyyzJUjn2KddIVWgeyI\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 2281,
-    "path": "../public/_server/assets/action-BVKOmiKt.js.gz"
-  },
-  "/_server/assets/app-CZcrTF1W.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"3c81-zvqDEmGg5mdKWb68ekPIr/RsNkQ\"",
-    "mtime": "2025-04-12T15:14:53.715Z",
-    "size": 15489,
-    "path": "../public/_server/assets/app-CZcrTF1W.css"
-  },
-  "/_server/assets/app-CZcrTF1W.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"d98-8M3lvkko9YSgTm2k9dkY5EYf0ZA\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 3480,
-    "path": "../public/_server/assets/app-CZcrTF1W.css.br"
-  },
-  "/_server/assets/app-CZcrTF1W.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"fc2-K7yNTbs+ZfhWiWHZO/F4NZ8tZkQ\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 4034,
-    "path": "../public/_server/assets/app-CZcrTF1W.css.gz"
-  },
-  "/_server/assets/app-DLO7lzbB.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"10dc-4a97q5Y7HCxHPT8xuzWOLtcyFgE\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 4316,
-    "path": "../public/_server/assets/app-DLO7lzbB.js.br"
-  },
-  "/_server/assets/app-DLO7lzbB.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"12c4-xybQr8jTqtNS/OIXEX4YebMwrtw\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 4804,
-    "path": "../public/_server/assets/app-DLO7lzbB.js.gz"
-  },
-  "/_server/assets/auth.server-DMy-hh56.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"205-uCv7fgver5UYOoHOWKYXqeSoo6A\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 517,
-    "path": "../public/_server/assets/auth.server-DMy-hh56.js.br"
-  },
-  "/_server/assets/auth.server-DMy-hh56.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"246-iNUdzmdQslfdJH6Mbs59/evkfcA\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 582,
-    "path": "../public/_server/assets/auth.server-DMy-hh56.js.gz"
-  },
-  "/_server/assets/ButtonSparkle-C8CRtCd0.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"10fa-0BUBUY2KaBooDDfxflmxDZXj8xE\"",
-    "mtime": "2025-04-12T15:14:53.709Z",
-    "size": 4346,
-    "path": "../public/_server/assets/ButtonSparkle-C8CRtCd0.css"
-  },
-  "/_server/assets/ButtonSparkle-C8CRtCd0.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"4f0-eo0y9i2/+nc2UH0pq1pwHoLFTVk\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 1264,
-    "path": "../public/_server/assets/ButtonSparkle-C8CRtCd0.css.br"
-  },
-  "/_server/assets/ButtonSparkle-C8CRtCd0.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"5b1-4I9y4effx5fawJJfKqw0pN8QUcU\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 1457,
-    "path": "../public/_server/assets/ButtonSparkle-C8CRtCd0.css.gz"
-  },
-  "/_server/assets/ButtonSparkle-DNpTyev3.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"323-syEyUo/C+tELCd0CZThFlJRE3nE\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 803,
-    "path": "../public/_server/assets/ButtonSparkle-DNpTyev3.js.br"
-  },
-  "/_server/assets/ButtonSparkle-DNpTyev3.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"3a7-poOR9/emhHLdSESz/QvdIpLKgmE\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 935,
-    "path": "../public/_server/assets/ButtonSparkle-DNpTyev3.js.gz"
-  },
-  "/_server/assets/Card-BcrU3z9h.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"f0-L8S4eH4QuXus4A26i2WE0HVv6iU\"",
-    "mtime": "2025-04-12T15:14:53.710Z",
-    "size": 240,
-    "path": "../public/_server/assets/Card-BcrU3z9h.css"
-  },
-  "/_server/assets/createUser-B8OMM0Mu.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"26d-PKJlv7gcjvOT7BUpKuI6Sw1YeJE\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 621,
-    "path": "../public/_server/assets/createUser-B8OMM0Mu.js.br"
-  },
-  "/_server/assets/createUser-B8OMM0Mu.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"2ea-mFHKHr1lCN0oyQEMay3yBJ8PdFI\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 746,
-    "path": "../public/_server/assets/createUser-B8OMM0Mu.js.gz"
-  },
-  "/_server/assets/Cursor-DUhhJVLJ.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"71f-z5m+w2kQQQxzF/2oVUabE0Nw4qg\"",
-    "mtime": "2025-04-12T15:14:53.715Z",
-    "size": 1823,
-    "path": "../public/_server/assets/Cursor-DUhhJVLJ.css"
-  },
-  "/_server/assets/Cursor-DUhhJVLJ.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"1f5-z3MUflhbmOHXrDl7L9quvhScDb0\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 501,
-    "path": "../public/_server/assets/Cursor-DUhhJVLJ.css.br"
-  },
-  "/_server/assets/Cursor-DUhhJVLJ.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"24c-qrXtHdYiWUmIWRwPTjKABl9R2og\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 588,
-    "path": "../public/_server/assets/Cursor-DUhhJVLJ.css.gz"
-  },
-  "/_server/assets/deleteWallet-CHR-5aIQ.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"24ec-pB0gU0RlZF/Qbzhi4KapFQp6D+U\"",
-    "mtime": "2025-04-12T15:14:53.708Z",
-    "size": 9452,
-    "path": "../public/_server/assets/deleteWallet-CHR-5aIQ.css"
-  },
-  "/_server/assets/deleteWallet-CHR-5aIQ.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"7fa-qPKh2HQsMESo0L1iKYI/ICxRcd4\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 2042,
-    "path": "../public/_server/assets/deleteWallet-CHR-5aIQ.css.br"
-  },
-  "/_server/assets/deleteWallet-CHR-5aIQ.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"929-pXaMaE5UVYJzdF8yhV00copbbwQ\"",
-    "mtime": "2025-04-12T15:14:55.561Z",
-    "size": 2345,
-    "path": "../public/_server/assets/deleteWallet-CHR-5aIQ.css.gz"
-  },
-  "/_server/assets/deleteWallet-D6_HIjzQ.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2ca-n/S0LaztIMwM5HIbqCDo29/enpo\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 714,
-    "path": "../public/_server/assets/deleteWallet-D6_HIjzQ.js.br"
-  },
-  "/_server/assets/deleteWallet-D6_HIjzQ.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"33e-rxMlRHw9gr56+YrgosdbwoVdKPs\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 830,
-    "path": "../public/_server/assets/deleteWallet-D6_HIjzQ.js.gz"
-  },
-  "/_server/assets/exchangeRates-BMINihpv.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"83-KzxKptaFVo7ktiNGDy58ufA10u8\"",
-    "mtime": "2025-04-12T15:14:53.708Z",
-    "size": 131,
-    "path": "../public/_server/assets/exchangeRates-BMINihpv.css"
-  },
-  "/_server/assets/exchangeRates-ChMJm5Xh.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"b72-UirXuj2gWw35ZkpaMq5JH8cgp84\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 2930,
-    "path": "../public/_server/assets/exchangeRates-ChMJm5Xh.js.br"
-  },
-  "/_server/assets/exchangeRates-ChMJm5Xh.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"cb4-Kd3R1Q5t5v5JR/o7REhm1G3q/7k\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 3252,
-    "path": "../public/_server/assets/exchangeRates-ChMJm5Xh.js.gz"
-  },
-  "/_server/assets/exchangeRates-Dp8OcCeR.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"8e6-uob2Zm784goAYjcWEmUkzwZelAE\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 2278,
-    "path": "../public/_server/assets/exchangeRates-Dp8OcCeR.js.br"
-  },
-  "/_server/assets/exchangeRates-Dp8OcCeR.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"9ce-mSt2X3Lp52PiqJl7D4qP5kxqEPk\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 2510,
-    "path": "../public/_server/assets/exchangeRates-Dp8OcCeR.js.gz"
-  },
-  "/_server/assets/fetchEvent-1KlzQMFw.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"60f-E2NMg3oiYZtcpx+OvfLfIPQy4so\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 1551,
-    "path": "../public/_server/assets/fetchEvent-1KlzQMFw.js.br"
-  },
-  "/_server/assets/fetchEvent-1KlzQMFw.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"6c0-ncPoKTszgomaEXQuZmljrwoPQVI\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 1728,
-    "path": "../public/_server/assets/fetchEvent-1KlzQMFw.js.gz"
-  },
-  "/_server/assets/getWallets.server-CbIIGRZN.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"7cc-hqTNNx0GQkAjaoezs5hrK6YAuUo\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 1996,
-    "path": "../public/_server/assets/getWallets.server-CbIIGRZN.js.br"
-  },
-  "/_server/assets/getWallets.server-CbIIGRZN.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"864-bXJvY6Tn05dCYCTAuDJrOK5uP1Q\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 2148,
-    "path": "../public/_server/assets/getWallets.server-CbIIGRZN.js.gz"
-  },
-  "/_server/assets/icons-Bh8061KW.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"2121-o/aZ5SHM/A7BCoclYc5YhiEjCoo\"",
-    "mtime": "2025-04-12T15:14:53.709Z",
-    "size": 8481,
-    "path": "../public/_server/assets/icons-Bh8061KW.css"
-  },
-  "/_server/assets/icons-Bh8061KW.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"71c-jm/DTUo4zCvWcPTYD0yiN5bCuAg\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 1820,
-    "path": "../public/_server/assets/icons-Bh8061KW.css.br"
-  },
-  "/_server/assets/icons-Bh8061KW.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"818-/0kwbJh3cYfA8GcWIbMNmcAZnVQ\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 2072,
-    "path": "../public/_server/assets/icons-Bh8061KW.css.gz"
-  },
-  "/_server/assets/icons-N8M97GAt.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2dd-kKI/4nhY/aUHpxMLLD0d1CgtF8k\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 733,
-    "path": "../public/_server/assets/icons-N8M97GAt.js.br"
-  },
-  "/_server/assets/icons-N8M97GAt.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"33b-hpvS+fDTmsO2pWTtmKZ6HLI5F9s\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 827,
-    "path": "../public/_server/assets/icons-N8M97GAt.js.gz"
-  },
-  "/_server/assets/index-2Np-G_nR.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"36b-pA+wI8rRLgD42kmUtmGHYeK1mqk\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 875,
-    "path": "../public/_server/assets/index-2Np-G_nR.js.br"
-  },
-  "/_server/assets/index-2Np-G_nR.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"411-GkdxZyVIov5jes1ba5wqR4ZoqlA\"",
-    "mtime": "2025-04-12T15:14:55.562Z",
-    "size": 1041,
-    "path": "../public/_server/assets/index-2Np-G_nR.js.gz"
-  },
-  "/_server/assets/index-B54VJo2T.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"e9b-IYM6wdjZUkIC3OzEK8u8hFSzQgI\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 3739,
-    "path": "../public/_server/assets/index-B54VJo2T.js.br"
-  },
-  "/_server/assets/index-B54VJo2T.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"1045-QD6KK/hwOS7pKzB4GjWdZoeId7k\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 4165,
-    "path": "../public/_server/assets/index-B54VJo2T.js.gz"
-  },
-  "/_server/assets/index-Bep36fvr.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"54a-/ZVZ+KPdNwoYsQLTIaXA52Qqy20\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 1354,
-    "path": "../public/_server/assets/index-Bep36fvr.js.br"
-  },
-  "/_server/assets/index-Bep36fvr.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"629-qBVBMfL4KNb+gbOVSzCrjMPvJXw\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 1577,
-    "path": "../public/_server/assets/index-Bep36fvr.js.gz"
-  },
-  "/_server/assets/index-Bn1gRDsI.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"1ce-Zk1OExjcn8O4Mn8k5LFv4/S789M\"",
-    "mtime": "2025-04-12T15:14:53.708Z",
-    "size": 462,
-    "path": "../public/_server/assets/index-Bn1gRDsI.css"
-  },
-  "/_server/assets/index-BUMPztWr.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"1e3-U6YW/anMhgfaWI37M2oAC3zT0U8\"",
-    "mtime": "2025-04-12T15:14:53.708Z",
-    "size": 483,
-    "path": "../public/_server/assets/index-BUMPztWr.css"
-  },
-  "/_server/assets/index-C1h2BJ6l.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"fc-IdF95Ew7kpLK8x8UIamF/bkH/F8\"",
-    "mtime": "2025-04-12T15:14:53.708Z",
-    "size": 252,
-    "path": "../public/_server/assets/index-C1h2BJ6l.css"
-  },
-  "/_server/assets/index-CI1g57kZ.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2b6-YieB8XhoH2I1wmytIqnFRNF0rLk\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 694,
-    "path": "../public/_server/assets/index-CI1g57kZ.js.br"
-  },
-  "/_server/assets/index-CI1g57kZ.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"32f-i9A6pyqfTOfcU90zagJxJsd2zio\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 815,
-    "path": "../public/_server/assets/index-CI1g57kZ.js.gz"
-  },
-  "/_server/assets/index-CM2EfUOf.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"4e2-BBrKdno1l3LoB5GLKPIjA0XZbK4\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 1250,
-    "path": "../public/_server/assets/index-CM2EfUOf.js.br"
-  },
-  "/_server/assets/index-CM2EfUOf.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"5bd-CPBYLWegX+ZrmjA/Y/ZKZGGfOLk\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 1469,
-    "path": "../public/_server/assets/index-CM2EfUOf.js.gz"
-  },
-  "/_server/assets/index-Ky9zR5dV.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"275-YocJd4VF6I9gUSSBMIiuWFc6Yaw\"",
-    "mtime": "2025-04-12T15:14:53.709Z",
-    "size": 629,
-    "path": "../public/_server/assets/index-Ky9zR5dV.css"
-  },
-  "/_server/assets/index-WwoiZKEg.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"4d06-hvthFnYPoMAmSBN/IgrOQYhpSAc\"",
-    "mtime": "2025-04-12T15:14:55.580Z",
-    "size": 19718,
-    "path": "../public/_server/assets/index-WwoiZKEg.js.br"
-  },
-  "/_server/assets/index-WwoiZKEg.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"5b59-ZFTpbgtZAgW/hYmVqBec0BAiSm0\"",
-    "mtime": "2025-04-12T15:14:55.579Z",
-    "size": 23385,
-    "path": "../public/_server/assets/index-WwoiZKEg.js.gz"
-  },
-  "/_server/assets/Inputs-Bqq548qA.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"cac-5xUbqIysRq8KE3AOoV/cNoIabV0\"",
-    "mtime": "2025-04-12T15:14:53.709Z",
-    "size": 3244,
-    "path": "../public/_server/assets/Inputs-Bqq548qA.css"
-  },
-  "/_server/assets/Inputs-Bqq548qA.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"3c1-Ray3nts1Bwyo6sYthtbayyZbpCg\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 961,
-    "path": "../public/_server/assets/Inputs-Bqq548qA.css.br"
-  },
-  "/_server/assets/Inputs-Bqq548qA.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"459-DoNxJCc+CJjJIOlW5HKj9K9vBR0\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 1113,
-    "path": "../public/_server/assets/Inputs-Bqq548qA.css.gz"
-  },
-  "/_server/assets/Inputs-CEYxPBfP.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"aa8-Yns4Ec8waiEFvyz/JT0qdjdsdxc\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 2728,
-    "path": "../public/_server/assets/Inputs-CEYxPBfP.js.br"
-  },
-  "/_server/assets/Inputs-CEYxPBfP.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"c43-3Q0LXNNlM/4Knuqfa/xoyKLFb+M\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 3139,
-    "path": "../public/_server/assets/Inputs-CEYxPBfP.js.gz"
-  },
-  "/_server/assets/loginUser-lOKuXLaT.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"261-dSGPctCvtXloLTtmu6Dhsvb95q4\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 609,
-    "path": "../public/_server/assets/loginUser-lOKuXLaT.js.br"
-  },
-  "/_server/assets/loginUser-lOKuXLaT.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"2a0-FKFsQ0M4DUQFHvmiUr1seQWFx0k\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 672,
-    "path": "../public/_server/assets/loginUser-lOKuXLaT.js.gz"
-  },
-  "/_server/assets/Menu-DSzeyodt.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"406-yXxJ7F5KIwI5YF6g5rdOrJ9UDNw\"",
-    "mtime": "2025-04-12T15:14:53.715Z",
-    "size": 1030,
-    "path": "../public/_server/assets/Menu-DSzeyodt.css"
-  },
-  "/_server/assets/Menu-DSzeyodt.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"169-hS7escrmswjNhFq5i/vIm4s7Y+c\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 361,
-    "path": "../public/_server/assets/Menu-DSzeyodt.css.br"
-  },
-  "/_server/assets/Menu-DSzeyodt.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"1c7-rIHpHvCKxxnv/ble8qHPJ+Qp4lc\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 455,
-    "path": "../public/_server/assets/Menu-DSzeyodt.css.gz"
-  },
-  "/_server/assets/Menu-OQmUNT5t.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"3cd-n/zCZR4DVRlOUUIf0cUs3gex2qE\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 973,
-    "path": "../public/_server/assets/Menu-OQmUNT5t.js.br"
-  },
-  "/_server/assets/Menu-OQmUNT5t.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"445-byfsDdmQWDFQ+Kp7vbVR7J1BMq0\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 1093,
-    "path": "../public/_server/assets/Menu-OQmUNT5t.js.gz"
-  },
-  "/_server/assets/otpInput-Dlb7jUEo.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"8b3-LYiHtnxqgRX4pfIkOO55BR//8b0\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 2227,
-    "path": "../public/_server/assets/otpInput-Dlb7jUEo.js.br"
-  },
-  "/_server/assets/otpInput-Dlb7jUEo.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"a09-XdogO92Jdq96vNbusK0RcL+rOkg\"",
-    "mtime": "2025-04-12T15:14:55.563Z",
-    "size": 2569,
-    "path": "../public/_server/assets/otpInput-Dlb7jUEo.js.gz"
-  },
-  "/_server/assets/otpInput-tBTztLmB.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"30e-BRU62CsVY4iiAFz59isIZdKOAGI\"",
-    "mtime": "2025-04-12T15:14:53.709Z",
-    "size": 782,
-    "path": "../public/_server/assets/otpInput-tBTztLmB.css"
-  },
-  "/_server/assets/prova-UkNyxD49.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"24b-fTkJi1zQl8ohnGhVx1EObU2ARz8\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 587,
-    "path": "../public/_server/assets/prova-UkNyxD49.js.br"
-  },
-  "/_server/assets/prova-UkNyxD49.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"2a4-/zVBvSmKcr6ut49nixf87bb0/+E\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 676,
-    "path": "../public/_server/assets/prova-UkNyxD49.js.gz"
-  },
-  "/_server/assets/riv-VPAlW_cg.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"55-HKRxB0OLEvqM0460qByGA52sIg0\"",
-    "mtime": "2025-04-12T15:14:53.709Z",
-    "size": 85,
-    "path": "../public/_server/assets/riv-VPAlW_cg.css"
-  },
-  "/_server/assets/routing-BSDkuvr3.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"d24-eYzteBjKpZi5ye2/QnbUzuJzbiE\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 3364,
-    "path": "../public/_server/assets/routing-BSDkuvr3.js.br"
-  },
-  "/_server/assets/routing-BSDkuvr3.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"e78-dW6zbXnsure69Ppo2o02N/FAQuA\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 3704,
-    "path": "../public/_server/assets/routing-BSDkuvr3.js.gz"
-  },
-  "/_server/assets/server-fns-ptihYXL4.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"3af9-8BvFvRR7VxHxDmXxWLKcCpKUKrA\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 15097,
-    "path": "../public/_server/assets/server-fns-ptihYXL4.js.br"
-  },
-  "/_server/assets/server-fns-ptihYXL4.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"42b9-nog70+UsYXsWUWkg2Dtqahafd/4\"",
-    "mtime": "2025-04-12T15:14:55.579Z",
-    "size": 17081,
-    "path": "../public/_server/assets/server-fns-ptihYXL4.js.gz"
-  },
-  "/_server/assets/Title-C8lsFfVd.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"643-3HyVvbzpRltAqieGqnicjGpgHuc\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 1603,
-    "path": "../public/_server/assets/Title-C8lsFfVd.js.br"
-  },
-  "/_server/assets/Title-C8lsFfVd.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"744-iNA492Miha74EKdRHlKcK07xQCw\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 1860,
-    "path": "../public/_server/assets/Title-C8lsFfVd.js.gz"
-  },
-  "/_server/assets/_..-D39vbXZ9.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"44ea-Hv6m+tmEfbb+wzixrawKm67P9YE\"",
-    "mtime": "2025-04-12T15:14:53.706Z",
-    "size": 17642,
-    "path": "../public/_server/assets/_..-D39vbXZ9.css"
-  },
-  "/_server/assets/_..-D39vbXZ9.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"861-0donVGTyqHLQzOZdP6KKEZ6C4QU\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 2145,
-    "path": "../public/_server/assets/_..-D39vbXZ9.css.br"
-  },
-  "/_server/assets/_..-D39vbXZ9.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"ace-e+MM8TTmRp6yvUSfIgjDFSAg/v8\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 2766,
-    "path": "../public/_server/assets/_..-D39vbXZ9.css.gz"
-  },
-  "/_build/assets/action-CDr_hENZ.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"f84-DsKT/8R+1K5scPamO0pK5GVhFeQ\"",
-    "mtime": "2025-04-12T15:14:43.397Z",
-    "size": 3972,
-    "path": "../public/_build/assets/action-CDr_hENZ.js"
-  },
-  "/_build/assets/action-CDr_hENZ.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"700-y6ocX3WChG4Nl2Xqa9h3cjR4pro\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 1792,
-    "path": "../public/_build/assets/action-CDr_hENZ.js.br"
-  },
-  "/_build/assets/action-CDr_hENZ.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"7a6-+u9FRiNkyAkLvUfDdmvUUlpjnDk\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 1958,
-    "path": "../public/_build/assets/action-CDr_hENZ.js.gz"
-  },
-  "/_build/assets/boolean-CynEgfvK.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"dcca-YWL+9YapyvAGjMFv9+SJhOryD9U\"",
-    "mtime": "2025-04-12T15:14:43.405Z",
-    "size": 56522,
-    "path": "../public/_build/assets/boolean-CynEgfvK.js"
-  },
-  "/_build/assets/boolean-CynEgfvK.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"452e-jWI4DJlmlFrXFokUNu92BR83Ubc\"",
-    "mtime": "2025-04-12T15:14:55.582Z",
-    "size": 17710,
-    "path": "../public/_build/assets/boolean-CynEgfvK.js.br"
-  },
-  "/_build/assets/boolean-CynEgfvK.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"4cd0-bOX7m4BdRR1RKbncH7/w3ciwazE\"",
-    "mtime": "2025-04-12T15:14:55.579Z",
-    "size": 19664,
-    "path": "../public/_build/assets/boolean-CynEgfvK.js.gz"
-  },
-  "/_build/assets/ButtonSparkle-C8CRtCd0.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"10fa-0BUBUY2KaBooDDfxflmxDZXj8xE\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 4346,
-    "path": "../public/_build/assets/ButtonSparkle-C8CRtCd0.css"
-  },
-  "/_build/assets/ButtonSparkle-C8CRtCd0.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"4f0-eo0y9i2/+nc2UH0pq1pwHoLFTVk\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 1264,
-    "path": "../public/_build/assets/ButtonSparkle-C8CRtCd0.css.br"
-  },
-  "/_build/assets/ButtonSparkle-C8CRtCd0.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"5b1-4I9y4effx5fawJJfKqw0pN8QUcU\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 1457,
-    "path": "../public/_build/assets/ButtonSparkle-C8CRtCd0.css.gz"
-  },
-  "/_build/assets/ButtonSparkle-CX-W2frl.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1917-C6LC0OG8GPhdH2Gx8HXaKr2BLvM\"",
-    "mtime": "2025-04-12T15:14:43.398Z",
-    "size": 6423,
-    "path": "../public/_build/assets/ButtonSparkle-CX-W2frl.js"
-  },
-  "/_build/assets/ButtonSparkle-CX-W2frl.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"97c-SLiyNWJg6L9WUrRkzKzHCBjagmo\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 2428,
-    "path": "../public/_build/assets/ButtonSparkle-CX-W2frl.js.br"
-  },
-  "/_build/assets/ButtonSparkle-CX-W2frl.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"a95-OafTbBwtJ8srjkZYf0J6eF+U6Eo\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 2709,
-    "path": "../public/_build/assets/ButtonSparkle-CX-W2frl.js.gz"
-  },
-  "/_build/assets/Card-BcrU3z9h.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"f0-L8S4eH4QuXus4A26i2WE0HVv6iU\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 240,
-    "path": "../public/_build/assets/Card-BcrU3z9h.css"
-  },
-  "/_build/assets/Card-DUNVX3H7.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"3ea-lfCnKdrIUe9/3dOciwUSdc6wZus\"",
-    "mtime": "2025-04-12T15:14:43.404Z",
-    "size": 1002,
-    "path": "../public/_build/assets/Card-DUNVX3H7.js"
-  },
-  "/_build/assets/Card.module-nMwE8ysR.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"6d-z9PKzfV9vfxtIWK8DP9kGZqIg2U\"",
-    "mtime": "2025-04-12T15:14:43.404Z",
-    "size": 109,
-    "path": "../public/_build/assets/Card.module-nMwE8ysR.js"
-  },
-  "/_build/assets/client-CZcrTF1W.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"3c81-zvqDEmGg5mdKWb68ekPIr/RsNkQ\"",
-    "mtime": "2025-04-12T15:14:43.371Z",
-    "size": 15489,
-    "path": "../public/_build/assets/client-CZcrTF1W.css"
-  },
-  "/_build/assets/client-CZcrTF1W.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"d98-8M3lvkko9YSgTm2k9dkY5EYf0ZA\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 3480,
-    "path": "../public/_build/assets/client-CZcrTF1W.css.br"
-  },
-  "/_build/assets/client-CZcrTF1W.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"fc2-K7yNTbs+ZfhWiWHZO/F4NZ8tZkQ\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 4034,
-    "path": "../public/_build/assets/client-CZcrTF1W.css.gz"
-  },
-  "/_build/assets/client-yC3zgFCw.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"83d2-mhxxjvKPCbeQaVJp5SMoBGEV12w\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 33746,
-    "path": "../public/_build/assets/client-yC3zgFCw.js"
-  },
-  "/_build/assets/client-yC3zgFCw.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"206f-+fPCvThuGnEakEsPvDeOkiWgRM0\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 8303,
-    "path": "../public/_build/assets/client-yC3zgFCw.js.br"
-  },
-  "/_build/assets/client-yC3zgFCw.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"24c2-DMXn725Yg81qNIUM/yvj2ACXdQw\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 9410,
-    "path": "../public/_build/assets/client-yC3zgFCw.js.gz"
-  },
-  "/_build/assets/components-BQhjVazl.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"34d-IrSc9qSoDD9fHdFp7DPPFv6G4Ng\"",
-    "mtime": "2025-04-12T15:14:43.404Z",
-    "size": 845,
-    "path": "../public/_build/assets/components-BQhjVazl.js"
-  },
-  "/_build/assets/Cursor-DPOt0gbm.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"f86-4ER8AZETX/zQFigmb4UsGhgGi5Q\"",
-    "mtime": "2025-04-12T15:14:43.378Z",
-    "size": 3974,
-    "path": "../public/_build/assets/Cursor-DPOt0gbm.js"
-  },
-  "/_build/assets/Cursor-DPOt0gbm.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"444-9C//j73YLGimS6jpCeQoGg6tJG8\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 1092,
-    "path": "../public/_build/assets/Cursor-DPOt0gbm.js.br"
-  },
-  "/_build/assets/Cursor-DPOt0gbm.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"504-qDE0RxA5e5zM/tbBNWC7MErymJ8\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 1284,
-    "path": "../public/_build/assets/Cursor-DPOt0gbm.js.gz"
-  },
-  "/_build/assets/Cursor-DUhhJVLJ.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"71f-z5m+w2kQQQxzF/2oVUabE0Nw4qg\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 1823,
-    "path": "../public/_build/assets/Cursor-DUhhJVLJ.css"
-  },
-  "/_build/assets/Cursor-DUhhJVLJ.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"1f5-z3MUflhbmOHXrDl7L9quvhScDb0\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 501,
-    "path": "../public/_build/assets/Cursor-DUhhJVLJ.css.br"
-  },
-  "/_build/assets/Cursor-DUhhJVLJ.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"24c-qrXtHdYiWUmIWRwPTjKABl9R2og\"",
-    "mtime": "2025-04-12T15:14:55.564Z",
-    "size": 588,
-    "path": "../public/_build/assets/Cursor-DUhhJVLJ.css.gz"
-  },
-  "/_build/assets/deleteWallet-CHR-5aIQ.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"24ec-pB0gU0RlZF/Qbzhi4KapFQp6D+U\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 9452,
-    "path": "../public/_build/assets/deleteWallet-CHR-5aIQ.css"
-  },
-  "/_build/assets/deleteWallet-CHR-5aIQ.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"7fa-qPKh2HQsMESo0L1iKYI/ICxRcd4\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 2042,
-    "path": "../public/_build/assets/deleteWallet-CHR-5aIQ.css.br"
-  },
-  "/_build/assets/deleteWallet-CHR-5aIQ.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"929-pXaMaE5UVYJzdF8yhV00copbbwQ\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 2345,
-    "path": "../public/_build/assets/deleteWallet-CHR-5aIQ.css.gz"
-  },
-  "/_build/assets/deleteWallet-DfLb0_b2.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"10d-qa6+SpsdGIF8rySciQslKmyTMxI\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 269,
-    "path": "../public/_build/assets/deleteWallet-DfLb0_b2.js"
-  },
-  "/_build/assets/deleteWallet-Djn27Ww0.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"32d-xzxM2zaf4nWm7zgeSpKJpsxn4LE\"",
-    "mtime": "2025-04-12T15:14:43.397Z",
-    "size": 813,
-    "path": "../public/_build/assets/deleteWallet-Djn27Ww0.js"
-  },
-  "/_build/assets/exchangeRates-BMINihpv.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"83-KzxKptaFVo7ktiNGDy58ufA10u8\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 131,
-    "path": "../public/_build/assets/exchangeRates-BMINihpv.css"
-  },
-  "/_build/assets/exchangeRates-DIwxOQun.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"8d4-6719jfLTD5Xa+Wc5bHM6XqtoBYo\"",
-    "mtime": "2025-04-12T15:14:43.397Z",
-    "size": 2260,
-    "path": "../public/_build/assets/exchangeRates-DIwxOQun.js"
-  },
-  "/_build/assets/exchangeRates-DIwxOQun.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2f8-h6sW/YdSeqoOzQHKqorJFft1kHI\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 760,
-    "path": "../public/_build/assets/exchangeRates-DIwxOQun.js.br"
-  },
-  "/_build/assets/exchangeRates-DIwxOQun.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"36e-/6b971hpMF02aZHF+m/2ZRDjqxQ\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 878,
-    "path": "../public/_build/assets/exchangeRates-DIwxOQun.js.gz"
-  },
-  "/_build/assets/gaussian-splat-compression-CYQZ50o2.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1425c-qYuAkDSW2kHkwiTKmTDq05fvPw4\"",
-    "mtime": "2025-04-12T15:14:43.405Z",
-    "size": 82524,
-    "path": "../public/_build/assets/gaussian-splat-compression-CYQZ50o2.js"
-  },
-  "/_build/assets/gaussian-splat-compression-CYQZ50o2.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"4d04-2vXaMRPC4rEEJN3wfH2yALIGaas\"",
-    "mtime": "2025-04-12T15:14:55.583Z",
-    "size": 19716,
-    "path": "../public/_build/assets/gaussian-splat-compression-CYQZ50o2.js.br"
-  },
-  "/_build/assets/gaussian-splat-compression-CYQZ50o2.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"5b08-Bxjd1SZIerFzL18W/0SuVdHJpW4\"",
-    "mtime": "2025-04-12T15:14:55.582Z",
-    "size": 23304,
-    "path": "../public/_build/assets/gaussian-splat-compression-CYQZ50o2.js.gz"
-  },
-  "/_build/assets/getTransactions-0ox0yA0f.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"124-CeVKFFTwO20TG7LR+m7kDdV97eU\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 292,
-    "path": "../public/_build/assets/getTransactions-0ox0yA0f.js"
-  },
-  "/_build/assets/howler-DGkKYxeN.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"6aa0-9/7yABrGvqxncH6DbwiPSyYMyzo\"",
-    "mtime": "2025-04-12T15:14:43.404Z",
-    "size": 27296,
-    "path": "../public/_build/assets/howler-DGkKYxeN.js"
-  },
-  "/_build/assets/howler-DGkKYxeN.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"1ca2-Qt/jwe25LzkgPGv13qShv6Mt/5k\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 7330,
-    "path": "../public/_build/assets/howler-DGkKYxeN.js.br"
-  },
-  "/_build/assets/howler-DGkKYxeN.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"2006-Q+KFV+oRxBM0JRAUUcp7Sb1pLRE\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 8198,
-    "path": "../public/_build/assets/howler-DGkKYxeN.js.gz"
-  },
-  "/_build/assets/icons-Bh8061KW.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"2121-o/aZ5SHM/A7BCoclYc5YhiEjCoo\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 8481,
-    "path": "../public/_build/assets/icons-Bh8061KW.css"
-  },
-  "/_build/assets/icons-Bh8061KW.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"71c-jm/DTUo4zCvWcPTYD0yiN5bCuAg\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1820,
-    "path": "../public/_build/assets/icons-Bh8061KW.css.br"
-  },
-  "/_build/assets/icons-Bh8061KW.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"818-/0kwbJh3cYfA8GcWIbMNmcAZnVQ\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 2072,
-    "path": "../public/_build/assets/icons-Bh8061KW.css.gz"
-  },
-  "/_build/assets/icons-ChlcGNuY.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"7fb-W9PhUvk1cfL91vHjWKOGasDzmXc\"",
-    "mtime": "2025-04-12T15:14:43.403Z",
-    "size": 2043,
-    "path": "../public/_build/assets/icons-ChlcGNuY.js"
-  },
-  "/_build/assets/icons-ChlcGNuY.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2e0-xL+u+SQ1ZcCkqXGztSKGZbaQoDY\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 736,
-    "path": "../public/_build/assets/icons-ChlcGNuY.js.br"
-  },
-  "/_build/assets/icons-ChlcGNuY.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"335-LK4I0tPtdjCxDWSA+kkHOvEgBpU\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 821,
-    "path": "../public/_build/assets/icons-ChlcGNuY.js.gz"
-  },
-  "/_build/assets/index-88vfUY6A.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"5cf-JM/PTLPx4K1/QYkT9X+aVxYWf14\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 1487,
-    "path": "../public/_build/assets/index-88vfUY6A.js"
-  },
-  "/_build/assets/index-88vfUY6A.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2dd-TjgDS39eMPpV5p3nFsvNbdr6b1k\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 733,
-    "path": "../public/_build/assets/index-88vfUY6A.js.br"
-  },
-  "/_build/assets/index-88vfUY6A.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"346-uWZZOESila8EdWtW5vvenNlOews\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 838,
-    "path": "../public/_build/assets/index-88vfUY6A.js.gz"
-  },
-  "/_build/assets/index-B4yOeCQX.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1968-qUTyK1DwzN102TbAhD1LmqZuszA\"",
-    "mtime": "2025-04-12T15:14:43.397Z",
-    "size": 6504,
-    "path": "../public/_build/assets/index-B4yOeCQX.js"
-  },
-  "/_build/assets/index-B4yOeCQX.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"7a2-d8TmjijWW2JWTYIY3X6lJfvi3Mc\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1954,
-    "path": "../public/_build/assets/index-B4yOeCQX.js.br"
-  },
-  "/_build/assets/index-B4yOeCQX.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"8bf-f2/6HxgEJlbUyluofMeAUp3mCHU\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 2239,
-    "path": "../public/_build/assets/index-B4yOeCQX.js.gz"
-  },
-  "/_build/assets/index-B9evPoF0.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1bb-2v5wghM6MTiIF/Ov2TT4khxfgtk\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 443,
-    "path": "../public/_build/assets/index-B9evPoF0.js"
-  },
-  "/_build/assets/index-Bb-RPvJO.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"67d-Q4LjTBM8ZTDqsqQEx18HWiZ44P8\"",
-    "mtime": "2025-04-12T15:14:43.396Z",
-    "size": 1661,
-    "path": "../public/_build/assets/index-Bb-RPvJO.js"
-  },
-  "/_build/assets/index-Bb-RPvJO.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2cb-G9d6va4oHrz9QZrpAabimPswRyM\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 715,
-    "path": "../public/_build/assets/index-Bb-RPvJO.js.br"
-  },
-  "/_build/assets/index-Bb-RPvJO.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"355-tKKPL6DrWlF0Wf5ZjO/OAVSEvSg\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 853,
-    "path": "../public/_build/assets/index-Bb-RPvJO.js.gz"
-  },
-  "/_build/assets/index-BI0YgTAM.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"14692-Buz5AjOopO9oPROI85Y1lVtp3d0\"",
-    "mtime": "2025-04-12T15:14:43.405Z",
-    "size": 83602,
-    "path": "../public/_build/assets/index-BI0YgTAM.js"
-  },
-  "/_build/assets/index-BI0YgTAM.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"5266-SZ8zkzALMhzmc4/VLQKu2a0OaiM\"",
-    "mtime": "2025-04-12T15:14:55.583Z",
-    "size": 21094,
-    "path": "../public/_build/assets/index-BI0YgTAM.js.br"
-  },
-  "/_build/assets/index-BI0YgTAM.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"62a6-eDz54TqD5WE512+dUOGaCErnWgE\"",
-    "mtime": "2025-04-12T15:14:55.582Z",
-    "size": 25254,
-    "path": "../public/_build/assets/index-BI0YgTAM.js.gz"
-  },
-  "/_build/assets/index-Bn1gRDsI.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"1ce-Zk1OExjcn8O4Mn8k5LFv4/S789M\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 462,
-    "path": "../public/_build/assets/index-Bn1gRDsI.css"
-  },
-  "/_build/assets/index-BQI8r8OJ.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"b45-AjB2YNNJ9rKhbz8cYor1cckxsEs\"",
-    "mtime": "2025-04-12T15:14:43.385Z",
-    "size": 2885,
-    "path": "../public/_build/assets/index-BQI8r8OJ.js"
-  },
-  "/_build/assets/index-BQI8r8OJ.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"496-O1PIJ66V+eC4UhHipH6rtxYHDFU\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1174,
-    "path": "../public/_build/assets/index-BQI8r8OJ.js.br"
-  },
-  "/_build/assets/index-BQI8r8OJ.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"519-jfDQx9WgguoUeN0XRy/KyxH8bRE\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1305,
-    "path": "../public/_build/assets/index-BQI8r8OJ.js.gz"
-  },
-  "/_build/assets/index-BUMPztWr.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"1e3-U6YW/anMhgfaWI37M2oAC3zT0U8\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 483,
-    "path": "../public/_build/assets/index-BUMPztWr.css"
-  },
-  "/_build/assets/index-C1h2BJ6l.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"fc-IdF95Ew7kpLK8x8UIamF/bkH/F8\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 252,
-    "path": "../public/_build/assets/index-C1h2BJ6l.css"
-  },
-  "/_build/assets/index-C8JvlN6N.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"a69-bvVEQT8UmpCDz+2YY7ZZrOAD2Sg\"",
-    "mtime": "2025-04-12T15:14:43.387Z",
-    "size": 2665,
-    "path": "../public/_build/assets/index-C8JvlN6N.js"
-  },
-  "/_build/assets/index-C8JvlN6N.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"482-QZnUxsBzdIyeMIhHi9u6ep7lpms\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1154,
-    "path": "../public/_build/assets/index-C8JvlN6N.js.br"
-  },
-  "/_build/assets/index-C8JvlN6N.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"562-PrmgVIlEc7aGMzdV86cE8i9i/Uw\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1378,
-    "path": "../public/_build/assets/index-C8JvlN6N.js.gz"
-  },
-  "/_build/assets/index-CeyMEmpq.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"751-uYcRqPisN2CmdAIW0rvmgZASPsM\"",
-    "mtime": "2025-04-12T15:14:43.403Z",
-    "size": 1873,
-    "path": "../public/_build/assets/index-CeyMEmpq.js"
-  },
-  "/_build/assets/index-CeyMEmpq.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"31e-uf1+/kgs7Ef3JQPCGdJfDEyvPZs\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 798,
-    "path": "../public/_build/assets/index-CeyMEmpq.js.br"
-  },
-  "/_build/assets/index-CeyMEmpq.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"3ad-TbC4bnYXYq2xJwSrnh9+Es6Z90s\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 941,
-    "path": "../public/_build/assets/index-CeyMEmpq.js.gz"
-  },
-  "/_build/assets/index-CH-czpgK.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"214b-bS6R/XepR1vkxO5lwOZmIvNUxkk\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 8523,
-    "path": "../public/_build/assets/index-CH-czpgK.js"
-  },
-  "/_build/assets/index-CH-czpgK.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"9ac-TlxeEPPr7wwoQpwssx9FIRlKT4w\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 2476,
-    "path": "../public/_build/assets/index-CH-czpgK.js.br"
-  },
-  "/_build/assets/index-CH-czpgK.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"b22-JvmwxR/WFtmYE3BbQAKQIYQKeS8\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 2850,
-    "path": "../public/_build/assets/index-CH-czpgK.js.gz"
-  },
-  "/_build/assets/index-CIjphGrZ.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"726-N1AyyXX2dMZefmtxJmnCDfdwVA0\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 1830,
-    "path": "../public/_build/assets/index-CIjphGrZ.js"
-  },
-  "/_build/assets/index-CIjphGrZ.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2d7-z2BrBrF3hywUWhIoFnIZcuzJrwg\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 727,
-    "path": "../public/_build/assets/index-CIjphGrZ.js.br"
-  },
-  "/_build/assets/index-CIjphGrZ.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"34f-Tf+JEuTcwu6OYMtPNYNBmLeSTzk\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 847,
-    "path": "../public/_build/assets/index-CIjphGrZ.js.gz"
-  },
-  "/_build/assets/index-CORO8PuB.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1284-8IqW4bpln33iTdBkBPHw+5cQpV4\"",
-    "mtime": "2025-04-12T15:14:43.396Z",
-    "size": 4740,
-    "path": "../public/_build/assets/index-CORO8PuB.js"
-  },
-  "/_build/assets/index-CORO8PuB.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"668-MC2SvjckHVDr4GvsUn7TXZNjVnI\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1640,
-    "path": "../public/_build/assets/index-CORO8PuB.js.br"
-  },
-  "/_build/assets/index-CORO8PuB.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"73b-qUdN5WAmdm1n/Rj2me4ZJmbohrQ\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1851,
-    "path": "../public/_build/assets/index-CORO8PuB.js.gz"
-  },
-  "/_build/assets/index-COvTVlLR.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"dce-D8mdwlfknxyu/XDuNpAOREgqwEk\"",
-    "mtime": "2025-04-12T15:14:43.403Z",
-    "size": 3534,
-    "path": "../public/_build/assets/index-COvTVlLR.js"
-  },
-  "/_build/assets/index-COvTVlLR.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"449-MN8finyoLzMc8itZJu46SJ5AGT0\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1097,
-    "path": "../public/_build/assets/index-COvTVlLR.js.br"
-  },
-  "/_build/assets/index-COvTVlLR.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"517-j9uYsvbJophdk/wrHe0bpVlxX/g\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1303,
-    "path": "../public/_build/assets/index-COvTVlLR.js.gz"
-  },
-  "/_build/assets/index-CWSqypye.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"f63-P+QMJv+7gwsIImLM4FOSQabGWZM\"",
-    "mtime": "2025-04-12T15:14:43.397Z",
-    "size": 3939,
-    "path": "../public/_build/assets/index-CWSqypye.js"
-  },
-  "/_build/assets/index-CWSqypye.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"5fb-tSNGqV/XW4+L/Ucd5QVza+VktvM\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1531,
-    "path": "../public/_build/assets/index-CWSqypye.js.br"
-  },
-  "/_build/assets/index-CWSqypye.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"6ea-U3qYHMrVGT/PVUkSmsdhb83ooRU\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1770,
-    "path": "../public/_build/assets/index-CWSqypye.js.gz"
-  },
-  "/_build/assets/index-D5Hanbsc.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f1-8KSBco3OcUG1J1dMPzmtPTa//pY\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 497,
-    "path": "../public/_build/assets/index-D5Hanbsc.js"
-  },
-  "/_build/assets/index-D8rVyQy1.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"88a4-YJT2hdJwp35xhHTKSrybJ0uReQA\"",
-    "mtime": "2025-04-12T15:14:43.387Z",
-    "size": 34980,
-    "path": "../public/_build/assets/index-D8rVyQy1.js"
-  },
-  "/_build/assets/index-D8rVyQy1.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"319f-uvxbuo+bW1m8x9HtN8t2zfXFgnc\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 12703,
-    "path": "../public/_build/assets/index-D8rVyQy1.js.br"
-  },
-  "/_build/assets/index-D8rVyQy1.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"36b8-VTA0uyINVLKYPghqXBYGJIDWoCY\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 14008,
-    "path": "../public/_build/assets/index-D8rVyQy1.js.gz"
-  },
-  "/_build/assets/index-DB7IFhIG.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1259-c7edGv5m4DRHyuwI0mFOl/bhPUw\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 4697,
-    "path": "../public/_build/assets/index-DB7IFhIG.js"
-  },
-  "/_build/assets/index-DB7IFhIG.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"657-BvBTpnmcCu5m9a2uFPPbnc9tNgw\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1623,
-    "path": "../public/_build/assets/index-DB7IFhIG.js.br"
-  },
-  "/_build/assets/index-DB7IFhIG.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"721-A+FRpnxReJ7EscAv8d8NFDL8VAs\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1825,
-    "path": "../public/_build/assets/index-DB7IFhIG.js.gz"
-  },
-  "/_build/assets/index-DcaoqgVt.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"dbf-z6Bwq2c3L8+qL3M27MJ7P/p0zks\"",
-    "mtime": "2025-04-12T15:14:43.397Z",
-    "size": 3519,
-    "path": "../public/_build/assets/index-DcaoqgVt.js"
-  },
-  "/_build/assets/index-DcaoqgVt.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"445-cPBHuzAZsP7WpAhnZAzer5Hac/A\"",
-    "mtime": "2025-04-12T15:14:55.565Z",
-    "size": 1093,
-    "path": "../public/_build/assets/index-DcaoqgVt.js.br"
-  },
-  "/_build/assets/index-DcaoqgVt.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"50d-QwycpuvP3IFsIw893Cm59mQIL6w\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 1293,
-    "path": "../public/_build/assets/index-DcaoqgVt.js.gz"
-  },
-  "/_build/assets/index-De9y16RJ.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1718-2/F241ZGRjKq93YBfGHX50McHjU\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 5912,
-    "path": "../public/_build/assets/index-De9y16RJ.js"
-  },
-  "/_build/assets/index-De9y16RJ.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"832-pOWKa1dXqHxT9h++nty5xK5/4rc\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 2098,
-    "path": "../public/_build/assets/index-De9y16RJ.js.br"
-  },
-  "/_build/assets/index-De9y16RJ.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"993-hGsiKn0z9s/dq6mrLi1hWCdS+hU\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 2451,
-    "path": "../public/_build/assets/index-De9y16RJ.js.gz"
-  },
-  "/_build/assets/index-DlIApr22.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"807-SFXki7ald1v9BkS8w8lOAuh1Ds8\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 2055,
-    "path": "../public/_build/assets/index-DlIApr22.js"
-  },
-  "/_build/assets/index-DlIApr22.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"384-cgIAdm2eFtW8JVwf46JhzvKgIG0\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 900,
-    "path": "../public/_build/assets/index-DlIApr22.js.br"
-  },
-  "/_build/assets/index-DlIApr22.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"415-D21PcdeC8STPlifopL+R7n5DZYY\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 1045,
-    "path": "../public/_build/assets/index-DlIApr22.js.gz"
-  },
-  "/_build/assets/index-DMf-fkG-.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"eea-VwLwfZq6+vz9Eiw+gUIfCdt4GTs\"",
-    "mtime": "2025-04-12T15:14:43.397Z",
-    "size": 3818,
-    "path": "../public/_build/assets/index-DMf-fkG-.js"
-  },
-  "/_build/assets/index-DMf-fkG-.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"5c1-CqOtpVpxASYlT1Hr+EeJ+xO+zis\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 1473,
-    "path": "../public/_build/assets/index-DMf-fkG-.js.br"
-  },
-  "/_build/assets/index-DMf-fkG-.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"6a9-nTR6QtZW2gs8FNedc+J//+F4S/U\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 1705,
-    "path": "../public/_build/assets/index-DMf-fkG-.js.gz"
-  },
-  "/_build/assets/index-hJ-BwGgJ.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"8fe-V3HZMxHlNwDR7F4tNJSinpQPRq0\"",
-    "mtime": "2025-04-12T15:14:43.396Z",
-    "size": 2302,
-    "path": "../public/_build/assets/index-hJ-BwGgJ.js"
-  },
-  "/_build/assets/index-hJ-BwGgJ.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"3fa-no5o9akWSOlT8Pp5AKKFTMJfsho\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 1018,
-    "path": "../public/_build/assets/index-hJ-BwGgJ.js.br"
-  },
-  "/_build/assets/index-hJ-BwGgJ.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"49d-f4PIUSNm417DHjV8G3mTcMVEx5A\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 1181,
-    "path": "../public/_build/assets/index-hJ-BwGgJ.js.gz"
-  },
-  "/_build/assets/index-K3Oktdx6.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"b05-8XJtg3XlyDbP1WHQYLAcJ9ujyYM\"",
-    "mtime": "2025-04-12T15:14:43.385Z",
-    "size": 2821,
-    "path": "../public/_build/assets/index-K3Oktdx6.js"
-  },
-  "/_build/assets/index-K3Oktdx6.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"474-NfThghETHgzbbJKfauQmYbGhvJU\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 1140,
-    "path": "../public/_build/assets/index-K3Oktdx6.js.br"
-  },
-  "/_build/assets/index-K3Oktdx6.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"520-lQPFxe453W6AsP/1N5YRAlH3YlY\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 1312,
-    "path": "../public/_build/assets/index-K3Oktdx6.js.gz"
-  },
-  "/_build/assets/index-Ky9zR5dV.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"275-YocJd4VF6I9gUSSBMIiuWFc6Yaw\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 629,
-    "path": "../public/_build/assets/index-Ky9zR5dV.css"
-  },
-  "/_build/assets/index.module-B9JvMj-k.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"61-fttA+oQdwAnVEdIlpVmcCYuDqsI\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 97,
-    "path": "../public/_build/assets/index.module-B9JvMj-k.js"
-  },
-  "/_build/assets/index.module-DJUCNMRy.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"511-AcWz31JLiRdOtW0F4z1Oj/URL5w\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 1297,
-    "path": "../public/_build/assets/index.module-DJUCNMRy.js"
-  },
-  "/_build/assets/index.module-DJUCNMRy.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"2b4-NQqBQe6TZg3spfnC9/YPvEXWg5s\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 692,
-    "path": "../public/_build/assets/index.module-DJUCNMRy.js.br"
-  },
-  "/_build/assets/index.module-DJUCNMRy.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"2fa-k9Kq5u3Umiysk7hzk5sdQ0xHy68\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 762,
-    "path": "../public/_build/assets/index.module-DJUCNMRy.js.gz"
-  },
-  "/_build/assets/Inputs-Bqq548qA.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"cac-5xUbqIysRq8KE3AOoV/cNoIabV0\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 3244,
-    "path": "../public/_build/assets/Inputs-Bqq548qA.css"
-  },
-  "/_build/assets/Inputs-Bqq548qA.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"3c1-Ray3nts1Bwyo6sYthtbayyZbpCg\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 961,
-    "path": "../public/_build/assets/Inputs-Bqq548qA.css.br"
-  },
-  "/_build/assets/Inputs-Bqq548qA.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"459-DoNxJCc+CJjJIOlW5HKj9K9vBR0\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 1113,
-    "path": "../public/_build/assets/Inputs-Bqq548qA.css.gz"
-  },
-  "/_build/assets/Inputs-hvbb28Ka.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"14279-hMYwXauPQK9jjhIf3V7BZtI4f+U\"",
-    "mtime": "2025-04-12T15:14:43.397Z",
-    "size": 82553,
-    "path": "../public/_build/assets/Inputs-hvbb28Ka.js"
-  },
-  "/_build/assets/Inputs-hvbb28Ka.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"6dbc-59w6h7rS3ZeC98fEpo9AFA0L7qY\"",
-    "mtime": "2025-04-12T15:14:55.585Z",
-    "size": 28092,
-    "path": "../public/_build/assets/Inputs-hvbb28Ka.js.br"
-  },
-  "/_build/assets/Inputs-hvbb28Ka.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"7a7b-aYC9zGlDmmTDrbsPCnnvjiNP6VA\"",
-    "mtime": "2025-04-12T15:14:55.583Z",
-    "size": 31355,
-    "path": "../public/_build/assets/Inputs-hvbb28Ka.js.gz"
-  },
-  "/_build/assets/LazyLoadSpline-CHHaaTq7.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"5c1-h7gBn1lAbvqMa5HMZBCw6XAmWJk\"",
-    "mtime": "2025-04-12T15:14:43.397Z",
-    "size": 1473,
-    "path": "../public/_build/assets/LazyLoadSpline-CHHaaTq7.js"
-  },
-  "/_build/assets/LazyLoadSpline-CHHaaTq7.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"26d-OaNWqTPq18xBO7cTLaVDLP+j/QU\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 621,
-    "path": "../public/_build/assets/LazyLoadSpline-CHHaaTq7.js.br"
-  },
-  "/_build/assets/LazyLoadSpline-CHHaaTq7.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"2c0-c/H1qD5AWonZQoqV9KzQLIKkGr0\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 704,
-    "path": "../public/_build/assets/LazyLoadSpline-CHHaaTq7.js.gz"
-  },
-  "/_build/assets/Menu-DSzeyodt.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"406-yXxJ7F5KIwI5YF6g5rdOrJ9UDNw\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 1030,
-    "path": "../public/_build/assets/Menu-DSzeyodt.css"
-  },
-  "/_build/assets/Menu-DSzeyodt.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"169-hS7escrmswjNhFq5i/vIm4s7Y+c\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 361,
-    "path": "../public/_build/assets/Menu-DSzeyodt.css.br"
-  },
-  "/_build/assets/Menu-DSzeyodt.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"1c7-rIHpHvCKxxnv/ble8qHPJ+Qp4lc\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 455,
-    "path": "../public/_build/assets/Menu-DSzeyodt.css.gz"
-  },
-  "/_build/assets/Menu-kyhemyOT.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"c42-muko49+Q0mRtg+y42NYey3kmB4Q\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 3138,
-    "path": "../public/_build/assets/Menu-kyhemyOT.js"
-  },
-  "/_build/assets/Menu-kyhemyOT.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"42c-wp/JNEbBSdqTAXgBqMrn5UShg+g\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 1068,
-    "path": "../public/_build/assets/Menu-kyhemyOT.js.br"
-  },
-  "/_build/assets/Menu-kyhemyOT.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"4ac-j7vdmFzEfVGqVbGy7iGcw0E/32w\"",
-    "mtime": "2025-04-12T15:14:55.566Z",
-    "size": 1196,
-    "path": "../public/_build/assets/Menu-kyhemyOT.js.gz"
-  },
-  "/_build/assets/navmesh-BFd9Mv4x.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"d731-Kb2YazXaXx8UukT1V8fbYAAledo\"",
-    "mtime": "2025-04-12T15:14:43.404Z",
-    "size": 55089,
-    "path": "../public/_build/assets/navmesh-BFd9Mv4x.js"
-  },
-  "/_build/assets/navmesh-BFd9Mv4x.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"242b-AyUViR0pIsumkvh0QnJjBNdmQF8\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 9259,
-    "path": "../public/_build/assets/navmesh-BFd9Mv4x.js.br"
-  },
-  "/_build/assets/navmesh-BFd9Mv4x.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"2ada-9JAJZ0diOqKzBnJCR29GFmXMwH8\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 10970,
-    "path": "../public/_build/assets/navmesh-BFd9Mv4x.js.gz"
-  },
-  "/_build/assets/opentype-LDE648lb.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"2a5db-hbOgF/CNFYOeRph3sZUzV8rXP1I\"",
-    "mtime": "2025-04-12T15:14:43.405Z",
-    "size": 173531,
-    "path": "../public/_build/assets/opentype-LDE648lb.js"
-  },
-  "/_build/assets/opentype-LDE648lb.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"a22e-Srei0AWa79aCVcT30QUPsRyZlt4\"",
-    "mtime": "2025-04-12T15:14:55.588Z",
-    "size": 41518,
-    "path": "../public/_build/assets/opentype-LDE648lb.js.br"
-  },
-  "/_build/assets/opentype-LDE648lb.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"c417-Nj2DKcaegMKgxd01UiGghIMVflc\"",
-    "mtime": "2025-04-12T15:14:55.590Z",
-    "size": 50199,
-    "path": "../public/_build/assets/opentype-LDE648lb.js.gz"
-  },
-  "/_build/assets/otpInput-BLB8o3Md.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"865-svc1HFcwx+16unNPogICJIaz7nU\"",
-    "mtime": "2025-04-12T15:14:43.397Z",
-    "size": 2149,
-    "path": "../public/_build/assets/otpInput-BLB8o3Md.js"
-  },
-  "/_build/assets/otpInput-BLB8o3Md.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"430-zTJKUJX5uVvIjztou9GkVREW00s\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 1072,
-    "path": "../public/_build/assets/otpInput-BLB8o3Md.js.br"
-  },
-  "/_build/assets/otpInput-BLB8o3Md.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"4cb-emRZSJ1NcNTwa/z/ePdYljO4J6c\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 1227,
-    "path": "../public/_build/assets/otpInput-BLB8o3Md.js.gz"
-  },
-  "/_build/assets/otpInput-DeXMA6XN.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"33b02-yQLLg4fWh3PlQAS8nr8cXyxP8cU\"",
-    "mtime": "2025-04-12T15:14:43.397Z",
-    "size": 211714,
-    "path": "../public/_build/assets/otpInput-DeXMA6XN.js"
-  },
-  "/_build/assets/otpInput-DeXMA6XN.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"90c9-80rmxyJpSFvGB4fu1AV2vJDwe4c\"",
-    "mtime": "2025-04-12T15:14:55.588Z",
-    "size": 37065,
-    "path": "../public/_build/assets/otpInput-DeXMA6XN.js.br"
-  },
-  "/_build/assets/otpInput-DeXMA6XN.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"ab95-t4bJ+f/xxOWZs1RnGGo9zyBFx5o\"",
-    "mtime": "2025-04-12T15:14:55.588Z",
-    "size": 43925,
-    "path": "../public/_build/assets/otpInput-DeXMA6XN.js.gz"
-  },
-  "/_build/assets/otpInput-tBTztLmB.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"30e-BRU62CsVY4iiAFz59isIZdKOAGI\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 782,
-    "path": "../public/_build/assets/otpInput-tBTztLmB.css"
-  },
-  "/_build/assets/physics-BM4kW-A5.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1e53b2-EbF8L0PN5bqhDak9pVn/9B0/qHE\"",
-    "mtime": "2025-04-12T15:14:43.406Z",
-    "size": 1987506,
-    "path": "../public/_build/assets/physics-BM4kW-A5.js"
-  },
-  "/_build/assets/physics-BM4kW-A5.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"83d25-BA/85laVA4i/v6U2hxsxW9iGYS0\"",
-    "mtime": "2025-04-12T15:14:59.620Z",
-    "size": 539941,
-    "path": "../public/_build/assets/physics-BM4kW-A5.js.br"
-  },
-  "/_build/assets/physics-BM4kW-A5.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"b04c0-sa17y4mXzSBI6wrG3NSDQWI9csk\"",
-    "mtime": "2025-04-12T15:14:55.801Z",
-    "size": 722112,
-    "path": "../public/_build/assets/physics-BM4kW-A5.js.gz"
-  },
-  "/_build/assets/preload-helper-CM3UJVvY.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"3e0-Q0Bp0QjKFMyDOuO3rqIIPlfnrHI\"",
-    "mtime": "2025-04-12T15:14:43.397Z",
-    "size": 992,
-    "path": "../public/_build/assets/preload-helper-CM3UJVvY.js"
-  },
-  "/_build/assets/process-DLQUZ-E7.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"108af-DaNDFTw5boqdb0AHgBvFPocUvXM\"",
-    "mtime": "2025-04-12T15:14:43.404Z",
-    "size": 67759,
-    "path": "../public/_build/assets/process-DLQUZ-E7.js"
-  },
-  "/_build/assets/process-DLQUZ-E7.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"50da-0XPnxcR7tchth8aSq6nZpbw3tvE\"",
-    "mtime": "2025-04-12T15:14:55.584Z",
-    "size": 20698,
-    "path": "../public/_build/assets/process-DLQUZ-E7.js.br"
-  },
-  "/_build/assets/process-DLQUZ-E7.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"59dd-7ix6D/7ifYupKRaNraySvKzoh+I\"",
-    "mtime": "2025-04-12T15:14:55.585Z",
-    "size": 23005,
-    "path": "../public/_build/assets/process-DLQUZ-E7.js.gz"
-  },
-  "/_build/assets/prova-Dx2gmhDX.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"b1b-R+wWl06kSEz27yIGHkNHryvm13s\"",
-    "mtime": "2025-04-12T15:14:43.396Z",
-    "size": 2843,
-    "path": "../public/_build/assets/prova-Dx2gmhDX.js"
-  },
-  "/_build/assets/prova-Dx2gmhDX.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"3ad-R9CsQeYCBShLGe4ct6LC9Gzutd0\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 941,
-    "path": "../public/_build/assets/prova-Dx2gmhDX.js.br"
-  },
-  "/_build/assets/prova-Dx2gmhDX.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"425-G1xWcr9gRPUsy4gTN95fB7ZBEWc\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 1061,
-    "path": "../public/_build/assets/prova-Dx2gmhDX.js.gz"
-  },
-  "/_build/assets/riv-CrzKM9lR.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"4bb-Ww4USC5R7dYNdCP7Bpw/RIOCPVo\"",
-    "mtime": "2025-04-12T15:14:43.385Z",
-    "size": 1211,
-    "path": "../public/_build/assets/riv-CrzKM9lR.js"
-  },
-  "/_build/assets/riv-CrzKM9lR.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"28e-u6LRe8JoqizWlEn2kO9r5PNpww0\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 654,
-    "path": "../public/_build/assets/riv-CrzKM9lR.js.br"
-  },
-  "/_build/assets/riv-CrzKM9lR.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"2cd-rSgqcrxO7Z8qljOrVceVcKZ2Huo\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 717,
-    "path": "../public/_build/assets/riv-CrzKM9lR.js.gz"
-  },
-  "/_build/assets/riv-VPAlW_cg.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"55-HKRxB0OLEvqM0460qByGA52sIg0\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 85,
-    "path": "../public/_build/assets/riv-VPAlW_cg.css"
-  },
-  "/_build/assets/rive-D3j5nBow.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f2a4-QJybYrMahWNEnJa1MJJioyb0SW8\"",
-    "mtime": "2025-04-12T15:14:43.406Z",
-    "size": 127652,
-    "path": "../public/_build/assets/rive-D3j5nBow.js"
-  },
-  "/_build/assets/rive-D3j5nBow.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"8938-PPxToKcfIPhGcG0x04ctnUx5X7E\"",
-    "mtime": "2025-04-12T15:14:55.590Z",
-    "size": 35128,
-    "path": "../public/_build/assets/rive-D3j5nBow.js.br"
-  },
-  "/_build/assets/rive-D3j5nBow.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"9ac2-16QPFDyhHfxpYHnD372uE0oQgNM\"",
-    "mtime": "2025-04-12T15:14:55.588Z",
-    "size": 39618,
-    "path": "../public/_build/assets/rive-D3j5nBow.js.gz"
-  },
-  "/_build/assets/routing-BUmn5GEU.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1d65-yWCGRbivCVOzxGSX1cPGdL+0RuA\"",
-    "mtime": "2025-04-12T15:14:43.404Z",
-    "size": 7525,
-    "path": "../public/_build/assets/routing-BUmn5GEU.js"
-  },
-  "/_build/assets/routing-BUmn5GEU.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"c9a-UD84GrqjgfOCVVdMG1/yPhD2MwA\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 3226,
-    "path": "../public/_build/assets/routing-BUmn5GEU.js.br"
-  },
-  "/_build/assets/routing-BUmn5GEU.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"dcf-0mEm/IKTG0fD9M5rL8CSk2SAhEY\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 3535,
-    "path": "../public/_build/assets/routing-BUmn5GEU.js.gz"
-  },
-  "/_build/assets/runtime-BmWp8cEw.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1e497a-9NtpK7GD68Er/WZs4TWq2QmnaCQ\"",
-    "mtime": "2025-04-12T15:14:43.399Z",
-    "size": 1984890,
-    "path": "../public/_build/assets/runtime-BmWp8cEw.js"
-  },
-  "/_build/assets/runtime-BmWp8cEw.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"71457-zZ/j/nneBZkNLpFNMsWI1PpmleY\"",
-    "mtime": "2025-04-12T15:14:59.277Z",
-    "size": 463959,
-    "path": "../public/_build/assets/runtime-BmWp8cEw.js.br"
-  },
-  "/_build/assets/runtime-BmWp8cEw.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"89a06-ufBHSuNazNvxolqbyVcXymrIndQ\"",
-    "mtime": "2025-04-12T15:14:55.786Z",
-    "size": 563718,
-    "path": "../public/_build/assets/runtime-BmWp8cEw.js.gz"
-  },
-  "/_build/assets/sendOtp-CjQewLXM.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"444-AZgmL5CX7yNSbgbGN1cVQVGmQxU\"",
-    "mtime": "2025-04-12T15:14:43.396Z",
-    "size": 1092,
-    "path": "../public/_build/assets/sendOtp-CjQewLXM.js"
-  },
-  "/_build/assets/sendOtp-CjQewLXM.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"1fc-dnR5cfQXjZhmITIJYhnpUwaoYeo\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 508,
-    "path": "../public/_build/assets/sendOtp-CjQewLXM.js.br"
-  },
-  "/_build/assets/sendOtp-CjQewLXM.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"245-xW8TOuxORkGcQ33w0VX0bdiPKiw\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 581,
-    "path": "../public/_build/assets/sendOtp-CjQewLXM.js.gz"
-  },
-  "/_build/assets/server-runtime-6wq6LtAi.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"5686-OmBGSH0YViNnmTOiqEshDntStIU\"",
-    "mtime": "2025-04-12T15:14:43.399Z",
-    "size": 22150,
-    "path": "../public/_build/assets/server-runtime-6wq6LtAi.js"
-  },
-  "/_build/assets/server-runtime-6wq6LtAi.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"16a6-D3wCVqpmz0hXW9SguYvIh+GwPGU\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 5798,
-    "path": "../public/_build/assets/server-runtime-6wq6LtAi.js.br"
-  },
-  "/_build/assets/server-runtime-6wq6LtAi.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"1962-gZo1GbULUQlFw+RXaYsM3pA6Bk4\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 6498,
-    "path": "../public/_build/assets/server-runtime-6wq6LtAi.js.gz"
-  },
-  "/_build/assets/Title-BAWdhi0q.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1409-yxC3aTrc4F8qk3v9wfUL0SAR+b0\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 5129,
-    "path": "../public/_build/assets/Title-BAWdhi0q.js"
-  },
-  "/_build/assets/Title-BAWdhi0q.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"772-q1hLF6VyBfE1a0sMz8koODvV/iM\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 1906,
-    "path": "../public/_build/assets/Title-BAWdhi0q.js.br"
-  },
-  "/_build/assets/Title-BAWdhi0q.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"86f-tdSX5lX0v01cebZl6qM4J+W/2Bg\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 2159,
-    "path": "../public/_build/assets/Title-BAWdhi0q.js.gz"
-  },
-  "/_build/assets/Toggle-BgaoKUuk.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"2e7-XMaEPn3Z3d2b1PuDRrTG1NL2iow\"",
-    "mtime": "2025-04-12T15:14:43.386Z",
-    "size": 743,
-    "path": "../public/_build/assets/Toggle-BgaoKUuk.js"
-  },
-  "/_build/assets/ui-BRPadsgT.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1673c-m2QBHuDwTbzqLwz+tkpqlayMwE4\"",
-    "mtime": "2025-04-12T15:14:43.405Z",
-    "size": 91964,
-    "path": "../public/_build/assets/ui-BRPadsgT.js"
-  },
-  "/_build/assets/ui-BRPadsgT.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"63f8-wP7Vm3uWBeA5Jc1CTs6MY2uPn48\"",
-    "mtime": "2025-04-12T15:14:55.585Z",
-    "size": 25592,
-    "path": "../public/_build/assets/ui-BRPadsgT.js.br"
-  },
-  "/_build/assets/ui-BRPadsgT.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"7093-UBXZYOqKk6O3qucityNlsJ50RuY\"",
-    "mtime": "2025-04-12T15:14:55.587Z",
-    "size": 28819,
-    "path": "../public/_build/assets/ui-BRPadsgT.js.gz"
-  },
-  "/_build/assets/Waves-CQ3GUdkf.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"4aa-3G/7sL8p5o/AO3aZ5Me/2065sAk\"",
-    "mtime": "2025-04-12T15:14:43.379Z",
-    "size": 1194,
-    "path": "../public/_build/assets/Waves-CQ3GUdkf.js"
-  },
-  "/_build/assets/Waves-CQ3GUdkf.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"205-NhwvtJF1GHfeCqyvx0gdS1AyPlU\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 517,
-    "path": "../public/_build/assets/Waves-CQ3GUdkf.js.br"
-  },
-  "/_build/assets/Waves-CQ3GUdkf.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"25f-WNgDxpf6NwNfBdHY0jZADtB6tFo\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 607,
-    "path": "../public/_build/assets/Waves-CQ3GUdkf.js.gz"
-  },
-  "/_build/assets/WavesWorker-CTH7zEzk.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"ad3-X5vf2QFhYNOY8WYy27Q9JMltYRM\"",
-    "mtime": "2025-04-12T15:14:43.406Z",
-    "size": 2771,
-    "path": "../public/_build/assets/WavesWorker-CTH7zEzk.js"
-  },
-  "/_build/assets/WavesWorker-CTH7zEzk.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"517-Leci0CoEq2kHEO0U1YhcK2j5328\"",
-    "mtime": "2025-04-12T15:14:55.568Z",
-    "size": 1303,
-    "path": "../public/_build/assets/WavesWorker-CTH7zEzk.js.br"
-  },
-  "/_build/assets/WavesWorker-CTH7zEzk.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"5cd-x/DiIkTH6aR4jpWGg5AY+At/Y6k\"",
-    "mtime": "2025-04-12T15:14:55.568Z",
-    "size": 1485,
-    "path": "../public/_build/assets/WavesWorker-CTH7zEzk.js.gz"
-  },
-  "/_build/assets/web-DcXN-p99.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"65d6-r5d34neYbwOuT72NR+09Rc0E11g\"",
-    "mtime": "2025-04-12T15:14:43.404Z",
-    "size": 26070,
-    "path": "../public/_build/assets/web-DcXN-p99.js"
-  },
-  "/_build/assets/web-DcXN-p99.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"23d4-15xquGgraYRqpzTI2rBMRQKjAuk\"",
-    "mtime": "2025-04-12T15:14:55.567Z",
-    "size": 9172,
-    "path": "../public/_build/assets/web-DcXN-p99.js.br"
-  },
-  "/_build/assets/web-DcXN-p99.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"277a-LYxBPjOOpT9pVTKZznbj0g1rrEQ\"",
-    "mtime": "2025-04-12T15:14:55.568Z",
-    "size": 10106,
-    "path": "../public/_build/assets/web-DcXN-p99.js.gz"
-  },
-  "/_build/assets/_..-D39vbXZ9.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"44ea-Hv6m+tmEfbb+wzixrawKm67P9YE\"",
-    "mtime": "2025-04-12T15:14:43.376Z",
-    "size": 17642,
-    "path": "../public/_build/assets/_..-D39vbXZ9.css"
-  },
-  "/_build/assets/_..-D39vbXZ9.css.br": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"861-0donVGTyqHLQzOZdP6KKEZ6C4QU\"",
-    "mtime": "2025-04-12T15:14:55.568Z",
-    "size": 2145,
-    "path": "../public/_build/assets/_..-D39vbXZ9.css.br"
-  },
-  "/_build/assets/_..-D39vbXZ9.css.gz": {
-    "type": "text/css; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"ace-e+MM8TTmRp6yvUSfIgjDFSAg/v8\"",
-    "mtime": "2025-04-12T15:14:55.568Z",
-    "size": 2766,
-    "path": "../public/_build/assets/_..-D39vbXZ9.css.gz"
-  },
-  "/_build/assets/_...404_-BOKr2Rfp.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"31a-o6wJxnsW94NV/HVRqcQ/ZowR5uc\"",
-    "mtime": "2025-04-12T15:14:43.377Z",
-    "size": 794,
-    "path": "../public/_build/assets/_...404_-BOKr2Rfp.js"
-  },
-  "/_build/assets/_...slug_-D_Uu6UUA.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"17f4-D6WrU015q2aRLydqy8HLFgwVRBU\"",
-    "mtime": "2025-04-12T15:14:43.385Z",
-    "size": 6132,
-    "path": "../public/_build/assets/_...slug_-D_Uu6UUA.js"
-  },
-  "/_build/assets/_...slug_-D_Uu6UUA.js.br": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "br",
-    "etag": "\"84f-BWf0/H9BoRl3bSu4pdlMC+Is05w\"",
-    "mtime": "2025-04-12T15:14:55.573Z",
-    "size": 2127,
-    "path": "../public/_build/assets/_...slug_-D_Uu6UUA.js.br"
-  },
-  "/_build/assets/_...slug_-D_Uu6UUA.js.gz": {
-    "type": "text/javascript; charset=utf-8",
-    "encoding": "gzip",
-    "etag": "\"91f-/BbC4zflBgNsMX2JA9EZ41VMjeQ\"",
-    "mtime": "2025-04-12T15:14:55.572Z",
-    "size": 2335,
-    "path": "../public/_build/assets/_...slug_-D_Uu6UUA.js.gz"
-  }
-};
-
-const _DRIVE_LETTER_START_RE = /^[A-Za-z]:\//;
-function normalizeWindowsPath(input = "") {
-  if (!input) {
-    return input;
-  }
-  return input.replace(/\\/g, "/").replace(_DRIVE_LETTER_START_RE, (r) => r.toUpperCase());
-}
-const _IS_ABSOLUTE_RE = /^[/\\](?![/\\])|^[/\\]{2}(?!\.)|^[A-Za-z]:[/\\]/;
-const _DRIVE_LETTER_RE = /^[A-Za-z]:$/;
-function cwd() {
-  if (typeof process !== "undefined" && typeof process.cwd === "function") {
-    return process.cwd().replace(/\\/g, "/");
-  }
-  return "/";
-}
-const resolve = function(...arguments_) {
-  arguments_ = arguments_.map((argument) => normalizeWindowsPath(argument));
-  let resolvedPath = "";
-  let resolvedAbsolute = false;
-  for (let index = arguments_.length - 1; index >= -1 && !resolvedAbsolute; index--) {
-    const path = index >= 0 ? arguments_[index] : cwd();
-    if (!path || path.length === 0) {
-      continue;
-    }
-    resolvedPath = `${path}/${resolvedPath}`;
-    resolvedAbsolute = isAbsolute(path);
-  }
-  resolvedPath = normalizeString(resolvedPath, !resolvedAbsolute);
-  if (resolvedAbsolute && !isAbsolute(resolvedPath)) {
-    return `/${resolvedPath}`;
-  }
-  return resolvedPath.length > 0 ? resolvedPath : ".";
-};
-function normalizeString(path, allowAboveRoot) {
-  let res = "";
-  let lastSegmentLength = 0;
-  let lastSlash = -1;
-  let dots = 0;
-  let char = null;
-  for (let index = 0; index <= path.length; ++index) {
-    if (index < path.length) {
-      char = path[index];
-    } else if (char === "/") {
-      break;
-    } else {
-      char = "/";
-    }
-    if (char === "/") {
-      if (lastSlash === index - 1 || dots === 1) ; else if (dots === 2) {
-        if (res.length < 2 || lastSegmentLength !== 2 || res[res.length - 1] !== "." || res[res.length - 2] !== ".") {
-          if (res.length > 2) {
-            const lastSlashIndex = res.lastIndexOf("/");
-            if (lastSlashIndex === -1) {
-              res = "";
-              lastSegmentLength = 0;
-            } else {
-              res = res.slice(0, lastSlashIndex);
-              lastSegmentLength = res.length - 1 - res.lastIndexOf("/");
-            }
-            lastSlash = index;
-            dots = 0;
-            continue;
-          } else if (res.length > 0) {
-            res = "";
-            lastSegmentLength = 0;
-            lastSlash = index;
-            dots = 0;
-            continue;
-          }
-        }
-        if (allowAboveRoot) {
-          res += res.length > 0 ? "/.." : "..";
-          lastSegmentLength = 2;
-        }
-      } else {
-        if (res.length > 0) {
-          res += `/${path.slice(lastSlash + 1, index)}`;
-        } else {
-          res = path.slice(lastSlash + 1, index);
-        }
-        lastSegmentLength = index - lastSlash - 1;
-      }
-      lastSlash = index;
-      dots = 0;
-    } else if (char === "." && dots !== -1) {
-      ++dots;
-    } else {
-      dots = -1;
-    }
-  }
-  return res;
-}
-const isAbsolute = function(p) {
-  return _IS_ABSOLUTE_RE.test(p);
-};
-const dirname = function(p) {
-  const segments = normalizeWindowsPath(p).replace(/\/$/, "").split("/").slice(0, -1);
-  if (segments.length === 1 && _DRIVE_LETTER_RE.test(segments[0])) {
-    segments[0] += "/";
-  }
-  return segments.join("/") || (isAbsolute(p) ? "/" : ".");
-};
-
-function readAsset (id) {
-  const serverDir = dirname(fileURLToPath(globalThis._importMeta_.url));
-  return promises.readFile(resolve(serverDir, assets$1[id].path))
-}
-
-const publicAssetBases = {};
-
-function isPublicAssetURL(id = '') {
-  if (assets$1[id]) {
-    return true
-  }
-  for (const base in publicAssetBases) {
-    if (id.startsWith(base)) { return true }
-  }
-  return false
-}
-
-function getAsset (id) {
-  return assets$1[id]
-}
-
-const METHODS = /* @__PURE__ */ new Set(["HEAD", "GET"]);
-const EncodingMap = { gzip: ".gz", br: ".br" };
-const _zBFq2t = eventHandler((event) => {
-  if (event.method && !METHODS.has(event.method)) {
-    return;
-  }
-  let id = decodePath(
-    withLeadingSlash(withoutTrailingSlash(parseURL(event.path).pathname))
-  );
-  let asset;
-  const encodingHeader = String(
-    getRequestHeader(event, "accept-encoding") || ""
-  );
-  const encodings = [
-    ...encodingHeader.split(",").map((e) => EncodingMap[e.trim()]).filter(Boolean).sort(),
-    ""
-  ];
-  if (encodings.length > 1) {
-    appendResponseHeader(event, "Vary", "Accept-Encoding");
-  }
-  for (const encoding of encodings) {
-    for (const _id of [id + encoding, joinURL(id, "index.html" + encoding)]) {
-      const _asset = getAsset(_id);
-      if (_asset) {
-        asset = _asset;
-        id = _id;
-        break;
-      }
-    }
-  }
-  if (!asset) {
-    if (isPublicAssetURL(id)) {
-      removeResponseHeader(event, "Cache-Control");
-      throw createError$1({
-        statusMessage: "Cannot find static asset " + id,
-        statusCode: 404
-      });
-    }
-    return;
-  }
-  const ifNotMatch = getRequestHeader(event, "if-none-match") === asset.etag;
-  if (ifNotMatch) {
-    setResponseStatus(event, 304, "Not Modified");
-    return "";
-  }
-  const ifModifiedSinceH = getRequestHeader(event, "if-modified-since");
-  const mtimeDate = new Date(asset.mtime);
-  if (ifModifiedSinceH && asset.mtime && new Date(ifModifiedSinceH) >= mtimeDate) {
-    setResponseStatus(event, 304, "Not Modified");
-    return "";
-  }
-  if (asset.type && !getResponseHeader(event, "Content-Type")) {
-    setResponseHeader(event, "Content-Type", asset.type);
-  }
-  if (asset.etag && !getResponseHeader(event, "ETag")) {
-    setResponseHeader(event, "ETag", asset.etag);
-  }
-  if (asset.mtime && !getResponseHeader(event, "Last-Modified")) {
-    setResponseHeader(event, "Last-Modified", mtimeDate.toUTCString());
-  }
-  if (asset.encoding && !getResponseHeader(event, "Content-Encoding")) {
-    setResponseHeader(event, "Content-Encoding", asset.encoding);
-  }
-  if (asset.size > 0 && !getResponseHeader(event, "Content-Length")) {
-    setResponseHeader(event, "Content-Length", asset.size);
-  }
-  return readAsset(id);
-});
-
 var __defProp$2 = Object.defineProperty;
 var __defNormalProp$2 = (obj, key, value) => key in obj ? __defProp$2(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField$2 = (obj, key, value) => __defNormalProp$2(obj, key + "" , value);
-function K$3(t = {}) {
+function z$2(t = {}) {
   let e, s = false;
   const r = (n) => {
     if (e && e !== n) throw new Error("Context conflict");
@@ -6697,7 +3631,7 @@ function K$3(t = {}) {
     const n = t.AsyncLocalStorage || globalThis.AsyncLocalStorage;
     n ? a = new n() : console.warn("[unctx] `AsyncLocalStorage` is not provided.");
   }
-  const d = () => {
+  const l = () => {
     if (a) {
       const n = a.getStore();
       if (n !== void 0) return n;
@@ -6705,10 +3639,10 @@ function K$3(t = {}) {
     return e;
   };
   return { use: () => {
-    const n = d();
+    const n = l();
     if (n === void 0) throw new Error("Context is not available");
     return n;
-  }, tryUse: () => d(), set: (n, i) => {
+  }, tryUse: () => l(), set: (n, i) => {
     i || r(n), e = n, s = true;
   }, unset: () => {
     e = void 0, s = false;
@@ -6724,101 +3658,104 @@ function K$3(t = {}) {
     const v = () => {
       e = n;
     }, p = () => e === n ? v : void 0;
-    h$2.add(p);
+    R$4.add(p);
     try {
-      const C = a ? a.run(n, i) : i();
-      return s || (e = void 0), await C;
+      const w = a ? a.run(n, i) : i();
+      return s || (e = void 0), await w;
     } finally {
-      h$2.delete(p);
+      R$4.delete(p);
     }
   } };
 }
-function B$3(t = {}) {
+function D$5(t = {}) {
   const e = {};
   return { get(s, r = {}) {
-    return e[s] || (e[s] = K$3({ ...t, ...r })), e[s];
+    return e[s] || (e[s] = z$2({ ...t, ...r })), e[s];
   } };
 }
-const u$2 = typeof globalThis < "u" ? globalThis : typeof self < "u" ? self : typeof global < "u" ? global : {}, g$2 = "__unctx__", M$5 = u$2[g$2] || (u$2[g$2] = B$3()), z$2 = (t, e = {}) => M$5.get(t, e), y$3 = "__unctx_async_handlers__", h$2 = u$2[y$3] || (u$2[y$3] = /* @__PURE__ */ new Set());
-function D$4(t) {
+const u$2 = typeof globalThis < "u" ? globalThis : typeof self < "u" ? self : typeof g$2 < "u" ? g$2 : {}, y$2 = "__unctx__", G$4 = u$2[y$2] || (u$2[y$2] = D$5()), J$3 = (t, e = {}) => G$4.get(t, e), h$2 = "__unctx_async_handlers__", R$4 = u$2[h$2] || (u$2[h$2] = /* @__PURE__ */ new Set());
+function pe$2(t) {
+  return t;
+}
+function Q$4(t) {
   let e;
-  const s = x$3(t), r = { duplex: "half", method: t.method, headers: t.headers };
+  const s = C$2(t), r = { duplex: "half", method: t.method, headers: t.headers };
   return t.node.req.body instanceof ArrayBuffer ? new Request(s, { ...r, body: t.node.req.body }) : new Request(s, { ...r, get body() {
-    return e || (e = Z$4(t), e);
+    return e || (e = se$2(t), e);
   } });
 }
-function G$3(t) {
+function V$3(t) {
   var _a;
-  return (_a = t.web) != null ? _a : t.web = { request: D$4(t), url: x$3(t) }, t.web.request;
+  return (_a = t.web) != null ? _a : t.web = { request: Q$4(t), url: C$2(t) }, t.web.request;
 }
-function J$2() {
-  return ne$3();
+function X$3() {
+  return ae$2();
 }
-const m$1 = Symbol("$HTTPEvent");
-function Q$4(t) {
-  return typeof t == "object" && (t instanceof H3Event || (t == null ? void 0 : t[m$1]) instanceof H3Event || (t == null ? void 0 : t.__is_event__) === true);
+const x$3 = Symbol("$HTTPEvent");
+function Y$5(t) {
+  return typeof t == "object" && (t instanceof H3Event || (t == null ? void 0 : t[x$3]) instanceof H3Event || (t == null ? void 0 : t.__is_event__) === true);
 }
 function o$1(t) {
   return function(...e) {
     var _a;
     let s = e[0];
-    if (Q$4(s)) e[0] = s instanceof H3Event || s.__is_event__ ? s : s[m$1];
+    if (Y$5(s)) e[0] = s instanceof H3Event || s.__is_event__ ? s : s[x$3];
     else {
       if (!((_a = globalThis.app.config.server.experimental) == null ? void 0 : _a.asyncContext)) throw new Error("AsyncLocalStorage was not enabled. Use the `server.experimental.asyncContext: true` option in your app configuration to enable it. Or, pass the instance of HTTPEvent that you have as the first argument to the function.");
-      if (s = J$2(), !s) throw new Error("No HTTPEvent found in AsyncLocalStorage. Make sure you are using the function within the server runtime.");
+      if (s = X$3(), !s) throw new Error("No HTTPEvent found in AsyncLocalStorage. Make sure you are using the function within the server runtime.");
       e.unshift(s);
     }
     return t(...e);
   };
 }
-const x$3 = o$1(getRequestURL), V$3 = o$1(getRequestIP), R$3 = o$1(setResponseStatus), S$3 = o$1(getResponseStatus), X$3 = o$1(getResponseStatusText), c$1 = o$1(getResponseHeaders), b$3 = o$1(getResponseHeader), Y$4 = o$1(setResponseHeader), H$2 = o$1(appendResponseHeader), ue$3 = o$1(parseCookies), le$2 = o$1(getCookie), fe$2 = o$1(setCookie), de$3 = o$1(useSession), pe$3 = o$1(setHeader), Z$4 = o$1(getRequestWebStream), ee$4 = o$1(removeResponseHeader), te$4 = o$1(G$3);
-function se$3() {
+const C$2 = o$1(getRequestURL), Z$4 = o$1(getRequestIP), b$3 = o$1(setResponseStatus), S$3 = o$1(getResponseStatus), ee$4 = o$1(getResponseStatusText), c$1 = o$1(getResponseHeaders), m$1 = o$1(getResponseHeader), te$4 = o$1(setResponseHeader), H$4 = o$1(appendResponseHeader), ge$3 = o$1(parseCookies), ye$3 = o$1(getCookie), he$2 = o$1(setCookie), Re$3 = o$1(deleteCookie), be$4 = o$1(useSession), Se$3 = o$1(sendWebResponse), me$3 = o$1(setHeader), se$2 = o$1(getRequestWebStream), ne$4 = o$1(removeResponseHeader), oe$3 = o$1(V$3);
+function re$3() {
   var _a;
-  return z$2("nitro-app", { asyncContext: !!((_a = globalThis.app.config.server.experimental) == null ? void 0 : _a.asyncContext), AsyncLocalStorage: AsyncLocalStorage });
+  return J$3("nitro-app", { asyncContext: !!((_a = globalThis.app.config.server.experimental) == null ? void 0 : _a.asyncContext), AsyncLocalStorage: AsyncLocalStorage });
 }
-function ne$3() {
-  return se$3().use().event;
+function ae$2() {
+  return re$3().use().event;
 }
-const l = "solidFetchEvent";
-function oe$1(t) {
-  return { request: te$4(t), response: ae$1(t), clientAddress: V$3(t), locals: {}, nativeEvent: t };
+const d$1 = "solidFetchEvent";
+function ie$3(t) {
+  return { request: oe$3(t), response: ue$1(t), clientAddress: Z$4(t), locals: {}, nativeEvent: t };
 }
-function ge$3(t) {
+function xe$4(t) {
   return { ...t };
 }
-function ye$3(t) {
-  if (!t.context[l]) {
-    const e = oe$1(t);
-    t.context[l] = e;
+function Ce$1(t) {
+  if (!t.context[d$1]) {
+    const e = ie$3(t);
+    t.context[d$1] = e;
   }
-  return t.context[l];
+  return t.context[d$1];
 }
-function he$2(t, e) {
-  for (const [s, r] of e.entries()) H$2(t, s, r);
+function He$3(t, e) {
+  for (const [s, r] of e.entries()) H$4(t, s, r);
 }
-let re$3 = class re {
+let ce$1 = class ce {
   constructor(e) {
     __publicField$2(this, "event");
     this.event = e;
   }
   get(e) {
-    const s = b$3(this.event, e);
+    const s = m$1(this.event, e);
     return Array.isArray(s) ? s.join(", ") : s || null;
   }
   has(e) {
     return this.get(e) !== void 0;
   }
   set(e, s) {
-    return Y$4(this.event, e, s);
+    return te$4(this.event, e, s);
   }
   delete(e) {
-    return ee$4(this.event, e);
+    return ne$4(this.event, e);
   }
   append(e, s) {
-    H$2(this.event, e, s);
+    H$4(this.event, e, s);
   }
   getSetCookie() {
-    const e = b$3(this.event, "Set-Cookie");
+    const e = m$1(this.event, "Set-Cookie");
     return Array.isArray(e) ? e : [e];
   }
   forEach(e) {
@@ -6837,23 +3774,105 @@ let re$3 = class re {
     return this.entries()[Symbol.iterator]();
   }
 };
-function ae$1(t) {
+function ue$1(t) {
   return { get status() {
     return S$3(t);
   }, set status(e) {
-    R$3(t, e);
+    b$3(t, e);
   }, get statusText() {
-    return X$3(t);
+    return ee$4(t);
   }, set statusText(e) {
-    R$3(t, S$3(t), e);
-  }, headers: new re$3(t) };
+    b$3(t, S$3(t), e);
+  }, headers: new ce$1(t) };
+}
+
+const { Pool: s$3 } = e$1, t$1 = new s$3({ host: o$3.env.DB_HOST, user: o$3.env.DB_USER, password: o$3.env.DB_PASSWORD, port: o$3.env.DB_PORT ? parseInt(o$3.env.DB_PORT, 10) : void 0, database: o$3.env.DB_NAME });
+
+function i$1(n, r = {}) {
+  const { revalidate: s, ...t } = r, e = new Headers(t.headers);
+  s !== void 0 && e.set("X-Revalidate", s.toString()), e.set("Content-Type", "application/json");
+  const o = new Response(JSON.stringify(n), { ...t, headers: e });
+  return o.customBody = () => n, o;
 }
 
 var __defProp$1 = Object.defineProperty;
 var __defNormalProp$1 = (obj, key, value) => key in obj ? __defProp$1(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField$1 = (obj, key, value) => __defNormalProp$1(obj, typeof key !== "symbol" ? key + "" : key, value);
-var st = ((t) => (t[t.AggregateError = 1] = "AggregateError", t[t.ArrowFunction = 2] = "ArrowFunction", t[t.ErrorPrototypeStack = 4] = "ErrorPrototypeStack", t[t.ObjectAssign = 8] = "ObjectAssign", t[t.BigIntTypedArray = 16] = "BigIntTypedArray", t[t.AbortSignal = 32] = "AbortSignal", t))(st || {});
-function it$1(t) {
+function fe$1(t) {
+  return async (e) => {
+    const r = Ce$1(e), i = await t(r);
+    i && await Se$3(e, i);
+  };
+}
+function ge$2(t) {
+  return async (e, r) => {
+    const i = Ce$1(e), a = await t(i, r);
+    a && await Se$3(e, a);
+  };
+}
+function yt$1({ onRequest: t, onBeforeResponse: e }) {
+  return pe$2({ onRequest: typeof t == "function" ? fe$1(t) : Array.isArray(t) ? t.map(fe$1) : void 0, onBeforeResponse: typeof e == "function" ? ge$2(e) : Array.isArray(e) ? e.map(ge$2) : void 0 });
+}
+const De$1 = ["http://localhost:3000", "https://tuo-dominio-produzione.com", "https://dominio-sito-esterno-1.com"];
+async function bt$1(t) {
+  const e = t.request.headers.get("authorization");
+  if (!e || !e.startsWith("Bearer ")) return i$1({ error: "Authentication required", code: "NO_AUTH_HEADER" }, { status: 401 });
+  const r = e.substring(7);
+  let i = null;
+  const a = o$3.env.JWT_SECRET || "", n = o$3.env.JWT_ISSUER || "pulsix";
+  if (!a) return console.error("[Auth Logic] Errore critico: JWT_SECRET non configurato!"), i$1({ error: "Server configuration error", code: "JWT_SECRET_MISSING" }, { status: 500 });
+  try {
+    i = O$3.verify(r, a, { issuer: n });
+  } catch (c) {
+    let u = "Invalid or expired token", d = "INVALID_TOKEN";
+    return c instanceof O$3.TokenExpiredError ? (u = "Token expired", d = "TOKEN_EXPIRED", console.log(`[Auth Logic] Token scaduto per ${t.request.url}.`)) : c instanceof O$3.JsonWebTokenError ? (u = `Invalid token (${c.message})`, d = "TOKEN_INVALID_SIGNATURE_OR_PAYLOAD", console.warn(`[Auth Logic] Errore verifica token per ${t.request.url}: ${c.message}`)) : console.error(`[Auth Logic] Errore verifica token (sconosciuto) per ${t.request.url}:`, c), i$1({ error: u, code: d }, { status: 401 });
+  }
+  if (typeof i != "object" || i === null || typeof i.sub != "number" || typeof i.jti != "string") return console.log("[Auth Logic] Payload token decodificato non valido. Payload:", i), i$1({ error: "Invalid token payload structure or types", code: "INVALID_TOKEN_PAYLOAD" }, { status: 401 });
+  const o = i.sub, l = i.jti;
+  try {
+    const u = (await t$1.query("SELECT id, state FROM auth.users WHERE id = $1", [o])).rows[0];
+    return u ? u.state === "blocked" || u.state === "sospended" ? (console.warn(`[Auth Logic] Accesso negato per utente ${o} (Stato: ${u.state})`), i$1({ error: `User account is ${u.state}`, code: `USER_${u.state.toUpperCase()}` }, { status: 403 })) : (console.log(`[Auth Logic] Utente ${o} autenticato per ${t.request.url}.`), { user: { id: o, tokenId: l, state: u.state } }) : (console.warn(`[Auth Logic] Utente ${o} non trovato.`), i$1({ error: "User associated with token not found", code: "USER_NOT_FOUND" }, { status: 401 }));
+  } catch (c) {
+    return console.error(`[Auth Logic] Errore DB check utente ${o}:`, c), i$1({ error: "Internal server error during user check" }, { status: 500 });
+  }
+}
+async function xt$1(t) {
+  const e = t.nativeEvent;
+  if (isPreflightRequest(e)) {
+    const r = t.request.headers.get("origin");
+    return handleCors(e, { origin: (a) => !a || De$1.includes(a), methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], allowHeaders: ["Authorization", "Content-Type", "Accept", "X-Requested-With"], credentials: true, maxAge: "86400" }) ? new Response(null, { status: 204 }) : (console.error(`[CORS Middleware] Preflight check failed for origin: ${r}`), i$1({ error: "CORS Preflight Check Failed" }, { status: 403 }));
+  }
+}
+async function At$1(t) {
+}
+const vt$1 = ["/API/Auth/login", "/API/Auth/registration", "/API/Auth/refresh", "/API/Auth/logout"], St$1 = "/API/";
+async function wt$1(t) {
+  var _a;
+  const r = new URL(t.request.url).pathname;
+  if (!r.startsWith(St$1)) return;
+  let i = null;
+  if (vt$1.some((o) => {
+    let l = false;
+    return typeof o == "string" ? l = o.endsWith("/") ? r.startsWith(o) : r === o : l = o.test(r), l && (i = o), l;
+  })) {
+    console.log(`[ApiAuth Middleware] SKIPPING AUTH for public API path "${r}" (matched: ${i})`);
+    return;
+  }
+  console.log(`[ApiAuth Middleware] Path "${r}" is a PROTECTED API endpoint. Running auth check...`);
+  const n = await bt$1(t);
+  if (n instanceof Response) return console.warn(`[ApiAuth Middleware] Auth check failed for API "${r}". Status: ${n.status}`), n;
+  t.locals.user = n.user, console.log(`[ApiAuth Middleware] Auth successful for user ${(_a = n.user) == null ? void 0 : _a.id} on API path "${r}"`);
+}
+const me$2 = yt$1({ onRequest: [(t) => {
+  t.locals.startTime = Date.now();
+}, xt$1, At$1, wt$1], onBeforeResponse: [(t) => {
+  appendCorsHeaders(t.nativeEvent, { origin: (e) => !e || De$1.includes(e), credentials: true });
+}, (t) => {
+  const e = t.locals;
+  e.startTime && (Date.now() - e.startTime, new URL(t.request.url).pathname);
+}] });
+var zt$1 = ((t) => (t[t.AggregateError = 1] = "AggregateError", t[t.ArrowFunction = 2] = "ArrowFunction", t[t.ErrorPrototypeStack = 4] = "ErrorPrototypeStack", t[t.ObjectAssign = 8] = "ObjectAssign", t[t.BigIntTypedArray = 16] = "BigIntTypedArray", t[t.AbortSignal = 32] = "AbortSignal", t))(zt$1 || {});
+function Rt$1(t) {
   switch (t) {
     case '"':
       return '\\"';
@@ -6880,12 +3899,12 @@ function it$1(t) {
       return;
   }
 }
-function g$1(t) {
+function g(t) {
   let e = "", r = 0, i;
-  for (let a = 0, n = t.length; a < n; a++) i = it$1(t[a]), i && (e += t.slice(r, a) + i, r = a + 1);
+  for (let a = 0, n = t.length; a < n; a++) i = Rt$1(t[a]), i && (e += t.slice(r, a) + i, r = a + 1);
   return r === 0 ? e = t : e += t.slice(r), e;
 }
-function at$1(t) {
+function kt$1(t) {
   switch (t) {
     case "\\\\":
       return "\\";
@@ -6912,147 +3931,147 @@ function at$1(t) {
       return t;
   }
 }
-function P$1(t) {
-  return t.replace(/(\\\\|\\"|\\n|\\r|\\b|\\t|\\f|\\u2028|\\u2029|\\x3C)/g, at$1);
+function A$2(t) {
+  return t.replace(/(\\\\|\\"|\\n|\\r|\\b|\\t|\\f|\\u2028|\\u2029|\\x3C)/g, kt$1);
 }
-var w$1 = "__SEROVAL_REFS__", D$3 = "$R", W$2 = `self.${D$3}`;
-function nt(t) {
-  return t == null ? `${W$2}=${W$2}||[]` : `(${W$2}=${W$2}||{})["${g$1(t)}"]=[]`;
+var z$1 = "__SEROVAL_REFS__", F$2 = "$R", D$4 = `self.${F$2}`;
+function It$1(t) {
+  return t == null ? `${D$4}=${D$4}||[]` : `(${D$4}=${D$4}||{})["${g(t)}"]=[]`;
 }
-function y$2(t, e) {
+function P$1(t, e) {
   if (!t) throw e;
 }
-var we$1 = /* @__PURE__ */ new Map(), S$2 = /* @__PURE__ */ new Map();
-function Re$1(t) {
-  return we$1.has(t);
+var Fe$1 = /* @__PURE__ */ new Map(), S$2 = /* @__PURE__ */ new Map();
+function Ue$1(t) {
+  return Fe$1.has(t);
 }
-function ot(t) {
+function Et$1(t) {
   return S$2.has(t);
 }
-function lt$1(t) {
-  return y$2(Re$1(t), new qt$1(t)), we$1.get(t);
+function _t$1(t) {
+  return P$1(Ue$1(t), new dr(t)), Fe$1.get(t);
 }
-function ct$1(t) {
-  return y$2(ot(t), new Ht$1(t)), S$2.get(t);
+function Ct$1(t) {
+  return P$1(Et$1(t), new fr(t)), S$2.get(t);
 }
-typeof globalThis < "u" ? Object.defineProperty(globalThis, w$1, { value: S$2, configurable: true, writable: false, enumerable: false }) : typeof self < "u" ? Object.defineProperty(self, w$1, { value: S$2, configurable: true, writable: false, enumerable: false }) : typeof global < "u" && Object.defineProperty(global, w$1, { value: S$2, configurable: true, writable: false, enumerable: false });
-function Ae$1(t, e) {
+typeof globalThis < "u" ? Object.defineProperty(globalThis, z$1, { value: S$2, configurable: true, writable: false, enumerable: false }) : typeof self < "u" ? Object.defineProperty(self, z$1, { value: S$2, configurable: true, writable: false, enumerable: false }) : typeof g$2 < "u" && Object.defineProperty(g$2, z$1, { value: S$2, configurable: true, writable: false, enumerable: false });
+function Oe$1(t, e) {
   for (let r = 0, i = e.length; r < i; r++) {
     let a = e[r];
-    t.has(a) || (t.add(a), a.extends && Ae$1(t, a.extends));
+    t.has(a) || (t.add(a), a.extends && Oe$1(t, a.extends));
   }
 }
-function Ie$1(t) {
+function Me$1(t) {
   if (t) {
     let e = /* @__PURE__ */ new Set();
-    return Ae$1(e, t), [...e];
+    return Oe$1(e, t), [...e];
   }
 }
-var ut$1 = { 0: "Symbol.asyncIterator", 1: "Symbol.hasInstance", 2: "Symbol.isConcatSpreadable", 3: "Symbol.iterator", 4: "Symbol.match", 5: "Symbol.matchAll", 6: "Symbol.replace", 7: "Symbol.search", 8: "Symbol.species", 9: "Symbol.split", 10: "Symbol.toPrimitive", 11: "Symbol.toStringTag", 12: "Symbol.unscopables" }, ke = { [Symbol.asyncIterator]: 0, [Symbol.hasInstance]: 1, [Symbol.isConcatSpreadable]: 2, [Symbol.iterator]: 3, [Symbol.match]: 4, [Symbol.matchAll]: 5, [Symbol.replace]: 6, [Symbol.search]: 7, [Symbol.species]: 8, [Symbol.split]: 9, [Symbol.toPrimitive]: 10, [Symbol.toStringTag]: 11, [Symbol.unscopables]: 12 }, pt$1 = { 0: Symbol.asyncIterator, 1: Symbol.hasInstance, 2: Symbol.isConcatSpreadable, 3: Symbol.iterator, 4: Symbol.match, 5: Symbol.matchAll, 6: Symbol.replace, 7: Symbol.search, 8: Symbol.species, 9: Symbol.split, 10: Symbol.toPrimitive, 11: Symbol.toStringTag, 12: Symbol.unscopables }, ht$1 = { 2: "!0", 3: "!1", 1: "void 0", 0: "null", 4: "-0", 5: "1/0", 6: "-1/0", 7: "0/0" }, dt$1 = { 2: true, 3: false, 1: void 0, 0: null, 4: -0, 5: Number.POSITIVE_INFINITY, 6: Number.NEGATIVE_INFINITY, 7: Number.NaN }, _e = { 0: "Error", 1: "EvalError", 2: "RangeError", 3: "ReferenceError", 4: "SyntaxError", 5: "TypeError", 6: "URIError" }, ft$1 = { 0: Error, 1: EvalError, 2: RangeError, 3: ReferenceError, 4: SyntaxError, 5: TypeError, 6: URIError }, s$1 = void 0;
+var $t$1 = { 0: "Symbol.asyncIterator", 1: "Symbol.hasInstance", 2: "Symbol.isConcatSpreadable", 3: "Symbol.iterator", 4: "Symbol.match", 5: "Symbol.matchAll", 6: "Symbol.replace", 7: "Symbol.search", 8: "Symbol.species", 9: "Symbol.split", 10: "Symbol.toPrimitive", 11: "Symbol.toStringTag", 12: "Symbol.unscopables" }, Le$1 = { [Symbol.asyncIterator]: 0, [Symbol.hasInstance]: 1, [Symbol.isConcatSpreadable]: 2, [Symbol.iterator]: 3, [Symbol.match]: 4, [Symbol.matchAll]: 5, [Symbol.replace]: 6, [Symbol.search]: 7, [Symbol.species]: 8, [Symbol.split]: 9, [Symbol.toPrimitive]: 10, [Symbol.toStringTag]: 11, [Symbol.unscopables]: 12 }, Tt$1 = { 0: Symbol.asyncIterator, 1: Symbol.hasInstance, 2: Symbol.isConcatSpreadable, 3: Symbol.iterator, 4: Symbol.match, 5: Symbol.matchAll, 6: Symbol.replace, 7: Symbol.search, 8: Symbol.species, 9: Symbol.split, 10: Symbol.toPrimitive, 11: Symbol.toStringTag, 12: Symbol.unscopables }, Wt$1 = { 2: "!0", 3: "!1", 1: "void 0", 0: "null", 4: "-0", 5: "1/0", 6: "-1/0", 7: "0/0" }, Dt$1 = { 2: true, 3: false, 1: void 0, 0: null, 4: -0, 5: Number.POSITIVE_INFINITY, 6: Number.NEGATIVE_INFINITY, 7: Number.NaN }, Ne$1 = { 0: "Error", 1: "EvalError", 2: "RangeError", 3: "ReferenceError", 4: "SyntaxError", 5: "TypeError", 6: "URIError" }, Ft$1 = { 0: Error, 1: EvalError, 2: RangeError, 3: ReferenceError, 4: SyntaxError, 5: TypeError, 6: URIError }, s$2 = void 0;
 function h$1(t, e, r, i, a, n, o, l, c, u, d, m) {
   return { t, i: e, s: r, l: i, c: a, m: n, p: o, e: l, a: c, f: u, b: d, o: m };
 }
-function z$1(t) {
-  return h$1(2, s$1, t, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1);
+function x$2(t) {
+  return h$1(2, s$2, t, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2);
 }
-var j$1 = z$1(2), B$2 = z$1(3), gt = z$1(1), mt$1 = z$1(0), yt$1 = z$1(4), bt$1 = z$1(5), zt$1 = z$1(6), Pt$1 = z$1(7);
-function te$3(t) {
+var q$2 = x$2(2), H$3 = x$2(3), Ut$1 = x$2(1), Ot$1 = x$2(0), Mt$1 = x$2(4), Lt$1 = x$2(5), Nt$1 = x$2(6), Vt$1 = x$2(7);
+function ie$2(t) {
   return t instanceof EvalError ? 1 : t instanceof RangeError ? 2 : t instanceof ReferenceError ? 3 : t instanceof SyntaxError ? 4 : t instanceof TypeError ? 5 : t instanceof URIError ? 6 : 0;
 }
-function xt$1(t) {
-  let e = _e[te$3(t)];
+function jt$1(t) {
+  let e = Ne$1[ie$2(t)];
   return t.name !== e ? { name: t.name } : t.constructor.name !== e ? { name: t.constructor.name } : {};
 }
-function ce$1(t, e) {
-  let r = xt$1(t), i = Object.getOwnPropertyNames(t);
+function Pe$2(t, e) {
+  let r = jt$1(t), i = Object.getOwnPropertyNames(t);
   for (let a = 0, n = i.length, o; a < n; a++) o = i[a], o !== "name" && o !== "message" && (o === "stack" ? e & 4 && (r = r || {}, r[o] = t[o]) : (r = r || {}, r[o] = t[o]));
   return r;
 }
-function Ee$1(t) {
+function Ve(t) {
   return Object.isFrozen(t) ? 3 : Object.isSealed(t) ? 2 : Object.isExtensible(t) ? 0 : 1;
 }
-function St$1(t) {
+function Bt(t) {
   switch (t) {
     case Number.POSITIVE_INFINITY:
-      return bt$1;
+      return Lt$1;
     case Number.NEGATIVE_INFINITY:
-      return zt$1;
+      return Nt$1;
   }
-  return t !== t ? Pt$1 : Object.is(t, -0) ? yt$1 : h$1(0, s$1, t, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1);
+  return t !== t ? Vt$1 : Object.is(t, -0) ? Mt$1 : h$1(0, s$2, t, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2);
 }
-function q$2(t) {
-  return h$1(1, s$1, g$1(t), s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1);
+function K$1(t) {
+  return h$1(1, s$2, g(t), s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2);
 }
-function vt$1(t) {
-  return h$1(3, s$1, "" + t, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1);
+function qt$1(t) {
+  return h$1(3, s$2, "" + t, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2);
 }
-function wt$1(t) {
-  return h$1(4, t, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1);
+function Ht$1(t) {
+  return h$1(4, t, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2);
 }
-function Rt$1(t, e) {
-  return h$1(5, t, e.toISOString(), s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1);
+function Kt$1(t, e) {
+  return h$1(5, t, e.toISOString(), s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2);
 }
-function At$1(t, e) {
-  return h$1(6, t, s$1, s$1, g$1(e.source), e.flags, s$1, s$1, s$1, s$1, s$1, s$1);
+function Xt$1(t, e) {
+  return h$1(6, t, s$2, s$2, g(e.source), e.flags, s$2, s$2, s$2, s$2, s$2, s$2);
 }
-function It$1(t, e) {
+function Gt$1(t, e) {
   let r = new Uint8Array(e), i = r.length, a = new Array(i);
   for (let n = 0; n < i; n++) a[n] = r[n];
-  return h$1(19, t, a, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1);
+  return h$1(19, t, a, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2);
 }
-function kt$1(t, e) {
-  return h$1(17, t, ke[e], s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1);
+function Jt$1(t, e) {
+  return h$1(17, t, Le$1[e], s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2);
 }
-function _t$1(t, e) {
-  return h$1(18, t, g$1(lt$1(e)), s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1);
+function Yt$1(t, e) {
+  return h$1(18, t, g(_t$1(e)), s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2);
 }
-function Ce$1(t, e, r) {
-  return h$1(25, t, r, s$1, g$1(e), s$1, s$1, s$1, s$1, s$1, s$1, s$1);
+function je$1(t, e, r) {
+  return h$1(25, t, r, s$2, g(e), s$2, s$2, s$2, s$2, s$2, s$2, s$2);
 }
-function Et$1(t, e, r) {
-  return h$1(9, t, s$1, e.length, s$1, s$1, s$1, s$1, r, s$1, s$1, Ee$1(e));
+function Zt$1(t, e, r) {
+  return h$1(9, t, s$2, e.length, s$2, s$2, s$2, s$2, r, s$2, s$2, Ve(e));
 }
-function Ct$1(t, e) {
-  return h$1(21, t, s$1, s$1, s$1, s$1, s$1, s$1, s$1, e, s$1, s$1);
+function Qt$1(t, e) {
+  return h$1(21, t, s$2, s$2, s$2, s$2, s$2, s$2, s$2, e, s$2, s$2);
 }
-function $t$1(t, e, r) {
-  return h$1(15, t, s$1, e.length, e.constructor.name, s$1, s$1, s$1, s$1, r, e.byteOffset, s$1);
+function er(t, e, r) {
+  return h$1(15, t, s$2, e.length, e.constructor.name, s$2, s$2, s$2, s$2, r, e.byteOffset, s$2);
 }
-function Ft$1(t, e, r) {
-  return h$1(16, t, s$1, e.length, e.constructor.name, s$1, s$1, s$1, s$1, r, e.byteOffset, s$1);
+function tr(t, e, r) {
+  return h$1(16, t, s$2, e.length, e.constructor.name, s$2, s$2, s$2, s$2, r, e.byteOffset, s$2);
 }
-function Wt$1(t, e, r) {
-  return h$1(20, t, s$1, e.byteLength, s$1, s$1, s$1, s$1, s$1, r, e.byteOffset, s$1);
+function rr(t, e, r) {
+  return h$1(20, t, s$2, e.byteLength, s$2, s$2, s$2, s$2, s$2, r, e.byteOffset, s$2);
 }
-function Dt$1(t, e, r) {
-  return h$1(13, t, te$3(e), s$1, s$1, g$1(e.message), r, s$1, s$1, s$1, s$1, s$1);
+function sr(t, e, r) {
+  return h$1(13, t, ie$2(e), s$2, s$2, g(e.message), r, s$2, s$2, s$2, s$2, s$2);
 }
-function Ot$1(t, e, r) {
-  return h$1(14, t, te$3(e), s$1, s$1, g$1(e.message), r, s$1, s$1, s$1, s$1, s$1);
+function ir(t, e, r) {
+  return h$1(14, t, ie$2(e), s$2, s$2, g(e.message), r, s$2, s$2, s$2, s$2, s$2);
 }
-function Nt$1(t, e, r) {
-  return h$1(7, t, s$1, e, s$1, s$1, s$1, s$1, r, s$1, s$1, s$1);
+function ar(t, e, r) {
+  return h$1(7, t, s$2, e, s$2, s$2, s$2, s$2, r, s$2, s$2, s$2);
 }
-function $e$1(t, e) {
-  return h$1(28, s$1, s$1, s$1, s$1, s$1, s$1, s$1, [t, e], s$1, s$1, s$1);
+function Be(t, e) {
+  return h$1(28, s$2, s$2, s$2, s$2, s$2, s$2, s$2, [t, e], s$2, s$2, s$2);
 }
-function Fe$1(t, e) {
-  return h$1(30, s$1, s$1, s$1, s$1, s$1, s$1, s$1, [t, e], s$1, s$1, s$1);
+function qe$1(t, e) {
+  return h$1(30, s$2, s$2, s$2, s$2, s$2, s$2, s$2, [t, e], s$2, s$2, s$2);
 }
-function We$1(t, e, r) {
-  return h$1(31, t, s$1, s$1, s$1, s$1, s$1, s$1, r, e, s$1, s$1);
+function He$2(t, e, r) {
+  return h$1(31, t, s$2, s$2, s$2, s$2, s$2, s$2, r, e, s$2, s$2);
 }
-function Ut$1(t, e) {
-  return h$1(32, t, s$1, s$1, s$1, s$1, s$1, s$1, s$1, e, s$1, s$1);
+function nr(t, e) {
+  return h$1(32, t, s$2, s$2, s$2, s$2, s$2, s$2, s$2, e, s$2, s$2);
 }
-function Lt$1(t, e) {
-  return h$1(33, t, s$1, s$1, s$1, s$1, s$1, s$1, s$1, e, s$1, s$1);
+function or(t, e) {
+  return h$1(33, t, s$2, s$2, s$2, s$2, s$2, s$2, s$2, e, s$2, s$2);
 }
-function Mt$1(t, e) {
-  return h$1(34, t, s$1, s$1, s$1, s$1, s$1, s$1, s$1, e, s$1, s$1);
+function lr(t, e) {
+  return h$1(34, t, s$2, s$2, s$2, s$2, s$2, s$2, s$2, e, s$2, s$2);
 }
-var { toString: re$2 } = Object.prototype;
-function Tt$1(t, e) {
+var { toString: ae$1 } = Object.prototype;
+function cr(t, e) {
   return e instanceof Error ? `Seroval caught an error during the ${t} process.
   
 ${e.name}
@@ -7061,64 +4080,64 @@ ${e.message}
 - For more information, please check the "cause" property of this error.
 - If you believe this is an error in Seroval, please submit an issue at https://github.com/lxsmnsyc/seroval/issues/new` : `Seroval caught an error during the ${t} process.
 
-"${re$2.call(e)}"
+"${ae$1.call(e)}"
 
 For more information, please check the "cause" property of this error.`;
 }
-var se$2 = class se extends Error {
+var ne$3 = class ne extends Error {
   constructor(e, r) {
-    super(Tt$1(e, r)), this.cause = r;
+    super(cr(e, r)), this.cause = r;
   }
-}, Vt$1 = class Vt extends se$2 {
+}, ur = class extends ne$3 {
   constructor(e) {
     super("parsing", e);
   }
-}, jt$1 = class jt extends se$2 {
+}, pr = class extends ne$3 {
   constructor(t) {
     super("serialization", t);
   }
-}, Bt$1 = class Bt extends se$2 {
+}, hr = class extends ne$3 {
   constructor(t) {
     super("deserialization", t);
   }
-}, O = class extends Error {
+}, U$1 = class U extends Error {
   constructor(e) {
-    super(`The value ${re$2.call(e)} of type "${typeof e}" cannot be parsed/serialized.
+    super(`The value ${ae$1.call(e)} of type "${typeof e}" cannot be parsed/serialized.
       
 There are few workarounds for this problem:
 - Transform the value in a way that it can be serialized.
 - If the reference is present on multiple runtimes (isomorphic), you can use the Reference API to map the references.`), this.value = e;
   }
-}, De$1 = class De extends Error {
+}, Ke$1 = class Ke extends Error {
   constructor(e) {
     super('Unsupported node type "' + e.t + '".');
   }
-}, Oe$1 = class Oe extends Error {
+}, Xe = class extends Error {
   constructor(t) {
     super('Missing plugin for tag "' + t + '".');
   }
-}, x$2 = class x extends Error {
+}, v = class extends Error {
   constructor(t) {
     super('Missing "' + t + '" instance.');
   }
-}, qt$1 = class qt extends Error {
+}, dr = class extends Error {
   constructor(t) {
-    super('Missing reference for the value "' + re$2.call(t) + '" of type "' + typeof t + '"'), this.value = t;
+    super('Missing reference for the value "' + ae$1.call(t) + '" of type "' + typeof t + '"'), this.value = t;
   }
-}, Ht$1 = class Ht extends Error {
+}, fr = class extends Error {
   constructor(e) {
-    super('Missing reference for id "' + g$1(e) + '"');
+    super('Missing reference for id "' + g(e) + '"');
   }
-}, Kt$1 = class Kt extends Error {
+}, gr = class extends Error {
   constructor(t) {
     super('Unknown TypedArray "' + t + '"');
   }
-}, Xt$1 = class Xt {
+}, mr = class {
   constructor(t, e) {
     this.value = t, this.replacement = e;
   }
-}, Yt$1 = {}, Gt$1 = {}, Zt$1 = { 0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {} };
-function H$1() {
+}, Pr = {}, yr = {}, br = { 0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {} };
+function X$2() {
   let t, e;
   return { promise: new Promise((r, i) => {
     t = r, e = i;
@@ -7128,10 +4147,10 @@ function H$1() {
     e(r);
   } };
 }
-function Jt$1(t) {
+function xr(t) {
   return "__SEROVAL_STREAM__" in t;
 }
-function E() {
+function C$1() {
   let t = /* @__PURE__ */ new Set(), e = [], r = true, i = true;
   function a(l) {
     for (let c of t.keys()) c.next(l);
@@ -7159,8 +4178,8 @@ function E() {
     r && (e.push(l), o(l), r = false, i = true, t.clear());
   } };
 }
-function Qt$1(t) {
-  let e = E(), r = t[Symbol.asyncIterator]();
+function Ar(t) {
+  let e = C$1(), r = t[Symbol.asyncIterator]();
   async function i() {
     try {
       let a = await r.next();
@@ -7172,7 +4191,7 @@ function Qt$1(t) {
   return i().catch(() => {
   }), e;
 }
-function er$1(t) {
+function vr(t) {
   return () => {
     let e = [], r = [], i = 0, a = -1, n = false;
     function o() {
@@ -7200,7 +4219,7 @@ function er$1(t) {
       if (a === -1) {
         let c = i++;
         if (c >= e.length) {
-          let u = H$1();
+          let u = X$2();
           return r.push(u), await u.promise;
         }
         return { done: false, value: e[c] };
@@ -7209,7 +4228,7 @@ function er$1(t) {
     } };
   };
 }
-function Ne$1(t) {
+function Ge(t) {
   let e = [], r = -1, i = -1, a = t[Symbol.iterator]();
   for (; ; ) try {
     let n = a.next();
@@ -7222,20 +4241,20 @@ function Ne$1(t) {
   }
   return { v: e, t: r, d: i };
 }
-function tr$1(t) {
+function Sr(t) {
   return () => {
     let e = 0;
     return { [Symbol.iterator]() {
       return this;
     }, next() {
-      if (e > t.d) return { done: true, value: s$1 };
+      if (e > t.d) return { done: true, value: s$2 };
       let r = e++, i = t.v[r];
       if (r === t.t) throw i;
       return { done: r === t.d, value: i };
     } };
   };
 }
-var rr$1 = class rr {
+var wr = class {
   constructor(e) {
     this.marked = /* @__PURE__ */ new Set(), this.plugins = e.plugins, this.features = 47 ^ (e.disabledFeatures || 0), this.refs = e.refs || /* @__PURE__ */ new Map();
   }
@@ -7247,44 +4266,44 @@ var rr$1 = class rr {
   }
   getIndexedValue(e) {
     let r = this.refs.get(e);
-    if (r != null) return this.markRef(r), { type: 1, value: wt$1(r) };
+    if (r != null) return this.markRef(r), { type: 1, value: Ht$1(r) };
     let i = this.refs.size;
     return this.refs.set(e, i), { type: 0, value: i };
   }
   getReference(e) {
     let r = this.getIndexedValue(e);
-    return r.type === 1 ? r : Re$1(e) ? { type: 2, value: _t$1(r.value, e) } : r;
+    return r.type === 1 ? r : Ue$1(e) ? { type: 2, value: Yt$1(r.value, e) } : r;
   }
   parseWellKnownSymbol(e) {
     let r = this.getReference(e);
-    return r.type !== 0 ? r.value : (y$2(e in ke, new O(e)), kt$1(r.value, e));
+    return r.type !== 0 ? r.value : (P$1(e in Le$1, new U$1(e)), Jt$1(r.value, e));
   }
   parseSpecialReference(e) {
-    let r = this.getIndexedValue(Zt$1[e]);
-    return r.type === 1 ? r.value : h$1(26, r.value, e, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1, s$1);
+    let r = this.getIndexedValue(br[e]);
+    return r.type === 1 ? r.value : h$1(26, r.value, e, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2, s$2);
   }
   parseIteratorFactory() {
-    let e = this.getIndexedValue(Yt$1);
-    return e.type === 1 ? e.value : h$1(27, e.value, s$1, s$1, s$1, s$1, s$1, s$1, s$1, this.parseWellKnownSymbol(Symbol.iterator), s$1, s$1);
+    let e = this.getIndexedValue(Pr);
+    return e.type === 1 ? e.value : h$1(27, e.value, s$2, s$2, s$2, s$2, s$2, s$2, s$2, this.parseWellKnownSymbol(Symbol.iterator), s$2, s$2);
   }
   parseAsyncIteratorFactory() {
-    let e = this.getIndexedValue(Gt$1);
-    return e.type === 1 ? e.value : h$1(29, e.value, s$1, s$1, s$1, s$1, s$1, s$1, [this.parseSpecialReference(1), this.parseWellKnownSymbol(Symbol.asyncIterator)], s$1, s$1, s$1);
+    let e = this.getIndexedValue(yr);
+    return e.type === 1 ? e.value : h$1(29, e.value, s$2, s$2, s$2, s$2, s$2, s$2, [this.parseSpecialReference(1), this.parseWellKnownSymbol(Symbol.asyncIterator)], s$2, s$2, s$2);
   }
   createObjectNode(e, r, i, a) {
-    return h$1(i ? 11 : 10, e, s$1, s$1, s$1, s$1, a, s$1, s$1, s$1, s$1, Ee$1(r));
+    return h$1(i ? 11 : 10, e, s$2, s$2, s$2, s$2, a, s$2, s$2, s$2, s$2, Ve(r));
   }
   createMapNode(e, r, i, a) {
-    return h$1(8, e, s$1, s$1, s$1, s$1, s$1, { k: r, v: i, s: a }, s$1, this.parseSpecialReference(0), s$1, s$1);
+    return h$1(8, e, s$2, s$2, s$2, s$2, s$2, { k: r, v: i, s: a }, s$2, this.parseSpecialReference(0), s$2, s$2);
   }
   createPromiseConstructorNode(e) {
-    return h$1(22, e, s$1, s$1, s$1, s$1, s$1, s$1, s$1, this.parseSpecialReference(1), s$1, s$1);
+    return h$1(22, e, s$2, s$2, s$2, s$2, s$2, s$2, s$2, this.parseSpecialReference(1), s$2, s$2);
   }
   createAbortSignalConstructorNode(e) {
-    return h$1(35, e, s$1, s$1, s$1, s$1, s$1, s$1, s$1, this.parseSpecialReference(5), s$1, s$1);
+    return h$1(35, e, s$2, s$2, s$2, s$2, s$2, s$2, s$2, this.parseSpecialReference(5), s$2, s$2);
   }
 };
-function sr(t) {
+function zr(t) {
   switch (t) {
     case "Int8Array":
       return Int8Array;
@@ -7309,10 +4328,10 @@ function sr(t) {
     case "BigUint64Array":
       return BigUint64Array;
     default:
-      throw new Kt$1(t);
+      throw new gr(t);
   }
 }
-function ue$2(t, e) {
+function ye$2(t, e) {
   switch (e) {
     case 3:
       return Object.freeze(t);
@@ -7324,35 +4343,35 @@ function ue$2(t, e) {
       return t;
   }
 }
-var ir = class {
+var Rr = class {
   constructor(e) {
     this.plugins = e.plugins, this.refs = e.refs || /* @__PURE__ */ new Map();
   }
   deserializeReference(e) {
-    return this.assignIndexedValue(e.i, ct$1(P$1(e.s)));
+    return this.assignIndexedValue(e.i, Ct$1(A$2(e.s)));
   }
   deserializeArray(e) {
     let r = e.l, i = this.assignIndexedValue(e.i, new Array(r)), a;
     for (let n = 0; n < r; n++) a = e.a[n], a && (i[n] = this.deserialize(a));
-    return ue$2(i, e.o), i;
+    return ye$2(i, e.o), i;
   }
   deserializeProperties(e, r) {
     let i = e.s;
     if (i) {
       let a = e.k, n = e.v;
-      for (let o = 0, l; o < i; o++) l = a[o], typeof l == "string" ? r[P$1(l)] = this.deserialize(n[o]) : r[this.deserialize(l)] = this.deserialize(n[o]);
+      for (let o = 0, l; o < i; o++) l = a[o], typeof l == "string" ? r[A$2(l)] = this.deserialize(n[o]) : r[this.deserialize(l)] = this.deserialize(n[o]);
     }
     return r;
   }
   deserializeObject(e) {
     let r = this.assignIndexedValue(e.i, e.t === 10 ? {} : /* @__PURE__ */ Object.create(null));
-    return this.deserializeProperties(e.p, r), ue$2(r, e.o), r;
+    return this.deserializeProperties(e.p, r), ye$2(r, e.o), r;
   }
   deserializeDate(e) {
     return this.assignIndexedValue(e.i, new Date(e.s));
   }
   deserializeRegExp(e) {
-    return this.assignIndexedValue(e.i, new RegExp(P$1(e.c), e.m));
+    return this.assignIndexedValue(e.i, new RegExp(A$2(e.c), e.m));
   }
   deserializeSet(e) {
     let r = this.assignIndexedValue(e.i, /* @__PURE__ */ new Set()), i = e.a;
@@ -7369,7 +4388,7 @@ var ir = class {
     return this.assignIndexedValue(e.i, r.buffer);
   }
   deserializeTypedArray(e) {
-    let r = sr(e.c), i = this.deserialize(e.f);
+    let r = zr(e.c), i = this.deserialize(e.f);
     return this.assignIndexedValue(e.i, new r(i, e.b, e.l));
   }
   deserializeDataView(e) {
@@ -7384,15 +4403,15 @@ var ir = class {
     return r;
   }
   deserializeAggregateError(e) {
-    let r = this.assignIndexedValue(e.i, new AggregateError([], P$1(e.m)));
+    let r = this.assignIndexedValue(e.i, new AggregateError([], A$2(e.m)));
     return this.deserializeDictionary(e, r);
   }
   deserializeError(e) {
-    let r = ft$1[e.s], i = this.assignIndexedValue(e.i, new r(P$1(e.m)));
+    let r = Ft$1[e.s], i = this.assignIndexedValue(e.i, new r(A$2(e.m)));
     return this.deserializeDictionary(e, i);
   }
   deserializePromise(e) {
-    let r = H$1(), i = this.assignIndexedValue(e.i, r), a = this.deserialize(e.f);
+    let r = X$2(), i = this.assignIndexedValue(e.i, r), a = this.deserialize(e.f);
     return e.s ? r.resolve(a) : r.reject(a), i.promise;
   }
   deserializeBoxed(e) {
@@ -7401,51 +4420,51 @@ var ir = class {
   deserializePlugin(e) {
     let r = this.plugins;
     if (r) {
-      let i = P$1(e.c);
+      let i = A$2(e.c);
       for (let a = 0, n = r.length; a < n; a++) {
         let o = r[a];
         if (o.tag === i) return this.assignIndexedValue(e.i, o.deserialize(e.s, this, { id: e.i }));
       }
     }
-    throw new Oe$1(e.c);
+    throw new Xe(e.c);
   }
   deserializePromiseConstructor(e) {
-    return this.assignIndexedValue(e.i, H$1()).promise;
+    return this.assignIndexedValue(e.i, X$2()).promise;
   }
   deserializePromiseResolve(e) {
     let r = this.refs.get(e.i);
-    y$2(r, new x$2("Promise")), r.resolve(this.deserialize(e.a[1]));
+    P$1(r, new v("Promise")), r.resolve(this.deserialize(e.a[1]));
   }
   deserializePromiseReject(e) {
     let r = this.refs.get(e.i);
-    y$2(r, new x$2("Promise")), r.reject(this.deserialize(e.a[1]));
+    P$1(r, new v("Promise")), r.reject(this.deserialize(e.a[1]));
   }
   deserializeIteratorFactoryInstance(e) {
     this.deserialize(e.a[0]);
     let r = this.deserialize(e.a[1]);
-    return tr$1(r);
+    return Sr(r);
   }
   deserializeAsyncIteratorFactoryInstance(e) {
     this.deserialize(e.a[0]);
     let r = this.deserialize(e.a[1]);
-    return er$1(r);
+    return vr(r);
   }
   deserializeStreamConstructor(e) {
-    let r = this.assignIndexedValue(e.i, E()), i = e.a.length;
+    let r = this.assignIndexedValue(e.i, C$1()), i = e.a.length;
     if (i) for (let a = 0; a < i; a++) this.deserialize(e.a[a]);
     return r;
   }
   deserializeStreamNext(e) {
     let r = this.refs.get(e.i);
-    y$2(r, new x$2("Stream")), r.next(this.deserialize(e.f));
+    P$1(r, new v("Stream")), r.next(this.deserialize(e.f));
   }
   deserializeStreamThrow(e) {
     let r = this.refs.get(e.i);
-    y$2(r, new x$2("Stream")), r.throw(this.deserialize(e.f));
+    P$1(r, new v("Stream")), r.throw(this.deserialize(e.f));
   }
   deserializeStreamReturn(e) {
     let r = this.refs.get(e.i);
-    y$2(r, new x$2("Stream")), r.return(this.deserialize(e.f));
+    P$1(r, new v("Stream")), r.return(this.deserialize(e.f));
   }
   deserializeIteratorFactory(e) {
     this.deserialize(e.f);
@@ -7458,7 +4477,7 @@ var ir = class {
   }
   deserializeAbortSignalAbort(e) {
     let r = this.refs.get(e.i);
-    y$2(r, new x$2("AbortSignal")), r.abort(this.deserialize(e.a[1]));
+    P$1(r, new v("AbortSignal")), r.abort(this.deserialize(e.a[1]));
   }
   deserializeAbortSignalSync(e) {
     return this.assignIndexedValue(e.i, AbortSignal.abort(this.deserialize(e.f)));
@@ -7467,11 +4486,11 @@ var ir = class {
     try {
       switch (e.t) {
         case 2:
-          return dt$1[e.s];
+          return Dt$1[e.s];
         case 0:
           return e.s;
         case 1:
-          return P$1(e.s);
+          return A$2(e.s);
         case 3:
           return BigInt(e.s);
         case 4:
@@ -7505,7 +4524,7 @@ var ir = class {
         case 12:
           return this.deserializePromise(e);
         case 17:
-          return pt$1[e.s];
+          return Tt$1[e.s];
         case 21:
           return this.deserializeBoxed(e);
         case 25:
@@ -7539,18 +4558,18 @@ var ir = class {
         case 37:
           return this.deserializeAbortSignalSync(e);
         default:
-          throw new De$1(e);
+          throw new Ke$1(e);
       }
     } catch (r) {
-      throw new Bt$1(r);
+      throw new hr(r);
     }
   }
-}, ar = /^[$A-Z_][0-9A-Z_$]*$/i;
-function pe$2(t) {
+}, kr = /^[$A-Z_][0-9A-Z_$]*$/i;
+function be$3(t) {
   let e = t[0];
-  return (e === "$" || e === "_" || e >= "A" && e <= "Z" || e >= "a" && e <= "z") && ar.test(t);
+  return (e === "$" || e === "_" || e >= "A" && e <= "Z" || e >= "a" && e <= "z") && kr.test(t);
 }
-function R$2(t) {
+function R$3(t) {
   switch (t.t) {
     case 0:
       return t.s + "=" + t.v;
@@ -7562,20 +4581,20 @@ function R$2(t) {
       return t.s + ".delete(" + t.k + ")";
   }
 }
-function nr(t) {
+function Ir(t) {
   let e = [], r = t[0];
-  for (let i = 1, a = t.length, n, o = r; i < a; i++) n = t[i], n.t === 0 && n.v === o.v ? r = { t: 0, s: n.s, k: s$1, v: R$2(r) } : n.t === 2 && n.s === o.s ? r = { t: 2, s: R$2(r), k: n.k, v: n.v } : n.t === 1 && n.s === o.s ? r = { t: 1, s: R$2(r), k: s$1, v: n.v } : n.t === 3 && n.s === o.s ? r = { t: 3, s: R$2(r), k: n.k, v: s$1 } : (e.push(r), r = n), o = n;
+  for (let i = 1, a = t.length, n, o = r; i < a; i++) n = t[i], n.t === 0 && n.v === o.v ? r = { t: 0, s: n.s, k: s$2, v: R$3(r) } : n.t === 2 && n.s === o.s ? r = { t: 2, s: R$3(r), k: n.k, v: n.v } : n.t === 1 && n.s === o.s ? r = { t: 1, s: R$3(r), k: s$2, v: n.v } : n.t === 3 && n.s === o.s ? r = { t: 3, s: R$3(r), k: n.k, v: s$2 } : (e.push(r), r = n), o = n;
   return e.push(r), e;
 }
-function he$1(t) {
+function xe$3(t) {
   if (t.length) {
-    let e = "", r = nr(t);
-    for (let i = 0, a = r.length; i < a; i++) e += R$2(r[i]) + ",";
+    let e = "", r = Ir(t);
+    for (let i = 0, a = r.length; i < a; i++) e += R$3(r[i]) + ",";
     return e;
   }
-  return s$1;
+  return s$2;
 }
-var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.resolve", pr = "Promise.reject", hr = { 3: "Object.freeze", 2: "Object.seal", 1: "Object.preventExtensions", 0: s$1 }, dr = class {
+var Er = "Object.create(null)", _r = "new Set", Cr = "new Map", $r = "Promise.resolve", Tr = "Promise.reject", Wr = { 3: "Object.freeze", 2: "Object.seal", 1: "Object.preventExtensions", 0: s$2 }, Dr = class {
   constructor(e) {
     this.stack = [], this.flags = [], this.assignments = [], this.plugins = e.plugins, this.features = e.features, this.marked = new Set(e.markedRefs);
   }
@@ -7598,25 +4617,25 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
     let e = "";
     for (let r = 0, i = this.flags, a = i.length; r < a; r++) {
       let n = i[r];
-      e += hr[n.type] + "(" + n.value + "),";
+      e += Wr[n.type] + "(" + n.value + "),";
     }
     return e;
   }
   resolvePatches() {
-    let e = he$1(this.assignments), r = this.resolveFlags();
+    let e = xe$3(this.assignments), r = this.resolveFlags();
     return e ? r ? e + r : e : r;
   }
   createAssignment(e, r) {
-    this.assignments.push({ t: 0, s: e, k: s$1, v: r });
+    this.assignments.push({ t: 0, s: e, k: s$2, v: r });
   }
   createAddAssignment(e, r) {
-    this.assignments.push({ t: 1, s: this.getRefParam(e), k: s$1, v: r });
+    this.assignments.push({ t: 1, s: this.getRefParam(e), k: s$2, v: r });
   }
   createSetAssignment(e, r, i) {
     this.assignments.push({ t: 2, s: this.getRefParam(e), k: r, v: i });
   }
   createDeleteAssignment(e, r) {
-    this.assignments.push({ t: 3, s: this.getRefParam(e), k: r, v: s$1 });
+    this.assignments.push({ t: 3, s: this.getRefParam(e), k: r, v: s$2 });
   }
   createArrayAssign(e, r, i) {
     this.createAssignment(this.getRefParam(e) + "[" + r + "]", i);
@@ -7628,7 +4647,7 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
     return e.t === 4 && this.stack.includes(e.i);
   }
   serializeReference(e) {
-    return this.assignIndexedValue(e.i, w$1 + '.get("' + e.s + '")');
+    return this.assignIndexedValue(e.i, z$1 + '.get("' + e.s + '")');
   }
   serializeArrayItem(e, r, i) {
     return r ? this.isIndexedValueInStack(r) ? (this.markRef(e), this.createArrayAssign(e, i, this.getRefParam(r.i)), "") : this.serialize(r) : "";
@@ -7645,7 +4664,7 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
   }
   serializeProperty(e, r, i) {
     if (typeof r == "string") {
-      let a = Number(r), n = a >= 0 && a.toString() === r || pe$2(r);
+      let a = Number(r), n = a >= 0 && a.toString() === r || be$3(r);
       if (this.isIndexedValueInStack(i)) {
         let o = this.getRefParam(i.i);
         return this.markRef(e.i), n && a !== a ? this.createObjectAssign(e.i, r, o) : this.createArrayAssign(e.i, n ? r : '"' + r + '"', o), "";
@@ -7673,7 +4692,7 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
     return a !== "{}" ? "Object.assign(" + i + "," + a + ")" : i;
   }
   serializeStringKeyAssignment(e, r, i, a) {
-    let n = this.serialize(a), o = Number(i), l = o >= 0 && o.toString() === i || pe$2(i);
+    let n = this.serialize(a), o = Number(i), l = o >= 0 && o.toString() === i || be$3(i);
     if (this.isIndexedValueInStack(a)) l && o !== o ? this.createObjectAssign(e.i, i, n) : this.createArrayAssign(e.i, l ? i : '"' + i + '"', n);
     else {
       let c = this.assignments;
@@ -7697,9 +4716,9 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
       let a = [], n = r.k, o = r.v;
       this.stack.push(e.i);
       for (let l = 0; l < i; l++) this.serializeAssignment(e, a, n[l], o[l]);
-      return this.stack.pop(), he$1(a);
+      return this.stack.pop(), xe$3(a);
     }
-    return s$1;
+    return s$2;
   }
   serializeDictionary(e, r) {
     if (e.p) if (this.features & 8) r = this.serializeWithObjectAssign(e, e.p, r);
@@ -7711,7 +4730,7 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
     return this.assignIndexedValue(e.i, r);
   }
   serializeNullConstructor(e) {
-    return this.pushObjectFlag(e.o, e.i), this.serializeDictionary(e, or);
+    return this.pushObjectFlag(e.o, e.i), this.serializeDictionary(e, Er);
   }
   serializeDate(e) {
     return this.assignIndexedValue(e.i, 'new Date("' + e.s + '")');
@@ -7723,7 +4742,7 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
     return this.isIndexedValueInStack(r) ? (this.markRef(e), this.createAddAssignment(e, this.getRefParam(r.i)), "") : this.serialize(r);
   }
   serializeSet(e) {
-    let r = lr, i = e.l, a = e.i;
+    let r = _r, i = e.l, a = e.i;
     if (i) {
       let n = e.a;
       this.stack.push(a);
@@ -7759,7 +4778,7 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
     return "[" + this.serialize(r) + "," + this.serialize(i) + "]";
   }
   serializeMap(e) {
-    let r = cr, i = e.e.s, a = e.i, n = e.f, o = this.getRefParam(n.i);
+    let r = Cr, i = e.e.s, a = e.i, n = e.f, o = this.getRefParam(n.i);
     if (i) {
       let l = e.e.k, c = e.e.v;
       this.stack.push(a);
@@ -7791,10 +4810,10 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
     return this.stack.pop(), i;
   }
   serializeError(e) {
-    return this.serializeDictionary(e, "new " + _e[e.s] + '("' + e.m + '")');
+    return this.serializeDictionary(e, "new " + Ne$1[e.s] + '("' + e.m + '")');
   }
   serializePromise(e) {
-    let r, i = e.f, a = e.i, n = e.s ? ur : pr;
+    let r, i = e.f, a = e.i, n = e.s ? $r : Tr;
     if (this.isIndexedValueInStack(i)) {
       let o = this.getRefParam(i.i);
       r = n + (e.s ? "().then(" + this.createFunction([], o) + ")" : "().catch(" + this.createEffectfulFunction([], "throw " + o) + ")");
@@ -7806,7 +4825,7 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
     return this.assignIndexedValue(a, r);
   }
   serializeWellKnownSymbol(e) {
-    return this.assignIndexedValue(e.i, ut$1[e.s]);
+    return this.assignIndexedValue(e.i, $t$1[e.s]);
   }
   serializeBoxed(e) {
     return this.assignIndexedValue(e.i, "Object(" + this.serialize(e.f) + ")");
@@ -7817,7 +4836,7 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
       let n = r[i];
       if (n.tag === e.c) return this.assignIndexedValue(e.i, n.serialize(e.s, this, { id: e.i }));
     }
-    throw new Oe$1(e.c);
+    throw new Xe(e.c);
   }
   getConstructor(e) {
     let r = this.serialize(e);
@@ -7902,7 +4921,7 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
     try {
       switch (e.t) {
         case 2:
-          return ht$1[e.s];
+          return Wt$1[e.s];
         case 0:
           return "" + e.s;
         case 1:
@@ -7977,18 +4996,18 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
         case 37:
           return this.serializeAbortSignalSync(e);
         default:
-          throw new De$1(e);
+          throw new Ke$1(e);
       }
     } catch (r) {
-      throw new jt$1(r);
+      throw new pr(r);
     }
   }
-}, fr = class extends dr {
+}, Fr = class extends Dr {
   constructor(t) {
     super(t), this.mode = "cross", this.scopeId = t.scopeId;
   }
   getRefParam(t) {
-    return D$3 + "[" + t + "]";
+    return F$2 + "[" + t + "]";
   }
   assignIndexedValue(t, e) {
     return this.getRefParam(t) + "=" + e;
@@ -7996,48 +5015,48 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
   serializeTop(t) {
     let e = this.serialize(t), r = t.i;
     if (r == null) return e;
-    let i = this.resolvePatches(), a = this.getRefParam(r), n = this.scopeId == null ? "" : D$3, o = i ? "(" + e + "," + i + a + ")" : e;
+    let i = this.resolvePatches(), a = this.getRefParam(r), n = this.scopeId == null ? "" : F$2, o = i ? "(" + e + "," + i + a + ")" : e;
     if (n === "") return t.t === 10 && !i ? "(" + o + ")" : o;
-    let l = this.scopeId == null ? "()" : "(" + D$3 + '["' + g$1(this.scopeId) + '"])';
+    let l = this.scopeId == null ? "()" : "(" + F$2 + '["' + g(this.scopeId) + '"])';
     return "(" + this.createFunction([n], o) + ")" + l;
   }
-}, gr$1 = class gr extends rr$1 {
+}, Ur = class extends wr {
   parseItems(t) {
     let e = [];
     for (let r = 0, i = t.length; r < i; r++) r in t && (e[r] = this.parse(t[r]));
     return e;
   }
   parseArray(t, e) {
-    return Et$1(t, e, this.parseItems(e));
+    return Zt$1(t, e, this.parseItems(e));
   }
   parseProperties(t) {
     let e = Object.entries(t), r = [], i = [];
-    for (let n = 0, o = e.length; n < o; n++) r.push(g$1(e[n][0])), i.push(this.parse(e[n][1]));
+    for (let n = 0, o = e.length; n < o; n++) r.push(g(e[n][0])), i.push(this.parse(e[n][1]));
     let a = Symbol.iterator;
-    return a in t && (r.push(this.parseWellKnownSymbol(a)), i.push($e$1(this.parseIteratorFactory(), this.parse(Ne$1(t))))), a = Symbol.asyncIterator, a in t && (r.push(this.parseWellKnownSymbol(a)), i.push(Fe$1(this.parseAsyncIteratorFactory(), this.parse(E())))), a = Symbol.toStringTag, a in t && (r.push(this.parseWellKnownSymbol(a)), i.push(q$2(t[a]))), a = Symbol.isConcatSpreadable, a in t && (r.push(this.parseWellKnownSymbol(a)), i.push(t[a] ? j$1 : B$2)), { k: r, v: i, s: r.length };
+    return a in t && (r.push(this.parseWellKnownSymbol(a)), i.push(Be(this.parseIteratorFactory(), this.parse(Ge(t))))), a = Symbol.asyncIterator, a in t && (r.push(this.parseWellKnownSymbol(a)), i.push(qe$1(this.parseAsyncIteratorFactory(), this.parse(C$1())))), a = Symbol.toStringTag, a in t && (r.push(this.parseWellKnownSymbol(a)), i.push(K$1(t[a]))), a = Symbol.isConcatSpreadable, a in t && (r.push(this.parseWellKnownSymbol(a)), i.push(t[a] ? q$2 : H$3)), { k: r, v: i, s: r.length };
   }
   parsePlainObject(t, e, r) {
     return this.createObjectNode(t, e, r, this.parseProperties(e));
   }
   parseBoxed(t, e) {
-    return Ct$1(t, this.parse(e.valueOf()));
+    return Qt$1(t, this.parse(e.valueOf()));
   }
   parseTypedArray(t, e) {
-    return $t$1(t, e, this.parse(e.buffer));
+    return er(t, e, this.parse(e.buffer));
   }
   parseBigIntTypedArray(t, e) {
-    return Ft$1(t, e, this.parse(e.buffer));
+    return tr(t, e, this.parse(e.buffer));
   }
   parseDataView(t, e) {
-    return Wt$1(t, e, this.parse(e.buffer));
+    return rr(t, e, this.parse(e.buffer));
   }
   parseError(t, e) {
-    let r = ce$1(e, this.features);
-    return Dt$1(t, e, r ? this.parseProperties(r) : s$1);
+    let r = Pe$2(e, this.features);
+    return sr(t, e, r ? this.parseProperties(r) : s$2);
   }
   parseAggregateError(t, e) {
-    let r = ce$1(e, this.features);
-    return Ot$1(t, e, r ? this.parseProperties(r) : s$1);
+    let r = Pe$2(e, this.features);
+    return ir(t, e, r ? this.parseProperties(r) : s$2);
   }
   parseMap(t, e) {
     let r = [], i = [];
@@ -8047,32 +5066,32 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
   parseSet(t, e) {
     let r = [];
     for (let i of e.keys()) r.push(this.parse(i));
-    return Nt$1(t, e.size, r);
+    return ar(t, e.size, r);
   }
   parsePlugin(t, e) {
     let r = this.plugins;
     if (r) for (let i = 0, a = r.length; i < a; i++) {
       let n = r[i];
-      if (n.parse.sync && n.test(e)) return Ce$1(t, n.tag, n.parse.sync(e, this, { id: t }));
+      if (n.parse.sync && n.test(e)) return je$1(t, n.tag, n.parse.sync(e, this, { id: t }));
     }
   }
   parseStream(t, e) {
-    return We$1(t, this.parseSpecialReference(4), []);
+    return He$2(t, this.parseSpecialReference(4), []);
   }
   parsePromise(t, e) {
     return this.createPromiseConstructorNode(t);
   }
   parseAbortSignalSync(t, e) {
-    return h$1(37, t, s$1, s$1, s$1, s$1, s$1, s$1, s$1, this.parse(e.reason), s$1, s$1);
+    return h$1(37, t, s$2, s$2, s$2, s$2, s$2, s$2, s$2, this.parse(e.reason), s$2, s$2);
   }
   parseAbortSignal(t, e) {
     return e.aborted ? this.parseAbortSignalSync(t, e) : this.createAbortSignalConstructorNode(t);
   }
   parseObject(t, e) {
     if (Array.isArray(e)) return this.parseArray(t, e);
-    if (Jt$1(e)) return this.parseStream(t, e);
+    if (xr(e)) return this.parseStream(t, e);
     let r = e.constructor;
-    if (r === Xt$1) return this.parse(e.replacement);
+    if (r === mr) return this.parse(e.replacement);
     let i = this.parsePlugin(t, e);
     if (i) return i;
     switch (r) {
@@ -8081,9 +5100,9 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
       case void 0:
         return this.parsePlainObject(t, e, true);
       case Date:
-        return Rt$1(t, e);
+        return Kt$1(t, e);
       case RegExp:
-        return At$1(t, e);
+        return Xt$1(t, e);
       case Error:
       case EvalError:
       case RangeError:
@@ -8098,7 +5117,7 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
       case BigInt:
         return this.parseBoxed(t, e);
       case ArrayBuffer:
-        return It$1(t, e);
+        return Gt$1(t, e);
       case Int8Array:
       case Int16Array:
       case Int32Array:
@@ -8127,47 +5146,47 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
     if (a & 1 && typeof AggregateError < "u" && (r === AggregateError || e instanceof AggregateError)) return this.parseAggregateError(t, e);
     if (e instanceof Error) return this.parseError(t, e);
     if (Symbol.iterator in e || Symbol.asyncIterator in e) return this.parsePlainObject(t, e, !!r);
-    throw new O(e);
+    throw new U$1(e);
   }
   parseFunction(t) {
     let e = this.getReference(t);
     if (e.type !== 0) return e.value;
     let r = this.parsePlugin(e.value, t);
     if (r) return r;
-    throw new O(t);
+    throw new U$1(t);
   }
   parse(t) {
     try {
       switch (typeof t) {
         case "boolean":
-          return t ? j$1 : B$2;
+          return t ? q$2 : H$3;
         case "undefined":
-          return gt;
+          return Ut$1;
         case "string":
-          return q$2(t);
+          return K$1(t);
         case "number":
-          return St$1(t);
+          return Bt(t);
         case "bigint":
-          return vt$1(t);
+          return qt$1(t);
         case "object": {
           if (t) {
             let e = this.getReference(t);
             return e.type === 0 ? this.parseObject(e.value, t) : e.value;
           }
-          return mt$1;
+          return Ot$1;
         }
         case "symbol":
           return this.parseWellKnownSymbol(t);
         case "function":
           return this.parseFunction(t);
         default:
-          throw new O(t);
+          throw new U$1(t);
       }
     } catch (e) {
-      throw new Vt$1(e);
+      throw new ur(e);
     }
   }
-}, mr = class extends gr$1 {
+}, Or = class extends Ur {
   constructor(e) {
     super(e), this.alive = true, this.pending = 0, this.initial = true, this.buffer = [], this.onParseCallback = e.onParse, this.onErrorCallback = e.onError, this.onDoneCallback = e.onDone;
   }
@@ -8199,18 +5218,18 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
   }
   parseProperties(e) {
     let r = Object.entries(e), i = [], a = [];
-    for (let o = 0, l = r.length; o < l; o++) i.push(g$1(r[o][0])), a.push(this.parse(r[o][1]));
+    for (let o = 0, l = r.length; o < l; o++) i.push(g(r[o][0])), a.push(this.parse(r[o][1]));
     let n = Symbol.iterator;
-    return n in e && (i.push(this.parseWellKnownSymbol(n)), a.push($e$1(this.parseIteratorFactory(), this.parse(Ne$1(e))))), n = Symbol.asyncIterator, n in e && (i.push(this.parseWellKnownSymbol(n)), a.push(Fe$1(this.parseAsyncIteratorFactory(), this.parse(Qt$1(e))))), n = Symbol.toStringTag, n in e && (i.push(this.parseWellKnownSymbol(n)), a.push(q$2(e[n]))), n = Symbol.isConcatSpreadable, n in e && (i.push(this.parseWellKnownSymbol(n)), a.push(e[n] ? j$1 : B$2)), { k: i, v: a, s: i.length };
+    return n in e && (i.push(this.parseWellKnownSymbol(n)), a.push(Be(this.parseIteratorFactory(), this.parse(Ge(e))))), n = Symbol.asyncIterator, n in e && (i.push(this.parseWellKnownSymbol(n)), a.push(qe$1(this.parseAsyncIteratorFactory(), this.parse(Ar(e))))), n = Symbol.toStringTag, n in e && (i.push(this.parseWellKnownSymbol(n)), a.push(K$1(e[n]))), n = Symbol.isConcatSpreadable, n in e && (i.push(this.parseWellKnownSymbol(n)), a.push(e[n] ? q$2 : H$3)), { k: i, v: a, s: i.length };
   }
   parsePromise(e, r) {
     return r.then((i) => {
       let a = this.parseWithError(i);
-      a && this.onParse(h$1(23, e, s$1, s$1, s$1, s$1, s$1, s$1, [this.parseSpecialReference(2), a], s$1, s$1, s$1)), this.popPendingState();
+      a && this.onParse(h$1(23, e, s$2, s$2, s$2, s$2, s$2, s$2, [this.parseSpecialReference(2), a], s$2, s$2, s$2)), this.popPendingState();
     }, (i) => {
       if (this.alive) {
         let a = this.parseWithError(i);
-        a && this.onParse(h$1(24, e, s$1, s$1, s$1, s$1, s$1, s$1, [this.parseSpecialReference(3), a], s$1, s$1, s$1));
+        a && this.onParse(h$1(24, e, s$2, s$2, s$2, s$2, s$2, s$2, [this.parseSpecialReference(3), a], s$2, s$2, s$2));
       }
       this.popPendingState();
     }), this.pushPendingState(), this.createPromiseConstructorNode(e);
@@ -8219,27 +5238,27 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
     let i = this.plugins;
     if (i) for (let a = 0, n = i.length; a < n; a++) {
       let o = i[a];
-      if (o.parse.stream && o.test(r)) return Ce$1(e, o.tag, o.parse.stream(r, this, { id: e }));
+      if (o.parse.stream && o.test(r)) return je$1(e, o.tag, o.parse.stream(r, this, { id: e }));
     }
-    return s$1;
+    return s$2;
   }
   parseStream(e, r) {
-    let i = We$1(e, this.parseSpecialReference(4), []);
+    let i = He$2(e, this.parseSpecialReference(4), []);
     return this.pushPendingState(), r.on({ next: (a) => {
       if (this.alive) {
         let n = this.parseWithError(a);
-        n && this.onParse(Ut$1(e, n));
+        n && this.onParse(nr(e, n));
       }
     }, throw: (a) => {
       if (this.alive) {
         let n = this.parseWithError(a);
-        n && this.onParse(Lt$1(e, n));
+        n && this.onParse(or(e, n));
       }
       this.popPendingState();
     }, return: (a) => {
       if (this.alive) {
         let n = this.parseWithError(a);
-        n && this.onParse(Mt$1(e, n));
+        n && this.onParse(lr(e, n));
       }
       this.popPendingState();
     } }), i;
@@ -8247,7 +5266,7 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
   handleAbortSignal(e, r) {
     if (this.alive) {
       let i = this.parseWithError(r.reason);
-      i && this.onParse(h$1(36, e, s$1, s$1, s$1, s$1, s$1, s$1, [this.parseSpecialReference(6), i], s$1, s$1, s$1));
+      i && this.onParse(h$1(36, e, s$2, s$2, s$2, s$2, s$2, s$2, [this.parseSpecialReference(6), i], s$2, s$2, s$2));
     }
     this.popPendingState();
   }
@@ -8258,7 +5277,7 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
     try {
       return this.parse(e);
     } catch (r) {
-      return this.onError(r), s$1;
+      return this.onError(r), s$2;
     }
   }
   start(e) {
@@ -8271,14 +5290,14 @@ var or = "Object.create(null)", lr = "new Set", cr = "new Map", ur = "Promise.re
   isAlive() {
     return this.alive;
   }
-}, yr = class extends mr {
+}, Mr = class extends Or {
   constructor() {
     super(...arguments), this.mode = "cross";
   }
 };
-function br(t, e) {
-  let r = Ie$1(e.plugins), i = new yr({ plugins: r, refs: e.refs, disabledFeatures: e.disabledFeatures, onParse(a, n) {
-    let o = new fr({ plugins: r, features: i.features, scopeId: e.scopeId, markedRefs: i.marked }), l;
+function Lr(t, e) {
+  let r = Me$1(e.plugins), i = new Mr({ plugins: r, refs: e.refs, disabledFeatures: e.disabledFeatures, onParse(a, n) {
+    let o = new Fr({ plugins: r, features: i.features, scopeId: e.scopeId, markedRefs: i.marked }), l;
     try {
       l = o.serializeTop(a);
     } catch (c) {
@@ -8289,7 +5308,7 @@ function br(t, e) {
   }, onError: e.onError, onDone: e.onDone });
   return i.start(t), i.destroy.bind(i);
 }
-var zr = class extends ir {
+var Nr = class extends Rr {
   constructor(t) {
     super(t), this.mode = "vanilla", this.marked = new Set(t.markedRefs);
   }
@@ -8297,26 +5316,26 @@ var zr = class extends ir {
     return this.marked.has(t) && this.refs.set(t, e), e;
   }
 };
-function de$2(t, e = {}) {
-  let r = Ie$1(e.plugins);
-  return new zr({ plugins: r, markedRefs: t.m }).deserialize(t.t);
+function Ae$1(t, e = {}) {
+  let r = Me$1(e.plugins);
+  return new Nr({ plugins: r, markedRefs: t.m }).deserialize(t.t);
 }
-function N$1(t) {
+function M$4(t) {
   return { detail: t.detail, bubbles: t.bubbles, cancelable: t.cancelable, composed: t.composed };
 }
-var Pr = { tag: "seroval-plugins/web/CustomEvent", test(t) {
+var Vr = { tag: "seroval-plugins/web/CustomEvent", test(t) {
   return typeof CustomEvent > "u" ? false : t instanceof CustomEvent;
 }, parse: { sync(t, e) {
-  return { type: e.parse(t.type), options: e.parse(N$1(t)) };
+  return { type: e.parse(t.type), options: e.parse(M$4(t)) };
 }, async async(t, e) {
-  return { type: await e.parse(t.type), options: await e.parse(N$1(t)) };
+  return { type: await e.parse(t.type), options: await e.parse(M$4(t)) };
 }, stream(t, e) {
-  return { type: e.parse(t.type), options: e.parse(N$1(t)) };
+  return { type: e.parse(t.type), options: e.parse(M$4(t)) };
 } }, serialize(t, e) {
   return "new CustomEvent(" + e.serialize(t.type) + "," + e.serialize(t.options) + ")";
 }, deserialize(t, e) {
   return new CustomEvent(e.deserialize(t.type), e.deserialize(t.options));
-} }, K$2 = Pr, xr = { tag: "seroval-plugins/web/DOMException", test(t) {
+} }, G$3 = Vr, jr = { tag: "seroval-plugins/web/DOMException", test(t) {
   return typeof DOMException > "u" ? false : t instanceof DOMException;
 }, parse: { sync(t, e) {
   return { name: e.parse(t.name), message: e.parse(t.message) };
@@ -8328,23 +5347,23 @@ var Pr = { tag: "seroval-plugins/web/CustomEvent", test(t) {
   return "new DOMException(" + e.serialize(t.message) + "," + e.serialize(t.name) + ")";
 }, deserialize(t, e) {
   return new DOMException(e.deserialize(t.message), e.deserialize(t.name));
-} }, X$2 = xr;
-function U$1(t) {
+} }, J$2 = jr;
+function L$1(t) {
   return { bubbles: t.bubbles, cancelable: t.cancelable, composed: t.composed };
 }
-var Sr = { tag: "seroval-plugins/web/Event", test(t) {
+var Br = { tag: "seroval-plugins/web/Event", test(t) {
   return typeof Event > "u" ? false : t instanceof Event;
 }, parse: { sync(t, e) {
-  return { type: e.parse(t.type), options: e.parse(U$1(t)) };
+  return { type: e.parse(t.type), options: e.parse(L$1(t)) };
 }, async async(t, e) {
-  return { type: await e.parse(t.type), options: await e.parse(U$1(t)) };
+  return { type: await e.parse(t.type), options: await e.parse(L$1(t)) };
 }, stream(t, e) {
-  return { type: e.parse(t.type), options: e.parse(U$1(t)) };
+  return { type: e.parse(t.type), options: e.parse(L$1(t)) };
 } }, serialize(t, e) {
   return "new Event(" + e.serialize(t.type) + "," + e.serialize(t.options) + ")";
 }, deserialize(t, e) {
   return new Event(e.deserialize(t.type), e.deserialize(t.options));
-} }, Y$3 = Sr, vr = { tag: "seroval-plugins/web/File", test(t) {
+} }, Y$4 = Br, qr = { tag: "seroval-plugins/web/File", test(t) {
   return typeof File > "u" ? false : t instanceof File;
 }, parse: { async async(t, e) {
   return { name: await e.parse(t.name), options: await e.parse({ type: t.type, lastModified: t.lastModified }), buffer: await e.parse(await t.arrayBuffer()) };
@@ -8352,15 +5371,15 @@ var Sr = { tag: "seroval-plugins/web/Event", test(t) {
   return "new File([" + e.serialize(t.buffer) + "]," + e.serialize(t.name) + "," + e.serialize(t.options) + ")";
 }, deserialize(t, e) {
   return new File([e.deserialize(t.buffer)], e.deserialize(t.name), e.deserialize(t.options));
-} }, wr = vr;
-function L$1(t) {
+} }, Hr = qr;
+function N$1(t) {
   let e = [];
   return t.forEach((r, i) => {
     e.push([i, r]);
   }), e;
 }
-var A$3 = {}, Rr = { tag: "seroval-plugins/web/FormDataFactory", test(t) {
-  return t === A$3;
+var k$1 = {}, Kr = { tag: "seroval-plugins/web/FormDataFactory", test(t) {
+  return t === k$1;
 }, parse: { sync() {
 }, async async() {
   return await Promise.resolve(void 0);
@@ -8368,15 +5387,15 @@ var A$3 = {}, Rr = { tag: "seroval-plugins/web/FormDataFactory", test(t) {
 } }, serialize(t, e) {
   return e.createEffectfulFunction(["e", "f", "i", "s", "t"], "f=new FormData;for(i=0,s=e.length;i<s;i++)f.append((t=e[i])[0],t[1]);return f");
 }, deserialize() {
-  return A$3;
-} }, Ar = { tag: "seroval-plugins/web/FormData", extends: [wr, Rr], test(t) {
+  return k$1;
+} }, Xr = { tag: "seroval-plugins/web/FormData", extends: [Hr, Kr], test(t) {
   return typeof FormData > "u" ? false : t instanceof FormData;
 }, parse: { sync(t, e) {
-  return { factory: e.parse(A$3), entries: e.parse(L$1(t)) };
+  return { factory: e.parse(k$1), entries: e.parse(N$1(t)) };
 }, async async(t, e) {
-  return { factory: await e.parse(A$3), entries: await e.parse(L$1(t)) };
+  return { factory: await e.parse(k$1), entries: await e.parse(N$1(t)) };
 }, stream(t, e) {
-  return { factory: e.parse(A$3), entries: e.parse(L$1(t)) };
+  return { factory: e.parse(k$1), entries: e.parse(N$1(t)) };
 } }, serialize(t, e) {
   return "(" + e.serialize(t.factory) + ")(" + e.serialize(t.entries) + ")";
 }, deserialize(t, e) {
@@ -8386,27 +5405,27 @@ var A$3 = {}, Rr = { tag: "seroval-plugins/web/FormDataFactory", test(t) {
     r.append(o[0], o[1]);
   }
   return r;
-} }, G$2 = Ar;
-function M$4(t) {
+} }, Z$3 = Xr;
+function V$2(t) {
   let e = [];
   return t.forEach((r, i) => {
     e.push([i, r]);
   }), e;
 }
-var Ir = { tag: "seroval-plugins/web/Headers", test(t) {
+var Gr = { tag: "seroval-plugins/web/Headers", test(t) {
   return typeof Headers > "u" ? false : t instanceof Headers;
 }, parse: { sync(t, e) {
-  return e.parse(M$4(t));
+  return e.parse(V$2(t));
 }, async async(t, e) {
-  return await e.parse(M$4(t));
+  return await e.parse(V$2(t));
 }, stream(t, e) {
-  return e.parse(M$4(t));
+  return e.parse(V$2(t));
 } }, serialize(t, e) {
   return "new Headers(" + e.serialize(t) + ")";
 }, deserialize(t, e) {
   return new Headers(e.deserialize(t));
-} }, k$1 = Ir, I = {}, kr = { tag: "seroval-plugins/web/ReadableStreamFactory", test(t) {
-  return t === I;
+} }, E = Gr, I$1 = {}, Jr = { tag: "seroval-plugins/web/ReadableStreamFactory", test(t) {
+  return t === I$1;
 }, parse: { sync() {
 }, async async() {
   return await Promise.resolve(void 0);
@@ -8414,10 +5433,10 @@ var Ir = { tag: "seroval-plugins/web/Headers", test(t) {
 } }, serialize(t, e) {
   return e.createFunction(["d"], "new ReadableStream({start:" + e.createEffectfulFunction(["c"], "d.on({next:" + e.createEffectfulFunction(["v"], "c.enqueue(v)") + ",throw:" + e.createEffectfulFunction(["v"], "c.error(v)") + ",return:" + e.createEffectfulFunction([], "c.close()") + "})") + "})");
 }, deserialize() {
-  return I;
+  return I$1;
 } };
-function fe$1(t) {
-  let e = E(), r = t.getReader();
+function ve$1(t) {
+  let e = C$1(), r = t.getReader();
   async function i() {
     try {
       let a = await r.read();
@@ -8429,14 +5448,14 @@ function fe$1(t) {
   return i().catch(() => {
   }), e;
 }
-var _r = { tag: "seroval/plugins/web/ReadableStream", extends: [kr], test(t) {
+var Yr = { tag: "seroval/plugins/web/ReadableStream", extends: [Jr], test(t) {
   return typeof ReadableStream > "u" ? false : t instanceof ReadableStream;
 }, parse: { sync(t, e) {
-  return { factory: e.parse(I), stream: e.parse(E()) };
+  return { factory: e.parse(I$1), stream: e.parse(C$1()) };
 }, async async(t, e) {
-  return { factory: await e.parse(I), stream: await e.parse(fe$1(t)) };
+  return { factory: await e.parse(I$1), stream: await e.parse(ve$1(t)) };
 }, stream(t, e) {
-  return { factory: e.parse(I), stream: e.parse(fe$1(t)) };
+  return { factory: e.parse(I$1), stream: e.parse(ve$1(t)) };
 } }, serialize(t, e) {
   return "(" + e.serialize(t.factory) + ")(" + e.serialize(t.stream) + ")";
 }, deserialize(t, e) {
@@ -8450,35 +5469,35 @@ var _r = { tag: "seroval/plugins/web/ReadableStream", extends: [kr], test(t) {
       i.close();
     } });
   } });
-} }, _$2 = _r;
-function ge$2(t, e) {
+} }, _$2 = Yr;
+function Se$2(t, e) {
   return { body: e, cache: t.cache, credentials: t.credentials, headers: t.headers, integrity: t.integrity, keepalive: t.keepalive, method: t.method, mode: t.mode, redirect: t.redirect, referrer: t.referrer, referrerPolicy: t.referrerPolicy };
 }
-var Er = { tag: "seroval-plugins/web/Request", extends: [_$2, k$1], test(t) {
+var Zr = { tag: "seroval-plugins/web/Request", extends: [_$2, E], test(t) {
   return typeof Request > "u" ? false : t instanceof Request;
 }, parse: { async async(t, e) {
-  return { url: await e.parse(t.url), options: await e.parse(ge$2(t, t.body ? await t.clone().arrayBuffer() : null)) };
+  return { url: await e.parse(t.url), options: await e.parse(Se$2(t, t.body ? await t.clone().arrayBuffer() : null)) };
 }, stream(t, e) {
-  return { url: e.parse(t.url), options: e.parse(ge$2(t, t.clone().body)) };
+  return { url: e.parse(t.url), options: e.parse(Se$2(t, t.clone().body)) };
 } }, serialize(t, e) {
   return "new Request(" + e.serialize(t.url) + "," + e.serialize(t.options) + ")";
 }, deserialize(t, e) {
   return new Request(e.deserialize(t.url), e.deserialize(t.options));
-} }, Z$3 = Er;
-function me$1(t) {
+} }, Q$3 = Zr;
+function we$1(t) {
   return { headers: t.headers, status: t.status, statusText: t.statusText };
 }
-var Cr = { tag: "seroval-plugins/web/Response", extends: [_$2, k$1], test(t) {
+var Qr = { tag: "seroval-plugins/web/Response", extends: [_$2, E], test(t) {
   return typeof Response > "u" ? false : t instanceof Response;
 }, parse: { async async(t, e) {
-  return { body: await e.parse(t.body ? await t.clone().arrayBuffer() : null), options: await e.parse(me$1(t)) };
+  return { body: await e.parse(t.body ? await t.clone().arrayBuffer() : null), options: await e.parse(we$1(t)) };
 }, stream(t, e) {
-  return { body: e.parse(t.clone().body), options: e.parse(me$1(t)) };
+  return { body: e.parse(t.clone().body), options: e.parse(we$1(t)) };
 } }, serialize(t, e) {
   return "new Response(" + e.serialize(t.body) + "," + e.serialize(t.options) + ")";
 }, deserialize(t, e) {
   return new Response(e.deserialize(t.body), e.deserialize(t.options));
-} }, J$1 = Cr, $r = { tag: "seroval-plugins/web/URLSearchParams", test(t) {
+} }, ee$3 = Qr, es$1 = { tag: "seroval-plugins/web/URLSearchParams", test(t) {
   return typeof URLSearchParams > "u" ? false : t instanceof URLSearchParams;
 }, parse: { sync(t, e) {
   return e.parse(t.toString());
@@ -8490,7 +5509,7 @@ var Cr = { tag: "seroval-plugins/web/Response", extends: [_$2, k$1], test(t) {
   return "new URLSearchParams(" + e.serialize(t) + ")";
 }, deserialize(t, e) {
   return new URLSearchParams(e.deserialize(t));
-} }, Q$3 = $r, Fr = { tag: "seroval-plugins/web/URL", test(t) {
+} }, te$3 = es$1, ts$1 = { tag: "seroval-plugins/web/URL", test(t) {
   return typeof URL > "u" ? false : t instanceof URL;
 }, parse: { sync(t, e) {
   return e.parse(t.href);
@@ -8502,28 +5521,28 @@ var Cr = { tag: "seroval-plugins/web/Response", extends: [_$2, k$1], test(t) {
   return "new URL(" + e.serialize(t) + ")";
 }, deserialize(t, e) {
   return new URL(e.deserialize(t));
-} }, ee$3 = Fr;
-const T = "Invariant Violation", { setPrototypeOf: Wr = function(t, e) {
+} }, re$2 = ts$1;
+const j$1 = "Invariant Violation", { setPrototypeOf: rs$1 = function(t, e) {
   return t.__proto__ = e, t;
 } } = Object;
-class ie extends Error {
-  constructor(e = T) {
-    super(typeof e == "number" ? `${T}: ${e} (see https://github.com/apollographql/invariant-packages)` : e);
+let oe$2 = class oe extends Error {
+  constructor(e = j$1) {
+    super(typeof e == "number" ? `${j$1}: ${e} (see https://github.com/apollographql/invariant-packages)` : e);
     __publicField$1(this, "framesToPop", 1);
-    __publicField$1(this, "name", T);
-    Wr(this, ie.prototype);
+    __publicField$1(this, "name", j$1);
+    rs$1(this, oe.prototype);
   }
+};
+function ss$1(t, e) {
+  if (!t) throw new oe$2(e);
 }
-function Dr(t, e) {
-  if (!t) throw new ie(e);
+const w$2 = { NORMAL: 0, WILDCARD: 1, PLACEHOLDER: 2 };
+function is$1(t = {}) {
+  const e = { options: t, rootNode: Je(), staticRoutesMap: {} }, r = (i) => t.strictTrailingSlash ? i : i.replace(/\/$/, "") || "/";
+  if (t.routes) for (const i in t.routes) ze$1(e, r(i), t.routes[i]);
+  return { ctx: e, lookup: (i) => as$1(e, r(i)), insert: (i, a) => ze$1(e, r(i), a), remove: (i) => ns$1(e, r(i)) };
 }
-const v = { NORMAL: 0, WILDCARD: 1, PLACEHOLDER: 2 };
-function Or(t = {}) {
-  const e = { options: t, rootNode: Ue$1(), staticRoutesMap: {} }, r = (i) => t.strictTrailingSlash ? i : i.replace(/\/$/, "") || "/";
-  if (t.routes) for (const i in t.routes) ye$2(e, r(i), t.routes[i]);
-  return { ctx: e, lookup: (i) => Nr(e, r(i)), insert: (i, a) => ye$2(e, r(i), a), remove: (i) => Ur(e, r(i)) };
-}
-function Nr(t, e) {
+function as$1(t, e) {
   const r = t.staticRoutesMap[e];
   if (r) return r.data;
   const i = e.split("/"), a = {};
@@ -8534,8 +5553,8 @@ function Nr(t, e) {
     const m = l.children.get(d);
     if (m === void 0) {
       if (l && l.placeholderChildren.length > 1) {
-        const b = i.length - u;
-        l = l.placeholderChildren.find((p) => p.maxDepth === b) || null;
+        const y = i.length - u;
+        l = l.placeholderChildren.find((p) => p.maxDepth === y) || null;
       } else l = l.placeholderChildren[0] || null;
       if (!l) break;
       l.paramName && (a[l.paramName] = d), n = true;
@@ -8543,7 +5562,7 @@ function Nr(t, e) {
   }
   return (l === null || l.data === null) && o !== null && (l = o, a[l.paramName || "_"] = c, n = true), l ? n ? { ...l.data, params: n ? a : void 0 } : l.data : null;
 }
-function ye$2(t, e, r) {
+function ze$1(t, e, r) {
   let i = true;
   const a = e.split("/");
   let n = t.rootNode, o = 0;
@@ -8552,14 +5571,14 @@ function ye$2(t, e, r) {
     let u;
     if (u = n.children.get(c)) n = u;
     else {
-      const d = Lr(c);
-      u = Ue$1({ type: d, parent: n }), n.children.set(c, u), d === v.PLACEHOLDER ? (u.paramName = c === "*" ? `_${o++}` : c.slice(1), n.placeholderChildren.push(u), i = false) : d === v.WILDCARD && (n.wildcardChildNode = u, u.paramName = c.slice(3) || "_", i = false), l.push(u), n = u;
+      const d = os$1(c);
+      u = Je({ type: d, parent: n }), n.children.set(c, u), d === w$2.PLACEHOLDER ? (u.paramName = c === "*" ? `_${o++}` : c.slice(1), n.placeholderChildren.push(u), i = false) : d === w$2.WILDCARD && (n.wildcardChildNode = u, u.paramName = c.slice(3) || "_", i = false), l.push(u), n = u;
     }
   }
   for (const [c, u] of l.entries()) u.maxDepth = Math.max(l.length - c, u.maxDepth || 0);
   return n.data = r, i === true && (t.staticRoutesMap[e] = n), n;
 }
-function Ur(t, e) {
+function ns$1(t, e) {
   let r = false;
   const i = e.split("/");
   let a = t.rootNode;
@@ -8570,57 +5589,57 @@ function Ur(t, e) {
   }
   return r;
 }
-function Ue$1(t = {}) {
-  return { type: t.type || v.NORMAL, maxDepth: 0, parent: t.parent || null, children: /* @__PURE__ */ new Map(), data: t.data || null, paramName: t.paramName || null, wildcardChildNode: null, placeholderChildren: [] };
+function Je(t = {}) {
+  return { type: t.type || w$2.NORMAL, maxDepth: 0, parent: t.parent || null, children: /* @__PURE__ */ new Map(), data: t.data || null, paramName: t.paramName || null, wildcardChildNode: null, placeholderChildren: [] };
 }
-function Lr(t) {
-  return t.startsWith("**") ? v.WILDCARD : t[0] === ":" || t === "*" ? v.PLACEHOLDER : v.NORMAL;
+function os$1(t) {
+  return t.startsWith("**") ? w$2.WILDCARD : t[0] === ":" || t === "*" ? w$2.PLACEHOLDER : w$2.NORMAL;
 }
-const Le$1 = [{ page: true, $component: { src: "src/routes/index.tsx?pick=default&pick=$css", build: () => import('../build/index.mjs'), import: () => import('../build/index.mjs') }, path: "/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/index.tsx" }, { page: true, $component: { src: "src/routes/[...404].tsx?pick=default&pick=$css", build: () => import('../build/_...404_.mjs'), import: () => import('../build/_...404_.mjs') }, path: "/*404", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/[...404].tsx" }, { page: true, $component: { src: "src/routes/UI/Cursor.tsx?pick=default&pick=$css", build: () => import('../build/Cursor.mjs'), import: () => import('../build/Cursor.mjs') }, path: "/UI/Cursor", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/UI/Cursor.tsx" }, { page: true, $component: { src: "src/routes/UI/Waves.tsx?pick=default&pick=$css", build: () => import('../build/Waves.mjs'), import: () => import('../build/Waves.mjs') }, path: "/UI/Waves", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/UI/Waves.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css", build: () => import('../build/index2.mjs'), import: () => import('../build/index2.mjs') }, path: "/(Pages)/LoginRegistration/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css", build: () => import('../build/riv.mjs'), import: () => import('../build/riv.mjs') }, path: "/(Pages)/LoginRegistration/riv", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/riv.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css", build: () => import('../build/index3.mjs'), import: () => import('../build/index3.mjs') }, path: "/(Pages)/Wallets/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css", build: () => import('../build/_...slug_.mjs'), import: () => import('../build/_...slug_.mjs') }, path: "/(Pages)/Wallets/*slug", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/[...slug].tsx" }, { page: true, $component: { src: "src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css", build: () => import('../build/deleteWallet.mjs'), import: () => import('../build/deleteWallet.mjs') }, path: "/API/Wallets/deleteWallet", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/deleteWallet.ts" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css", build: () => import('../build/Toggle.mjs'), import: () => import('../build/Toggle.mjs') }, path: "/(Pages)/LoginRegistration/components/Toggle", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/components/Toggle.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css", build: () => import('../build/index4.mjs'), import: () => import('../build/index4.mjs') }, path: "/(Pages)/LoginRegistration/Login/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Login/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css", build: () => import('../build/index5.mjs'), import: () => import('../build/index5.mjs') }, path: "/(Pages)/LoginRegistration/Registration/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css", build: () => import('../build/index6.mjs'), import: () => import('../build/index6.mjs') }, path: "/(Pages)/Wallets/Wallet/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/Wallet/index.tsx" }, { page: true, $component: { src: "src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css", build: () => import('../build/getTransactions.mjs'), import: () => import('../build/getTransactions.mjs') }, path: "/API/Wallets/Wallet/getTransactions", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/Wallet/getTransactions.ts" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css", build: () => import('../build/index7.mjs'), import: () => import('../build/index7.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Credentials/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css", build: () => import('../build/index8.mjs'), import: () => import('../build/index8.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Email/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css", build: () => import('../build/index9.mjs'), import: () => import('../build/index9.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Phone/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css", build: () => import('../build/sendOtp.mjs'), import: () => import('../build/sendOtp.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Phone/sendOtp", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css", build: () => import('../build/index10.mjs'), import: () => import('../build/index10.mjs') }, path: "/(Pages)/Wallets/_components/Card/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/Card/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css", build: () => import('../build/index11.mjs'), import: () => import('../build/index11.mjs') }, path: "/(Pages)/Wallets/_components/Card3D/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/Card3D/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css", build: () => import('../build/LazyLoadSpline.mjs'), import: () => import('../build/LazyLoadSpline.mjs') }, path: "/(Pages)/Wallets/_components/Card3D/LazyLoadSpline", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css", build: () => import('../build/index12.mjs'), import: () => import('../build/index12.mjs') }, path: "/(Pages)/Wallets/_components/cardHolder/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css", build: () => import('../build/index13.mjs'), import: () => import('../build/index13.mjs') }, path: "/(Pages)/Wallets/_components/SetWallet/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css", build: () => import('../build/otpInput.mjs'), import: () => import('../build/otpInput.mjs') }, path: "/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css", build: () => import('../build/index14.mjs'), import: () => import('../build/index14.mjs') }, path: "/(Pages)/LoginRegistration/Registration/components/ProgressBar/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css", build: () => import('../build/index15.mjs'), import: () => import('../build/index15.mjs') }, path: "/(Pages)/Wallets/Wallet/components/table.tsx/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css", build: () => import('../build/Card.mjs'), import: () => import('../build/Card.mjs') }, path: "/(Pages)/Wallets/_components/cardHolder/Card/Card", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx" }], Mr = Tr(Le$1.filter((t) => t.page));
-function Tr(t) {
+const Ye = [{ page: true, $component: { src: "src/routes/index.tsx?pick=default&pick=$css", build: () => import('../build/index.mjs'), import: () => import('../build/index.mjs') }, path: "/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/index.tsx" }, { page: true, $component: { src: "src/routes/[...404].tsx?pick=default&pick=$css", build: () => import('../build/_...404_.mjs'), import: () => import('../build/_...404_.mjs') }, path: "/*404", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/[...404].tsx" }, { page: false, $POST: { src: "src/routes/API/prova.ts?pick=POST", build: () => import('../build/prova.mjs'), import: () => import('../build/prova.mjs') }, path: "/API/prova", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/prova.ts" }, { page: true, $component: { src: "src/routes/UI/Cursor.tsx?pick=default&pick=$css", build: () => import('../build/Cursor.mjs'), import: () => import('../build/Cursor.mjs') }, path: "/UI/Cursor", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/UI/Cursor.tsx" }, { page: true, $component: { src: "src/routes/UI/Loading.tsx?pick=default&pick=$css", build: () => import('../build/Loading.mjs'), import: () => import('../build/Loading.mjs') }, path: "/UI/Loading", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/UI/Loading.tsx" }, { page: true, $component: { src: "src/routes/UI/Waves.tsx?pick=default&pick=$css", build: () => import('../build/Waves.mjs'), import: () => import('../build/Waves.mjs') }, path: "/UI/Waves", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/UI/Waves.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css", build: () => import('../build/index2.mjs'), import: () => import('../build/index2.mjs') }, path: "/(Pages)/LoginRegistration/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css", build: () => import('../build/riv.mjs'), import: () => import('../build/riv.mjs') }, path: "/(Pages)/LoginRegistration/riv", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/riv.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css", build: () => import('../build/index3.mjs'), import: () => import('../build/index3.mjs') }, path: "/(Pages)/Wallets/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css", build: () => import('../build/_...slug_.mjs'), import: () => import('../build/_...slug_.mjs') }, path: "/(Pages)/Wallets/*slug", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/[...slug].tsx" }, { page: false, $POST: { src: "src/routes/API/Auth/logout.ts?pick=POST", build: () => import('../build/logout.mjs'), import: () => import('../build/logout.mjs') }, path: "/API/Auth/logout", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Auth/logout.ts" }, { page: false, $POST: { src: "src/routes/API/Auth/refresh.ts?pick=POST", build: () => import('../build/refresh.mjs'), import: () => import('../build/refresh.mjs') }, path: "/API/Auth/refresh", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Auth/refresh.ts" }, { page: false, $POST: { src: "src/routes/API/lib/addTransaction.ts?pick=POST", build: () => import('../build/addTransaction.mjs'), import: () => import('../build/addTransaction.mjs') }, path: "/API/lib/addTransaction", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/lib/addTransaction.ts" }, { page: false, $POST: { src: "src/routes/API/lib/getWalletsPaths.ts?pick=POST", build: () => import('../build/getWalletsPaths.mjs'), import: () => import('../build/getWalletsPaths.mjs') }, path: "/API/lib/getWalletsPaths", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/lib/getWalletsPaths.ts" }, { page: false, $POST: { src: "src/routes/API/Wallets/addWallet.ts?pick=POST", build: () => import('../build/addWallet.mjs'), import: () => import('../build/addWallet.mjs') }, path: "/API/Wallets/addWallet", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/addWallet.ts" }, { page: true, $component: { src: "src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css", build: () => import('../build/deleteWallet.mjs'), import: () => import('../build/deleteWallet.mjs') }, path: "/API/Wallets/deleteWallet", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/deleteWallet.ts" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css", build: () => import('../build/index4.mjs'), import: () => import('../build/index4.mjs') }, path: "/(Pages)/(lib)/Login/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Login/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css", build: () => import('../build/index5.mjs'), import: () => import('../build/index5.mjs') }, path: "/(Pages)/(lib)/Transactions/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css", build: () => import('../build/Toggle.mjs'), import: () => import('../build/Toggle.mjs') }, path: "/(Pages)/LoginRegistration/components/Toggle", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/components/Toggle.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css", build: () => import('../build/index6.mjs'), import: () => import('../build/index6.mjs') }, path: "/(Pages)/LoginRegistration/Login/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Login/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css", build: () => import('../build/index7.mjs'), import: () => import('../build/index7.mjs') }, path: "/(Pages)/LoginRegistration/Registration/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css", build: () => import('../build/index8.mjs'), import: () => import('../build/index8.mjs') }, path: "/(Pages)/Wallets/Wallet/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/Wallet/index.tsx" }, { page: false, $POST: { src: "src/routes/API/Auth/login/index.ts?pick=POST", build: () => import('../build/index9.mjs'), import: () => import('../build/index9.mjs') }, path: "/API/Auth/login/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Auth/login/index.ts" }, { page: false, $POST: { src: "src/routes/API/Wallets/Wallet/addTransaction.ts?pick=POST", build: () => import('../build/addTransaction2.mjs'), import: () => import('../build/addTransaction2.mjs') }, path: "/API/Wallets/Wallet/addTransaction", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/Wallet/addTransaction.ts" }, { page: true, $component: { src: "src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css", build: () => import('../build/getTransactions.mjs'), import: () => import('../build/getTransactions.mjs') }, path: "/API/Wallets/Wallet/getTransactions", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/Wallet/getTransactions.ts" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css", build: () => import('../build/pathWallets.mjs'), import: () => import('../build/pathWallets.mjs') }, path: "/(Pages)/(lib)/Transactions/utils/pathWallets", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css", build: () => import('../build/index10.mjs'), import: () => import('../build/index10.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Credentials/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css", build: () => import('../build/index11.mjs'), import: () => import('../build/index11.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Email/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css", build: () => import('../build/index12.mjs'), import: () => import('../build/index12.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Phone/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css", build: () => import('../build/sendOtp.mjs'), import: () => import('../build/sendOtp.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Phone/sendOtp", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css", build: () => import('../build/index13.mjs'), import: () => import('../build/index13.mjs') }, path: "/(Pages)/Wallets/_components/addWallet/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/addWallet/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css", build: () => import('../build/index14.mjs'), import: () => import('../build/index14.mjs') }, path: "/(Pages)/Wallets/_components/Card/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/Card/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css", build: () => import('../build/index15.mjs'), import: () => import('../build/index15.mjs') }, path: "/(Pages)/Wallets/_components/Card3D/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/Card3D/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css", build: () => import('../build/preLoader.mjs'), import: () => import('../build/preLoader.mjs') }, path: "/(Pages)/Wallets/_components/Card3D/preLoader", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css", build: () => import('../build/index16.mjs'), import: () => import('../build/index16.mjs') }, path: "/(Pages)/Wallets/_components/cardHolder/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css", build: () => import('../build/index17.mjs'), import: () => import('../build/index17.mjs') }, path: "/(Pages)/Wallets/_components/SetWallet/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx" }, { page: false, $POST: { src: "src/routes/API/Wallets/Wallet/addTransactionByFile/addTransactions.ts?pick=POST", build: () => import('../build/addTransactions.mjs'), import: () => import('../build/addTransactions.mjs') }, path: "/API/Wallets/Wallet/addTransactionByFile/addTransactions", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/Wallet/addTransactionByFile/addTransactions.ts" }, { page: false, $POST: { src: "src/routes/API/Wallets/Wallet/addTransactionByFile/uploadFile.ts?pick=POST", build: () => import('../build/uploadFile.mjs'), import: () => import('../build/uploadFile.mjs') }, path: "/API/Wallets/Wallet/addTransactionByFile/uploadFile", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/Wallet/addTransactionByFile/uploadFile.ts" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css", build: () => import('../build/index18.mjs'), import: () => import('../build/index18.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csv/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css", build: () => import('../build/index19.mjs'), import: () => import('../build/index19.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csvChat/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css", build: () => import('../build/mapper.mjs'), import: () => import('../build/mapper.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csvChat/mapper", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css", build: () => import('../build/preview.mjs'), import: () => import('../build/preview.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csvChat/preview", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css", build: () => import('../build/uploadFile2.mjs'), import: () => import('../build/uploadFile2.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csvChat/uploadFile", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css", build: () => import('../build/otpInput.mjs'), import: () => import('../build/otpInput.mjs') }, path: "/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css", build: () => import('../build/index20.mjs'), import: () => import('../build/index20.mjs') }, path: "/(Pages)/LoginRegistration/Registration/components/ProgressBar/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css", build: () => import('../build/index21.mjs'), import: () => import('../build/index21.mjs') }, path: "/(Pages)/LoginRegistration/Registration/components/spline/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css", build: () => import('../build/index22.mjs'), import: () => import('../build/index22.mjs') }, path: "/(Pages)/Wallets/Wallet/components/table.tsx/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css", build: () => import('../build/Card.mjs'), import: () => import('../build/Card.mjs') }, path: "/(Pages)/Wallets/_components/cardHolder/Card/Card", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css", build: () => import('../build/index23.mjs'), import: () => import('../build/index23.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csv/mapper/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css", build: () => import('../build/index24.mjs'), import: () => import('../build/index24.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csv/Preview/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css", build: () => import('../build/index25.mjs'), import: () => import('../build/index25.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csv/Upload/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css", build: () => import('../build/index26.mjs'), import: () => import('../build/index26.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx" }], ls$1 = cs$1(Ye.filter((t) => t.page));
+function cs$1(t) {
   function e(r, i, a, n) {
     const o = Object.values(r).find((l) => a.startsWith(l.id + "/"));
     return o ? (e(o.children || (o.children = []), i, a.slice(o.id.length)), r) : (r.push({ ...i, id: a, path: a.replace(/\([^)/]+\)/g, "").replace(/\/+/g, "/") }), r);
   }
   return t.sort((r, i) => r.path.length - i.path.length).reduce((r, i) => e(r, i, i.path, i.path), []);
 }
-function Vr(t) {
+function us$1(t) {
   return t.$HEAD || t.$GET || t.$POST || t.$PUT || t.$PATCH || t.$DELETE;
 }
-Or({ routes: Le$1.reduce((t, e) => {
-  if (!Vr(e)) return t;
+is$1({ routes: Ye.reduce((t, e) => {
+  if (!us$1(e)) return t;
   let r = e.path.replace(/\([^)/]+\)/g, "").replace(/\/+/g, "/").replace(/\*([^/]*)/g, (i, a) => `**:${a}`).split("/").map((i) => i.startsWith(":") || i.startsWith("*") ? i : encodeURIComponent(i)).join("/");
   if (/:[^/]*\?/g.test(r)) throw new Error(`Optional parameters are not supported in API routes: ${r}`);
   if (t[r]) throw new Error(`Duplicate API routes for "${r}" found at "${t[r].route.path}" and "${e.path}"`);
   return t[r] = { route: e }, t;
 }, {}) });
-var Br = " ";
-const qr = { style: (t) => ssrElement("style", t.attrs, () => t.children, true), link: (t) => ssrElement("link", t.attrs, void 0, true), script: (t) => t.attrs.src ? ssrElement("script", mergeProps(() => t.attrs, { get id() {
+var hs$1 = " ";
+const ds$1 = { style: (t) => ssrElement("style", t.attrs, () => t.children, true), link: (t) => ssrElement("link", t.attrs, void 0, true), script: (t) => t.attrs.src ? ssrElement("script", mergeProps(() => t.attrs, { get id() {
   return t.key;
-} }), () => ssr(Br), true) : null, noscript: (t) => ssrElement("noscript", t.attrs, () => escape(t.children), true) };
-function Hr(t, e) {
+} }), () => ssr(hs$1), true) : null, noscript: (t) => ssrElement("noscript", t.attrs, () => escape(t.children), true) };
+function fs$1(t, e) {
   let { tag: r, attrs: { key: i, ...a } = { key: void 0 }, children: n } = t;
-  return qr[r]({ attrs: { ...a, nonce: e }, key: i, children: n });
+  return ds$1[r]({ attrs: { ...a, nonce: e }, key: i, children: n });
 }
-function Kr(t, e, r, i = "default") {
+function gs$1(t, e, r, i = "default") {
   return lazy(async () => {
     var _a;
     {
       const n = (await t.import())[i], l = (await ((_a = e.inputs) == null ? void 0 : _a[t.src].assets())).filter((u) => u.tag === "style" || u.attrs.rel === "stylesheet");
-      return { default: (u) => [...l.map((d) => Hr(d)), createComponent(n, u)] };
+      return { default: (u) => [...l.map((d) => fs$1(d)), createComponent(n, u)] };
     }
   });
 }
-function Me$1() {
+function Ze() {
   function t(r) {
-    return { ...r, ...r.$$route ? r.$$route.require().route : void 0, info: { ...r.$$route ? r.$$route.require().route.info : {}, filesystem: true }, component: r.$component && Kr(r.$component, globalThis.MANIFEST.client, globalThis.MANIFEST.ssr), children: r.children ? r.children.map(t) : void 0 };
+    return { ...r, ...r.$$route ? r.$$route.require().route : void 0, info: { ...r.$$route ? r.$$route.require().route.info : {}, filesystem: true }, component: r.$component && gs$1(r.$component, globalThis.MANIFEST.client, globalThis.MANIFEST.ssr), children: r.children ? r.children.map(t) : void 0 };
   }
-  return Mr.map(t);
+  return ls$1.map(t);
 }
-let be$1;
-const ys = isServer ? () => getRequestEvent().routes : () => be$1 || (be$1 = Me$1());
-function Xr(t) {
-  const e = le$2(t.nativeEvent, "flash");
+let Re$2;
+const Bs = isServer ? () => getRequestEvent().routes : () => Re$2 || (Re$2 = Ze());
+function ms$1(t) {
+  const e = ye$3(t.nativeEvent, "flash");
   if (e) try {
     let r = JSON.parse(e);
     if (!r || !r.result) return;
@@ -8629,26 +5648,26 @@ function Xr(t) {
   } catch (r) {
     console.error(r);
   } finally {
-    fe$2(t.nativeEvent, "flash", "", { maxAge: 0 });
+    he$2(t.nativeEvent, "flash", "", { maxAge: 0 });
   }
 }
-async function Yr(t) {
+async function Ps$1(t) {
   const e = globalThis.MANIFEST.client;
-  return globalThis.MANIFEST.ssr, t.response.headers.set("Content-Type", "text/html"), Object.assign(t, { manifest: await e.json(), assets: [...await e.inputs[e.handler].assets()], router: { submission: Xr(t) }, routes: Me$1(), complete: false, $islands: /* @__PURE__ */ new Set() });
+  return globalThis.MANIFEST.ssr, t.response.headers.set("Content-Type", "text/html"), Object.assign(t, { manifest: await e.json(), assets: [...await e.inputs[e.handler].assets()], router: { submission: ms$1(t) }, routes: Ze(), complete: false, $islands: /* @__PURE__ */ new Set() });
 }
-const Gr = /* @__PURE__ */ new Set([301, 302, 303, 307, 308]);
-function Zr(t) {
-  return t.status && Gr.has(t.status) ? t.status : 302;
+const ys$1 = /* @__PURE__ */ new Set([301, 302, 303, 307, 308]);
+function bs$1(t) {
+  return t.status && ys$1.has(t.status) ? t.status : 302;
 }
-const Jr = { "src_routes_API_Wallets_deleteWallet_ts--deleteWallet_1": { functionName: "deleteWallet_1", importer: () => import('../build/deleteWallet-DfS0S0n9.mjs') }, "src_routes_API_Wallets_Wallet_getTransactions_ts--getTransactions_1": { functionName: "getTransactions_1", importer: () => import('../build/getTransactions-B7wMQXy1.mjs') }, "src_routes_API_Auth_login_loginUser_ts--loginUser_action": { functionName: "loginUser_action", importer: () => import('../build/loginUser-lOKuXLaT.mjs') }, "src_routes_API_Wallets_getWallets_server_ts--getWallets_1": { functionName: "getWallets_1", importer: () => import('../build/getWallets.server-CbIIGRZN.mjs') }, "src_routes_API_Wallets_getWallets_server_ts--getWalletsContainer_1": { functionName: "getWalletsContainer_1", importer: () => import('../build/getWallets.server-CbIIGRZN.mjs') }, "src_routes_API_Wallets_getWallets_server_ts--getRecursiveWalletBalance_1": { functionName: "getRecursiveWalletBalance_1", importer: () => import('../build/getWallets.server-CbIIGRZN.mjs') }, "src_routes_API_Wallets_getWallets_server_ts--getWalletName_1": { functionName: "getWalletName_1", importer: () => import('../build/getWallets.server-CbIIGRZN.mjs') }, "src_Server_auth_server_ts--getUserId_1": { functionName: "getUserId_1", importer: () => import('../build/auth.server-DMy-hh56.mjs') }, "src_Server_auth_server_ts--getUsername_1": { functionName: "getUsername_1", importer: () => import('../build/auth.server-DMy-hh56.mjs') }, "src_Server_auth_server_ts--getUser_1": { functionName: "getUser_1", importer: () => import('../build/auth.server-DMy-hh56.mjs') }, "src_routes_API_exchangeRates_exchangeRates_ts--getExchangeRate_1": { functionName: "getExchangeRate_1", importer: () => import('../build/exchangeRates-Dp8OcCeR.mjs') }, "src_routes_API_exchangeRates_exchangeRates_ts--getConversionRate_1": { functionName: "getConversionRate_1", importer: () => import('../build/exchangeRates-Dp8OcCeR.mjs') }, "src_routes_API_exchangeRates_exchangeRates_ts--calculateConvertedTotal_1": { functionName: "calculateConvertedTotal_1", importer: () => import('../build/exchangeRates-Dp8OcCeR.mjs') }, "src_routes_API_exchangeRates_exchangeRates_ts--convertBalance_1": { functionName: "convertBalance_1", importer: () => import('../build/exchangeRates-Dp8OcCeR.mjs') }, "src_routes_API_Wallets_getWallet_ts--getWallet_1": { functionName: "getWallet_1", importer: () => import('../build/getWallet-VD3qZcEm.mjs') }, "src_routes_API_Wallets_setWallet_ts--setWallet_action": { functionName: "setWallet_action", importer: () => import('../build/setWallet-BkA1dzP6.mjs') }, "src_routes_API_Auth_registration_createUser_ts--createUser_action": { functionName: "createUser_action", importer: () => import('../build/createUser-B8OMM0Mu.mjs') }, "src_routes_API_Auth_registration_credentials_usernameAlreadyexist_ts--usernameAlreadyexist_action": { functionName: "usernameAlreadyexist_action", importer: () => import('../build/usernameAlreadyexist-DlESc_vE.mjs') }, "src_routes_API_Auth_registration_phone_phoneAlreadyexist_ts--phoneAlreadyexist_action": { functionName: "phoneAlreadyexist_action", importer: () => import('../build/phoneAlreadyexist-bH2ki4sU.mjs') }, "src_routes_API_Auth_registration_email_emailAlreadyexist_ts--emailAlreadyexist_action": { functionName: "emailAlreadyexist_action", importer: () => import('../build/emailAlreadyexist-BASsf-Xu.mjs') } };
-function Qr(t) {
+const xs$1 = { "src_routes_API_Wallets_deleteWallet_ts--deleteWallet_1": { functionName: "deleteWallet_1", importer: () => import('../build/deleteWallet-jK3sXpn2.mjs') }, "src_routes_API_Wallets_Wallet_getTransactions_ts--getTransactions_1": { functionName: "getTransactions_1", importer: () => import('../build/getTransactions-Cr4f694O.mjs') }, "src_routes_API_Wallets_getWallets_server_ts--getWallets_1": { functionName: "getWallets_1", importer: () => import('../build/getWallets.server-Ddr8BrzP.mjs') }, "src_routes_API_Wallets_getWallets_server_ts--getWalletsContainer_1": { functionName: "getWalletsContainer_1", importer: () => import('../build/getWallets.server-Ddr8BrzP.mjs') }, "src_routes_API_Wallets_getWallets_server_ts--getRecursiveWalletBalance_1": { functionName: "getRecursiveWalletBalance_1", importer: () => import('../build/getWallets.server-Ddr8BrzP.mjs') }, "src_routes_API_Wallets_getWallets_server_ts--getWalletName_1": { functionName: "getWalletName_1", importer: () => import('../build/getWallets.server-Ddr8BrzP.mjs') }, "src_server_auth_server_ts--getUserId_1": { functionName: "getUserId_1", importer: () => import('../build/auth.server-F_zbwjhE.mjs') }, "src_server_auth_server_ts--getUsername_1": { functionName: "getUsername_1", importer: () => import('../build/auth.server-F_zbwjhE.mjs') }, "src_server_auth_server_ts--getUser_1": { functionName: "getUser_1", importer: () => import('../build/auth.server-F_zbwjhE.mjs') }, "src_routes_API_exchangeRates_exchangeRates_ts--getExchangeRate_1": { functionName: "getExchangeRate_1", importer: () => import('../build/exchangeRates-BoUYCRuj.mjs') }, "src_routes_API_exchangeRates_exchangeRates_ts--getConversionRate_1": { functionName: "getConversionRate_1", importer: () => import('../build/exchangeRates-BoUYCRuj.mjs') }, "src_routes_API_exchangeRates_exchangeRates_ts--calculateConvertedTotal_1": { functionName: "calculateConvertedTotal_1", importer: () => import('../build/exchangeRates-BoUYCRuj.mjs') }, "src_routes_API_exchangeRates_exchangeRates_ts--convertBalance_1": { functionName: "convertBalance_1", importer: () => import('../build/exchangeRates-BoUYCRuj.mjs') }, "src_routes_API_Wallets_getWallet_ts--getWallet_1": { functionName: "getWallet_1", importer: () => import('../build/getWallet-CFmvrtny.mjs') }, "src_routes_API_Auth_registration_createUser_ts--createUser_action": { functionName: "createUser_action", importer: () => import('../build/createUser-CqiEsOu_.mjs') }, "src_routes_API_Wallets_setWallet_ts--setWallet_action": { functionName: "setWallet_action", importer: () => import('../build/setWallet-LYtwpUnS.mjs') }, "src_routes_API_Auth_registration_credentials_usernameAlreadyexist_ts--usernameAlreadyexist_action": { functionName: "usernameAlreadyexist_action", importer: () => import('../build/usernameAlreadyexist-CUMQy92F.mjs') }, "src_routes_API_Auth_registration_phone_phoneAlreadyexist_ts--phoneAlreadyexist_action": { functionName: "phoneAlreadyexist_action", importer: () => import('../build/phoneAlreadyexist-BFvINIFk.mjs') }, "src_routes_API_Auth_registration_email_emailAlreadyexist_ts--emailAlreadyexist_action": { functionName: "emailAlreadyexist_action", importer: () => import('../build/emailAlreadyexist-BoJ37vKf.mjs') } };
+function As$1(t) {
   const e = new TextEncoder().encode(t), r = e.length, i = r.toString(16), a = "00000000".substring(0, 8 - i.length) + i, n = new TextEncoder().encode(`;0x${a};`), o = new Uint8Array(12 + r);
   return o.set(n), o.set(e, 12), o;
 }
-function ze$1(t, e) {
+function ke$1(t, e) {
   return new ReadableStream({ start(r) {
-    br(e, { scopeId: t, plugins: [K$2, X$2, Y$3, G$2, k$1, _$2, Z$3, J$1, Q$3, ee$3], onSerialize(i, a) {
-      r.enqueue(Qr(a ? `(${nt(t)},${i})` : i));
+    Lr(e, { scopeId: t, plugins: [G$3, J$2, Y$4, Z$3, E, _$2, Q$3, ee$3, te$3, re$2], onSerialize(i, a) {
+      r.enqueue(As$1(a ? `(${It$1(t)},${i})` : i));
     }, onDone() {
       r.close();
     }, onError(i) {
@@ -8656,57 +5675,57 @@ function ze$1(t, e) {
     } });
   } });
 }
-async function es(t) {
-  const e = ye$3(t), r = e.request, i = r.headers.get("X-Server-Id"), a = r.headers.get("X-Server-Instance"), n = r.headers.has("X-Single-Flight"), o = new URL(r.url);
+async function vs$1(t) {
+  const e = Ce$1(t), r = e.request, i = r.headers.get("X-Server-Id"), a = r.headers.get("X-Server-Instance"), n = r.headers.has("X-Single-Flight"), o = new URL(r.url);
   let l, c;
-  if (i) Dr(typeof i == "string", "Invalid server function"), [l, c] = i.split("#");
+  if (i) ss$1(typeof i == "string", "Invalid server function"), [l, c] = i.split("#");
   else if (l = o.searchParams.get("id"), c = o.searchParams.get("name"), !l || !c) return new Response(null, { status: 404 });
-  const u = Jr[l];
+  const u = xs$1[l];
   let d;
   if (!u) return new Response(null, { status: 404 });
   d = await u.importer();
   const m = d[u.functionName];
-  let b = [];
+  let y = [];
   if (!a || t.method === "GET") {
     const p = o.searchParams.get("args");
     if (p) {
       const f = JSON.parse(p);
-      (f.t ? de$2(f, { plugins: [K$2, X$2, Y$3, G$2, k$1, _$2, Z$3, J$1, Q$3, ee$3] }) : f).forEach((C) => b.push(C));
+      (f.t ? Ae$1(f, { plugins: [G$3, J$2, Y$4, Z$3, E, _$2, Q$3, ee$3, te$3, re$2] }) : f).forEach(($) => y.push($));
     }
   }
   if (t.method === "POST") {
-    const p = r.headers.get("content-type"), f = t.node.req, C = f instanceof ReadableStream, Te = f.body instanceof ReadableStream, ae = C && f.locked || Te && f.body.locked, ne = C ? f : f.body;
-    if ((p == null ? void 0 : p.startsWith("multipart/form-data")) || (p == null ? void 0 : p.startsWith("application/x-www-form-urlencoded"))) b.push(await (ae ? r : new Request(r, { ...r, body: ne })).formData());
+    const p = r.headers.get("content-type"), f = t.node.req, $ = f instanceof ReadableStream, Qe = f.body instanceof ReadableStream, le = $ && f.locked || Qe && f.body.locked, ce = $ ? f : f.body;
+    if ((p == null ? void 0 : p.startsWith("multipart/form-data")) || (p == null ? void 0 : p.startsWith("application/x-www-form-urlencoded"))) y.push(await (le ? r : new Request(r, { ...r, body: ce })).formData());
     else if (p == null ? void 0 : p.startsWith("application/json")) {
-      const Ve = ae ? r : new Request(r, { ...r, body: ne });
-      b = de$2(await Ve.json(), { plugins: [K$2, X$2, Y$3, G$2, k$1, _$2, Z$3, J$1, Q$3, ee$3] });
+      const et = le ? r : new Request(r, { ...r, body: ce });
+      y = Ae$1(await et.json(), { plugins: [G$3, J$2, Y$4, Z$3, E, _$2, Q$3, ee$3, te$3, re$2] });
     }
   }
   try {
-    let p = await provideRequestEvent(e, async () => (sharedConfig.context = { event: e }, e.locals.serverFunctionMeta = { id: l + "#" + c }, m(...b)));
-    if (n && a && (p = await xe$1(e, p)), p instanceof Response) {
+    let p = await provideRequestEvent(e, async () => (sharedConfig.context = { event: e }, e.locals.serverFunctionMeta = { id: l + "#" + c }, m(...y)));
+    if (n && a && (p = await Ee$1(e, p)), p instanceof Response) {
       if (p.headers && p.headers.has("X-Content-Raw")) return p;
-      a && (p.headers && he$2(t, p.headers), p.status && (p.status < 300 || p.status >= 400) && R$3(t, p.status), p.customBody ? p = await p.customBody() : p.body == null && (p = null));
+      a && (p.headers && He$3(t, p.headers), p.status && (p.status < 300 || p.status >= 400) && b$3(t, p.status), p.customBody ? p = await p.customBody() : p.body == null && (p = null));
     }
-    return a ? (pe$3(t, "content-type", "text/javascript"), ze$1(a, p)) : Pe$1(p, r, b);
+    return a ? (me$3(t, "content-type", "text/javascript"), ke$1(a, p)) : Ie$1(p, r, y);
   } catch (p) {
-    if (p instanceof Response) n && a && (p = await xe$1(e, p)), p.headers && he$2(t, p.headers), p.status && (!a || p.status < 300 || p.status >= 400) && R$3(t, p.status), p.customBody ? p = p.customBody() : p.body == null && (p = null), pe$3(t, "X-Error", "true");
+    if (p instanceof Response) n && a && (p = await Ee$1(e, p)), p.headers && He$3(t, p.headers), p.status && (!a || p.status < 300 || p.status >= 400) && b$3(t, p.status), p.customBody ? p = p.customBody() : p.body == null && (p = null), me$3(t, "X-Error", "true");
     else if (a) {
       const f = p instanceof Error ? p.message : typeof p == "string" ? p : "true";
-      pe$3(t, "X-Error", f.replace(/[\r\n]+/g, ""));
-    } else p = Pe$1(p, r, b, true);
-    return a ? (pe$3(t, "content-type", "text/javascript"), ze$1(a, p)) : p;
+      me$3(t, "X-Error", f.replace(/[\r\n]+/g, ""));
+    } else p = Ie$1(p, r, y, true);
+    return a ? (me$3(t, "content-type", "text/javascript"), ke$1(a, p)) : p;
   }
 }
-function Pe$1(t, e, r, i) {
+function Ie$1(t, e, r, i) {
   const a = new URL(e.url), n = t instanceof Error;
   let o = 302, l;
-  return t instanceof Response ? (l = new Headers(t.headers), t.headers.has("Location") && (l.set("Location", new URL(t.headers.get("Location"), a.origin + "").toString()), o = Zr(t))) : l = new Headers({ Location: new URL(e.headers.get("referer")).toString() }), t && l.append("Set-Cookie", `flash=${encodeURIComponent(JSON.stringify({ url: a.pathname + a.search, result: n ? t.message : t, thrown: i, error: n, input: [...r.slice(0, -1), [...r[r.length - 1].entries()]] }))}; Secure; HttpOnly;`), new Response(null, { status: o, headers: l });
+  return t instanceof Response ? (l = new Headers(t.headers), t.headers.has("Location") && (l.set("Location", new URL(t.headers.get("Location"), a.origin + "").toString()), o = bs$1(t))) : l = new Headers({ Location: new URL(e.headers.get("referer")).toString() }), t && l.append("Set-Cookie", `flash=${encodeURIComponent(JSON.stringify({ url: a.pathname + a.search, result: n ? t.message : t, thrown: i, error: n, input: [...r.slice(0, -1), [...r[r.length - 1].entries()]] }))}; Secure; HttpOnly;`), new Response(null, { status: o, headers: l });
 }
-let V$2;
-function ts(t) {
+let B$1;
+function Ss(t) {
   var _a;
-  const e = new Headers(t.request.headers), r = ue$3(t.nativeEvent), i = t.response.headers.getSetCookie();
+  const e = new Headers(t.request.headers), r = ge$3(t.nativeEvent), i = t.response.headers.getSetCookie();
   e.delete("cookie");
   let a = false;
   return ((_a = t.nativeEvent.node) == null ? void 0 : _a.req) && (a = true, t.nativeEvent.node.req.headers.cookie = ""), i.forEach((n) => {
@@ -8717,15 +5736,15 @@ function ts(t) {
     e.append("cookie", `${n}=${o}`), a && (t.nativeEvent.node.req.headers.cookie += `${n}=${o};`);
   }), e;
 }
-async function xe$1(t, e) {
+async function Ee$1(t, e) {
   let r, i = new URL(t.request.headers.get("referer")).toString();
   e instanceof Response && (e.headers.has("X-Revalidate") && (r = e.headers.get("X-Revalidate").split(",")), e.headers.has("Location") && (i = new URL(e.headers.get("Location"), new URL(t.request.url).origin + "").toString()));
-  const a = ge$3(t);
-  return a.request = new Request(i, { headers: ts(t) }), await provideRequestEvent(a, async () => {
-    await Yr(a), V$2 || (V$2 = (await import('../build/app-DLO7lzbB.mjs')).default), a.router.dataOnly = r || true, a.router.previousUrl = t.request.headers.get("referer");
+  const a = xe$4(t);
+  return a.request = new Request(i, { headers: Ss(t) }), await provideRequestEvent(a, async () => {
+    await Ps$1(a), B$1 || (B$1 = (await import('../build/app-DedkBFsa.mjs')).default), a.router.dataOnly = r || true, a.router.previousUrl = t.request.headers.get("referer");
     try {
       renderToString(() => {
-        sharedConfig.context.event = a, V$2();
+        sharedConfig.context.event = a, B$1();
       });
     } catch (l) {
       console.log(l);
@@ -8737,12 +5756,12 @@ async function xe$1(t, e) {
     return o && (e instanceof Response ? e.customBody && (n._$value = e.customBody()) : (n._$value = e, e = new Response(null, { status: 200 })), e.customBody = () => n, e.headers.set("X-Single-Flight", "true")), e;
   });
 }
-const bs = eventHandler(es);
+const _e = eventHandler(vs$1), qs = eventHandler({ onRequest: me$2.onRequest, onBeforeResponse: me$2.onBeforeResponse, handler: _e, websocket: _e.__websocket__ });
 
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, key + "" , value);
-function N(t = {}) {
+function B(t = {}) {
   let e, s = false;
   const r = (n) => {
     if (e && e !== n) throw new Error("Context conflict");
@@ -8776,9 +5795,9 @@ function N(t = {}) {
     }
   }, async callAsync(n, i) {
     e = n;
-    const H = () => {
+    const C = () => {
       e = n;
-    }, p = () => e === n ? H : void 0;
+    }, p = () => e === n ? C : void 0;
     h.add(p);
     try {
       const v = a ? a.run(n, i) : i();
@@ -8788,89 +5807,92 @@ function N(t = {}) {
     }
   } };
 }
-function K$1(t = {}) {
+function z(t = {}) {
   const e = {};
   return { get(s, r = {}) {
-    return e[s] || (e[s] = N({ ...t, ...r })), e[s];
+    return e[s] || (e[s] = B({ ...t, ...r })), e[s];
   } };
 }
-const u$1 = typeof globalThis < "u" ? globalThis : typeof self < "u" ? self : typeof global < "u" ? global : {}, g = "__unctx__", B$1 = u$1[g] || (u$1[g] = K$1()), M$3 = (t, e = {}) => B$1.get(t, e), y$1 = "__unctx_async_handlers__", h = u$1[y$1] || (u$1[y$1] = /* @__PURE__ */ new Set());
-function z(t) {
+const u$1 = typeof globalThis < "u" ? globalThis : typeof self < "u" ? self : typeof g$2 < "u" ? g$2 : {}, y$1 = "__unctx__", D$3 = u$1[y$1] || (u$1[y$1] = z()), G$2 = (t, e = {}) => D$3.get(t, e), R$2 = "__unctx_async_handlers__", h = u$1[R$2] || (u$1[R$2] = /* @__PURE__ */ new Set());
+function pe$1(t) {
+  return t;
+}
+function J$1(t) {
   let e;
-  const s = m(t), r = { duplex: "half", method: t.method, headers: t.headers };
+  const s = H$2(t), r = { duplex: "half", method: t.method, headers: t.headers };
   return t.node.req.body instanceof ArrayBuffer ? new Request(s, { ...r, body: t.node.req.body }) : new Request(s, { ...r, get body() {
-    return e || (e = Z$2(t), e);
+    return e || (e = se$1(t), e);
   } });
 }
-function D$2(t) {
+function Q$2(t) {
   var _a;
-  return (_a = t.web) != null ? _a : t.web = { request: z(t), url: m(t) }, t.web.request;
+  return (_a = t.web) != null ? _a : t.web = { request: J$1(t), url: H$2(t) }, t.web.request;
 }
-function G$1() {
-  return ne$2();
+function V$1() {
+  return ae();
 }
 const x$1 = Symbol("$HTTPEvent");
-function J(t) {
+function X$1(t) {
   return typeof t == "object" && (t instanceof H3Event || (t == null ? void 0 : t[x$1]) instanceof H3Event || (t == null ? void 0 : t.__is_event__) === true);
 }
 function o(t) {
   return function(...e) {
     var _a;
     let s = e[0];
-    if (J(s)) e[0] = s instanceof H3Event || s.__is_event__ ? s : s[x$1];
+    if (X$1(s)) e[0] = s instanceof H3Event || s.__is_event__ ? s : s[x$1];
     else {
       if (!((_a = globalThis.app.config.server.experimental) == null ? void 0 : _a.asyncContext)) throw new Error("AsyncLocalStorage was not enabled. Use the `server.experimental.asyncContext: true` option in your app configuration to enable it. Or, pass the instance of HTTPEvent that you have as the first argument to the function.");
-      if (s = G$1(), !s) throw new Error("No HTTPEvent found in AsyncLocalStorage. Make sure you are using the function within the server runtime.");
+      if (s = V$1(), !s) throw new Error("No HTTPEvent found in AsyncLocalStorage. Make sure you are using the function within the server runtime.");
       e.unshift(s);
     }
     return t(...e);
   };
 }
-const m = o(getRequestURL), Q$2 = o(getRequestIP), R$1 = o(setResponseStatus), S$1 = o(getResponseStatus), V$1 = o(getResponseStatusText), c = o(getResponseHeaders), b$2 = o(getResponseHeader), X$1 = o(setResponseHeader), Y$2 = o(appendResponseHeader), ue$1 = o(sendRedirect), de$1 = o(getCookie), le$1 = o(setCookie), fe = o(useSession), pe$1 = o(setHeader), Z$2 = o(getRequestWebStream), ee$2 = o(removeResponseHeader), te$2 = o(D$2);
-function se$1() {
+const H$2 = o(getRequestURL), Y$3 = o(getRequestIP), b$2 = o(setResponseStatus), S$1 = o(getResponseStatus), Z$2 = o(getResponseStatusText), c = o(getResponseHeaders), m = o(getResponseHeader), ee$2 = o(setResponseHeader), te$2 = o(appendResponseHeader), ge$1 = o(sendRedirect), ye$1 = o(getCookie), Re$1 = o(setCookie), he$1 = o(deleteCookie), be$2 = o(useSession), Se$1 = o(sendWebResponse), me$1 = o(setHeader), se$1 = o(getRequestWebStream), ne$2 = o(removeResponseHeader), oe$1 = o(Q$2);
+function re$1() {
   var _a;
-  return M$3("nitro-app", { asyncContext: !!((_a = globalThis.app.config.server.experimental) == null ? void 0 : _a.asyncContext), AsyncLocalStorage: AsyncLocalStorage });
+  return G$2("nitro-app", { asyncContext: !!((_a = globalThis.app.config.server.experimental) == null ? void 0 : _a.asyncContext), AsyncLocalStorage: AsyncLocalStorage });
 }
-function ne$2() {
-  return se$1().use().event;
+function ae() {
+  return re$1().use().event;
 }
 const d = "solidFetchEvent";
-function oe(t) {
-  return { request: te$2(t), response: ae(t), clientAddress: Q$2(t), locals: {}, nativeEvent: t };
+function ie$1(t) {
+  return { request: oe$1(t), response: ue(t), clientAddress: Y$3(t), locals: {}, nativeEvent: t };
 }
-function ge$1(t) {
+function xe$2(t) {
   return { ...t };
 }
-function ye$1(t) {
+function He$1(t) {
   if (!t.context[d]) {
-    const e = oe(t);
+    const e = ie$1(t);
     t.context[d] = e;
   }
   return t.context[d];
 }
-let re$1 = class re {
+class ce {
   constructor(e) {
     __publicField(this, "event");
     this.event = e;
   }
   get(e) {
-    const s = b$2(this.event, e);
+    const s = m(this.event, e);
     return Array.isArray(s) ? s.join(", ") : s || null;
   }
   has(e) {
     return this.get(e) !== void 0;
   }
   set(e, s) {
-    return X$1(this.event, e, s);
+    return ee$2(this.event, e, s);
   }
   delete(e) {
-    return ee$2(this.event, e);
+    return ne$2(this.event, e);
   }
   append(e, s) {
-    Y$2(this.event, e, s);
+    te$2(this.event, e, s);
   }
   getSetCookie() {
-    const e = b$2(this.event, "Set-Cookie");
+    const e = m(this.event, "Set-Cookie");
     return Array.isArray(e) ? e : [e];
   }
   forEach(e) {
@@ -8888,17 +5910,26 @@ let re$1 = class re {
   [Symbol.iterator]() {
     return this.entries()[Symbol.iterator]();
   }
-};
-function ae(t) {
+}
+function ue(t) {
   return { get status() {
     return S$1(t);
   }, set status(e) {
-    R$1(t, e);
+    b$2(t, e);
   }, get statusText() {
-    return V$1(t);
+    return Z$2(t);
   }, set statusText(e) {
-    R$1(t, S$1(t), e);
-  }, headers: new re$1(t) };
+    b$2(t, S$1(t), e);
+  }, headers: new ce(t) };
+}
+
+const { Pool: s$1 } = e$1, t = new s$1({ host: o$3.env.DB_HOST, user: o$3.env.DB_USER, password: o$3.env.DB_PASSWORD, port: o$3.env.DB_PORT ? parseInt(o$3.env.DB_PORT, 10) : void 0, database: o$3.env.DB_NAME });
+
+function i(n, r = {}) {
+  const { revalidate: s, ...t } = r, e = new Headers(t.headers);
+  s !== void 0 && e.set("X-Revalidate", s.toString()), e.set("Content-Type", "application/json");
+  const o = new Response(JSON.stringify(n), { ...t, headers: e });
+  return o.customBody = () => n, o;
 }
 
 function ye() {
@@ -8917,9 +5948,9 @@ function ye() {
   }
   return { subscribe: e, confirm: r };
 }
-let D$1;
+let D$2;
 function V() {
-  (!window.history.state || window.history.state._depth == null) && window.history.replaceState({ ...window.history.state, _depth: window.history.length - 1 }, ""), D$1 = window.history.state._depth;
+  (!window.history.state || window.history.state._depth == null) && window.history.replaceState({ ...window.history.state, _depth: window.history.length - 1 }, ""), D$2 = window.history.state._depth;
 }
 isServer || V();
 function qe(t) {
@@ -8928,9 +5959,9 @@ function qe(t) {
 function Ie(t, e) {
   let n = false;
   return () => {
-    const r = D$1;
+    const r = D$2;
     V();
-    const s = r == null ? null : D$1 - r;
+    const s = r == null ? null : D$2 - r;
     if (n) {
       n = false;
       return;
@@ -8938,31 +5969,31 @@ function Ie(t, e) {
     s && e(s) ? (n = true, window.history.go(-s)) : t();
   };
 }
-const we = /^(?:[a-z0-9]+:)?\/\//i, ve = /^\/+|(\/)\/+$/g, Pe = "http://sr";
-function F$2(t, e = false) {
+const we = /^(?:[a-z0-9]+:)?\/\//i, ve = /^\/+|(\/)\/+$/g, Pe$1 = "http://sr";
+function F$1(t, e = false) {
   const n = t.replace(ve, "$1");
   return n ? e || /^[?#]/.test(n) ? n : "/" + n : "";
 }
 function W$1(t, e, n) {
   if (we.test(e)) return;
-  const r = F$2(t), s = n && F$2(n);
+  const r = F$1(t), s = n && F$1(n);
   let o = "";
-  return !s || e.startsWith("/") ? o = r : s.toLowerCase().indexOf(r.toLowerCase()) !== 0 ? o = r + s : o = s, (o || "/") + F$2(e, !o);
+  return !s || e.startsWith("/") ? o = r : s.toLowerCase().indexOf(r.toLowerCase()) !== 0 ? o = r + s : o = s, (o || "/") + F$1(e, !o);
 }
 function Re(t, e) {
   if (t == null) throw new Error(e);
   return t;
 }
-function xe(t, e) {
-  return F$2(t).replace(/\/*(\*.*)?$/g, "") + F$2(e);
+function xe$1(t, e) {
+  return F$1(t).replace(/\/*(\*.*)?$/g, "") + F$1(e);
 }
-function Y$1(t) {
+function Y$2(t) {
   const e = {};
   return t.searchParams.forEach((n, r) => {
     r in e ? Array.isArray(e[r]) ? e[r].push(n) : e[r] = [e[r], n] : e[r] = n;
   }), e;
 }
-function be(t, e, n) {
+function be$1(t, e, n) {
   const [r, s] = t.split("/*", 2), o = r.split("/").filter(Boolean), a = o.length;
   return (c) => {
     const f = c.split("/").filter(Boolean), h = f.length - a;
@@ -9022,9 +6053,9 @@ function Le(t, e = "") {
   const { component: n, preload: r, load: s, children: o, info: a } = t, c = !o || Array.isArray(o) && !o.length, f = { key: t, component: n, preload: r || s, info: a };
   return ne$1(t.path).reduce((h, l) => {
     for (const m of ee$1(l)) {
-      const d = xe(e, m);
+      const d = xe$1(e, m);
       let p = c ? d : d.split("/*", 1)[0];
-      p = p.split("/").map((y) => y.startsWith(":") || y.startsWith("*") ? y : encodeURIComponent(y)).join("/"), h.push({ ...f, originalPath: l, pattern: p, matcher: be(p, !c, t.matchFilters) });
+      p = p.split("/").map((y) => y.startsWith(":") || y.startsWith("*") ? y : encodeURIComponent(y)).join("/"), h.push({ ...f, originalPath: l, pattern: p, matcher: be$1(p, !c, t.matchFilters) });
     }
     return h;
   }, []);
@@ -9064,7 +6095,7 @@ function Oe(t, e = "", n = [], r = []) {
   }
   return n.length ? r : r.sort((o, a) => a.score - o.score);
 }
-function M$2(t, e) {
+function M$3(t, e) {
   for (let n = 0, r = t.length; n < r; n++) {
     const s = t[n].matcher(e);
     if (s) return s;
@@ -9072,14 +6103,14 @@ function M$2(t, e) {
   return [];
 }
 function je(t, e, n) {
-  const r = new URL(Pe), s = createMemo((l) => {
+  const r = new URL(Pe$1), s = createMemo((l) => {
     const m = t();
     try {
       return new URL(m, r);
     } catch {
       return console.error(`Invalid path ${m}`), l;
     }
-  }, r, { equals: (l, m) => l.href === m.href }), o = createMemo(() => s().pathname), a = createMemo(() => s().search, true), c = createMemo(() => s().hash), f = () => "", h = on(a, () => Y$1(s()));
+  }, r, { equals: (l, m) => l.href === m.href }), o = createMemo(() => s().pathname), a = createMemo(() => s().search, true), c = createMemo(() => s().hash), f = () => "", h = on(a, () => Y$2(s()));
   return { get pathname() {
     return o();
   }, get search() {
@@ -9117,7 +6148,7 @@ function Ne(t, e, n, r = {}) {
         P = void 0, i === "navigate" && ie(p), d(false), p = void 0;
       });
     }));
-  }, [v, E] = createSignal(s().value), [S, re] = createSignal(s().state), O = je(v, S, a.queryWrapper), j = [], z = createSignal(isServer ? ue() : []), H = createMemo(() => typeof r.transformUrl == "function" ? M$2(e(), r.transformUrl(O.pathname)) : M$2(e(), O.pathname)), K = () => {
+  }, [v, E] = createSignal(s().value), [S, re] = createSignal(s().state), O = je(v, S, a.queryWrapper), j = [], z = createSignal(isServer ? ue() : []), H = createMemo(() => typeof r.transformUrl == "function" ? M$3(e(), r.transformUrl(O.pathname)) : M$3(e(), O.pathname)), K = () => {
     const i = H(), u = {};
     for (let g = 0; g < i.length; g++) Object.assign(u, i[g].params);
     return u;
@@ -9149,13 +6180,13 @@ function Ne(t, e, n, r = {}) {
     u && (o({ ...i, replace: u.replace, scroll: u.scroll }), j.length = 0);
   }
   function ce(i, u) {
-    const g = M$2(e(), i.pathname), R = P;
+    const g = M$3(e(), i.pathname), R = P;
     P = "preload";
     for (let B in g) {
       const { route: x, params: _ } = g[B];
       x.component && x.component.preload && x.component.preload();
       const { preload: b } = x;
-      C = true, u && b && runWithOwner(n(), () => b({ params: _, location: { pathname: i.pathname, search: i.search, hash: i.hash, query: Y$1(i), state: null, key: "" }, intent: "preload" })), C = false;
+      C = true, u && b && runWithOwner(n(), () => b({ params: _, location: { pathname: i.pathname, search: i.search, hash: i.hash, query: Y$2(i), state: null, key: "" }, intent: "preload" })), C = false;
     }
     P = R;
   }
@@ -9175,12 +6206,12 @@ function Te(t, e, n, r) {
   } };
 }
 
-function A$2(e) {
+function A$1(e) {
   e = mergeProps$1({ inactiveClass: "inactive", activeClass: "active" }, e);
   const [, r] = splitProps(e, ["href", "state", "class", "activeClass", "inactiveClass", "end"]), i = We(() => e.href), o = $e(i), l = De(), a = createMemo(() => {
     const n = i();
     if (n === void 0) return [false, false];
-    const t = F$2(n.split(/[?#]/, 1)[0]).toLowerCase(), s = decodeURI(F$2(l.pathname).toLowerCase());
+    const t = F$1(n.split(/[?#]/, 1)[0]).toLowerCase(), s = decodeURI(F$1(l.pathname).toLowerCase());
     return [e.end ? t === s : s.startsWith(t + "/") || s === t, t === s];
   });
   return ssrElement("a", mergeProps(r, { get href() {
@@ -9194,10 +6225,10 @@ function A$2(e) {
   } }), void 0, true);
 }
 
-var u = ["<svg", ' class="Icon" stroke-width="0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="', '"><path fill="currentColor" d="M21 20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.489a1 1 0 0 1 .386-.79l8-6.222a1 1 0 0 1 1.228 0l8 6.222a1 1 0 0 1 .386.79v10.51Zm-2-1V9.978l-7-5.445-7 5.445V19h14Z"></path></svg>'], w = ["<svg", ' class="Icon" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="', '"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 12v-4"></path><path d="M15 12v-2"></path><path d="M12 12v-1"></path><path d="M3 4h18"></path><path d="M4 4v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-10"></path><path d="M12 16v4"></path><path d="M9 20h6"></path></svg>'], f = ["<svg", ' class="Icon" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" viewBox="0 0 24 24" style="', '"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3"></path></svg>'], x = ["<div", ' class="flex flex-col gap-27 mt-60">', "</div>"], M$1 = ["<div", ' class="', '"><div class="flex flex-col ml-15 gap-31 mt-60">', "</div><!--$-->", "<!--/--></div>"];
-function H() {
-  const [n, v] = createSignal(false), [s, c] = createSignal(null), l = [{ name: "Home", svg: ssr(u, ssrHydrationKey(), "overflow:visible;color:currentcolor;width:24px;height:24px") }, { name: "Dashboard", svg: ssr(w, ssrHydrationKey(), "overflow:visible;color:currentcolor;width:24px;height:24px") }, { name: "Wallets", svg: ssr(f, ssrHydrationKey(), "overflow:none;color:currentcolor;width:24px;height:24px") }], p = [{ name: "Home", icon: "Home", href: "/", svg: l[0].svg }, { name: "Dashboard", icon: "Dashboard", href: "/", svg: l[1].svg }, { name: "Wallets", icon: "Wallet", href: "/Wallets", svg: l[2].svg }], i = (e) => ({ onMouseEnter: () => c(e), onMouseLeave: () => c(null) });
-  return ssr(M$1, ssrHydrationKey(), `Menu flex flex-row z-10 ${n() ? "Extend" : ""}`, escape(p.map((e) => createComponent$1(A$2, mergeProps({ get href() {
+var u = ["<svg", ' class="Icon" stroke-width="0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="', '"><path fill="currentColor" d="M21 20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.489a1 1 0 0 1 .386-.79l8-6.222a1 1 0 0 1 1.228 0l8 6.222a1 1 0 0 1 .386.79v10.51Zm-2-1V9.978l-7-5.445-7 5.445V19h14Z"></path></svg>'], w$1 = ["<svg", ' class="Icon" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="', '"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 12v-4"></path><path d="M15 12v-2"></path><path d="M12 12v-1"></path><path d="M3 4h18"></path><path d="M4 4v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-10"></path><path d="M12 16v4"></path><path d="M9 20h6"></path></svg>'], f = ["<svg", ' class="Icon" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" viewBox="0 0 24 24" style="', '"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3"></path></svg>'], x = ["<div", ' class="flex flex-col gap-27 mt-60">', "</div>"], M$2 = ["<div", ' class="', '"><div class="flex flex-col ml-15 gap-31 mt-60">', "</div><!--$-->", "<!--/--></div>"];
+function H$1() {
+  const [n, v] = createSignal(false), [s, c] = createSignal(null), l = [{ name: "Home", svg: ssr(u, ssrHydrationKey(), "overflow:visible;color:currentcolor;width:24px;height:24px") }, { name: "Dashboard", svg: ssr(w$1, ssrHydrationKey(), "overflow:visible;color:currentcolor;width:24px;height:24px") }, { name: "Wallets", svg: ssr(f, ssrHydrationKey(), "overflow:none;color:currentcolor;width:24px;height:24px") }], p = [{ name: "Home", icon: "Home", href: "/", svg: l[0].svg }, { name: "Dashboard", icon: "Dashboard", href: "/", svg: l[1].svg }, { name: "Wallets", icon: "Wallet", href: "/Wallets", svg: l[2].svg }], i = (e) => ({ onMouseEnter: () => c(e), onMouseLeave: () => c(null) });
+  return ssr(M$2, ssrHydrationKey(), `Menu flex flex-row z-10 ${n() ? "Extend" : ""}`, escape(p.map((e) => createComponent$1(A$1, mergeProps({ get href() {
     return e.href;
   }, get class() {
     return `Icon ${s() === e.name ? "Hover" : ""}`;
@@ -9206,7 +6237,7 @@ function H() {
   } })))), escape(createComponent$1(Show, { get when() {
     return n();
   }, get children() {
-    return ssr(x, ssrHydrationKey(), escape(p.map((e) => createComponent$1(A$2, mergeProps({ get href() {
+    return ssr(x, ssrHydrationKey(), escape(p.map((e) => createComponent$1(A$1, mergeProps({ get href() {
       return e.href;
     }, get class() {
       return `Text ${s() === e.name ? "Hover" : ""} ${s() !== e.name && s() ? "Blur" : ""}`;
@@ -9223,23 +6254,147 @@ function y() {
   }, 300), createComponent$1(Show, { get when() {
     return $() && n();
   }, get children() {
-    return createComponent$1(H, {});
+    return createComponent$1(H$1, {});
   } });
 }
 
-const k = "Location", K = 5e3, U = 18e4;
-let R = /* @__PURE__ */ new Map();
+var w = ["<div", ' class="', '" style="', '"></div>'], D$1 = ["<div", ' class="cursor-magnetic-ring" style="', '"></div>'], O$1 = ["<div", ' class="cursor-trail-particle" style="', '"></div>'];
+const [q$1, G$1] = createSignal(true), J = () => {
+  const [s, L] = createSignal({ x: 0, y: 0 }), [C, P] = createSignal([]), [l, X] = createSignal(false), [v, g] = createSignal(false), [B, A] = createSignal({ x: 0, y: 0 }), [K, M] = createSignal({ x: 0, y: 0 }), [y, p] = createSignal(false), T = 8, b = 15;
+  return onMount(() => {
+    let c = 0, a = 0, x = performance.now();
+    const E = document.createElement("style");
+    E.textContent = "* { cursor: none !important; }", document.head.appendChild(E);
+    const $ = (t) => {
+      const e = performance.now(), o = e - x;
+      if (o > 0) {
+        const i = Math.abs((t.clientX - c) / o) * 20, d = Math.abs((t.clientY - a) / o) * 20, Y = Math.min(Math.sqrt(i * i + d * d), 10);
+        A({ x: i, y: d }), document.documentElement.style.setProperty("--cursor-speed", Y);
+      }
+      M(s()), L({ x: t.clientX, y: t.clientY }), c = t.clientX, a = t.clientY, x = e;
+    }, h = (t) => {
+      const e = t.target, o = e.tagName === "INPUT" || e.tagName === "TEXTAREA", i = e.tagName === "A" || e.tagName === "BUTTON" || e.classList.contains("clickable") || e.closest("button") || e.closest("a") || o;
+      p(o), X(i);
+    }, f = (t) => {
+      g(true), k(t.clientX, t.clientY);
+      const e = t.target, o = e.tagName === "INPUT" || e.tagName === "TEXTAREA";
+      p(o);
+    }, N = () => {
+      g(false);
+    }, k = (t, e) => {
+    }, U = setInterval(() => {
+      P((t) => [...t, { ...s(), timestamp: Date.now() }].slice(-8));
+    }, b), I = (t) => {
+      const e = t.target, o = t.relatedTarget;
+      (e.tagName === "INPUT" || e.tagName === "TEXTAREA") && (!o || o.tagName !== "INPUT" && o.tagName !== "TEXTAREA") && p(false);
+    };
+    document.addEventListener("mousemove", $), document.addEventListener("mouseover", h), document.addEventListener("mouseout", I), document.addEventListener("mousedown", f), document.addEventListener("mouseup", N), document.body.style.cursor = "none", onCleanup(() => {
+      document.removeEventListener("mousemove", $), document.removeEventListener("mouseover", h), document.removeEventListener("mouseout", I), document.removeEventListener("mousedown", f), document.removeEventListener("mouseup", N), clearInterval(U);
+    });
+  }), createComponent$1(Show, { get when() {
+    return q$1();
+  }, get children() {
+    return [C().map((c, a) => ssr(O$1, ssrHydrationKey(), `left:${escape(c.x, true)}px;top:${escape(c.y, true)}px` + (";opacity:" + escape(a, true) / escape(T, true)) + `;transform:scale(${0.5 + escape(a, true) / escape(T, true) / 2});animation-delay:${escape(a, true) * 50}ms`)), ssr(w, ssrHydrationKey(), `cursor-outer ${l() ? "hovering" : ""} ${v() ? "clicking" : ""} ${y() ? "text-input" : ""}`, `left:${escape(s().x, true)}px;top:${escape(s().y, true)}px`), ssr(w, ssrHydrationKey(), `cursor-inner ${l() ? "hovering" : ""} ${v() ? "clicking" : ""} ${y() ? "text-input" : ""}`, `left:${escape(s().x, true)}px;top:${escape(s().y, true)}px`), ssr(D$1, ssrHydrationKey(), `left:${escape(s().x, true)}px;top:${escape(s().y, true)}px` + (";opacity:" + (l() ? 1 : 0)) + `;transform:translate(-50%, -50%) scale(${l() ? 1 : 0}) rotate(${escape(s().x, true) / 5}deg)`)];
+  } });
+};
+
+const n = d$2.create({ baseURL: "http://localhost:3000/", withCredentials: true, headers: { "Content-Type": "application/json" } });
+function T() {
+  const [u, a] = createSignal(null), [i, o] = createStore({ user: null, isAuthenticated: false, isLoading: true, error: null });
+  async function g() {
+    o({ isLoading: true, error: null });
+    try {
+      const e = await n.post("API/Auth/refresh");
+      console.log(e.data.accessToken), a(e.data.accessToken), o({ isAuthenticated: true, error: null, isLoading: false });
+    } catch {
+      console.log("Initialization: No valid refresh token found or refresh failed."), a(null), o({ isAuthenticated: false, error: null });
+    } finally {
+      o({ isLoading: false });
+    }
+  }
+  function A(e, t) {
+    var _a, _b, _c, _d, _e, _f;
+    let r = t;
+    if (d$2.isAxiosError(e)) {
+      const s = e;
+      r = ((_b = (_a = s.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || ((_d = (_c = s.response) == null ? void 0 : _c.data) == null ? void 0 : _d.message) || s.message || t, ((_f = (_e = s.response) == null ? void 0 : _e.data) == null ? void 0 : _f.details) && (r = Object.values(s.response.data.details).map((P) => P._errors.join(", ")).join("; "));
+    } else e instanceof Error && (r = e.message);
+    console.error(`${t} Error:`, e), o({ error: r });
+  }
+  async function p(e, t) {
+    o({ isLoading: true, error: null }), console.log("Login");
+    try {
+      const r = await n.post("API/Auth/login", { username: e, password: t });
+      return a(r.data.accessToken), true;
+    } catch (r) {
+      return A(r, "Login failed"), false;
+    } finally {
+      o({ isLoading: false });
+    }
+  }
+  async function h() {
+    i.isLoading || o({ isLoading: true }), u(), a(null), o({ user: null, isAuthenticated: false, error: null });
+    try {
+      await n.post("API/Auth/logout");
+    } catch (e) {
+      console.error("Logout API call error:", e);
+    } finally {
+      o({ isLoading: false });
+    }
+  }
+  n.interceptors.request.use((e) => {
+    const t = u();
+    return console.log("INTERCEPTOR: Token value:", t), console.log("INTERCEPTOR: Config headers object:", e.headers), t && e.headers && (console.log("token yess"), e.url !== "API/Auth/login" && e.url !== "API/Auth/registration" && (e.headers.Authorization = `Bearer ${t}`, console.log("header", e.headers.Authorization))), e;
+  }, (e) => Promise.reject(e));
+  let l = false, c = [];
+  const f = (e, t = null) => {
+    c.forEach((r) => {
+      e ? r.reject(e) : (r.config.headers.Authorization = `Bearer ${t}`, n(r.config).then(r.resolve).catch(r.reject));
+    }), c = [];
+  };
+  return n.interceptors.response.use((e) => e, async (e) => {
+    var _a;
+    const t = e.config;
+    if (((_a = e.response) == null ? void 0 : _a.status) === 401 && t && t.url !== "API/Auth/refresh" && t.url !== "API/Auth/login" && t.url !== "API/Auth/registration") {
+      if (l) return new Promise((r, s) => {
+        c.push({ resolve: r, reject: s, config: t });
+      }).catch((r) => Promise.reject(r));
+      t._retry = true, l = true, console.log("Axios interceptor: 401 detected, attempting refresh...");
+      try {
+        const s = (await n.post("API/Auth/refresh")).data.accessToken;
+        return a(s), console.log("Axios interceptor: Token refreshed successfully."), t.headers && (t.headers.Authorization = `Bearer ${s}`), f(null, s), n(t);
+      } catch (r) {
+        return console.error("Axios interceptor: Refresh token failed.", r), f(r, null), await h(), Promise.reject(r);
+      } finally {
+        l = false;
+      }
+    }
+    return Promise.reject(e);
+  }), { get user() {
+    return i.user;
+  }, get isAuthenticated() {
+    return i.isAuthenticated;
+  }, get isLoading() {
+    return i.isLoading;
+  }, get error() {
+    return i.error;
+  }, initialize: g, login: p, logout: h, api: n };
+}
+const j = T();
+
+const k = "Location", q = 5e3, K = 18e4;
+let R$1 = /* @__PURE__ */ new Map();
 isServer || setInterval(() => {
   const e = Date.now();
-  for (let [t, r] of R.entries()) !r[4].count && e - r[0] > U && R.delete(t);
+  for (let [t, r] of R$1.entries()) !r[4].count && e - r[0] > K && R$1.delete(t);
 }, 3e5);
 function b() {
-  if (!isServer) return R;
+  if (!isServer) return R$1;
   const e = getRequestEvent();
   if (!e) throw new Error("Cannot find cache context");
   return (e.router || (e.router = {})).cache || (e.router.cache = /* @__PURE__ */ new Map());
 }
-function X(e, t = true) {
+function U(e, t = true) {
   return startTransition(() => {
     const r = Date.now();
     D(e, (a) => {
@@ -9249,12 +6404,12 @@ function X(e, t = true) {
 }
 function D(e, t) {
   e && !Array.isArray(e) && (e = [e]);
-  for (let r of R.keys()) (e === void 0 || M(r, e)) && t(R.get(r));
+  for (let r of R$1.keys()) (e === void 0 || M$1(r, e)) && t(R$1.get(r));
 }
-function A$1(e, t) {
+function A(e, t) {
   e.GET && (e = e.GET);
   const r = (...a) => {
-    const i = b(), s = ze(), d = He(), E = getOwner() ? Me() : void 0, w = Date.now(), l = t + F$1(a);
+    const i = b(), s = ze(), d = He(), E = getOwner() ? Me() : void 0, w = Date.now(), l = t + F(a);
     let n = i.get(l), y;
     if (isServer) {
       const o = getRequestEvent();
@@ -9263,11 +6418,11 @@ function A$1(e, t) {
         if (u) {
           const p = o && (o.router.data || (o.router.data = {}));
           if (p && l in p) return p[l];
-          if (Array.isArray(u) && !M(l, u)) return p[l] = void 0, Promise.resolve();
+          if (Array.isArray(u) && !M$1(l, u)) return p[l] = void 0, Promise.resolve();
         }
       }
     }
-    if (getListener() && !isServer && (y = true, onCleanup(() => n[4].count--)), n && n[0] && (isServer || s === "native" || n[4].count || Date.now() - n[0] < K)) {
+    if (getListener() && !isServer && (y = true, onCleanup(() => n[4].count--)), n && n[0] && (isServer || s === "native" || n[4].count || Date.now() - n[0] < q)) {
       y && (n[4].count++, n[4][0]()), n[3] === "preload" && s !== "preload" && (n[0] = w);
       let o = n[1];
       return s !== "preload" && (o = "then" in n[1] ? n[1].then(g(false), g(true)) : g(false)(n[1]), !isServer && s === "navigate" && startTransition(() => n[4][1](n[0]))), d && "then" in o && o.catch(() => {
@@ -9306,29 +6461,29 @@ function A$1(e, t) {
       };
     }
   };
-  return r.keyFor = (...a) => t + F$1(a), r.key = t, r;
+  return r.keyFor = (...a) => t + F(a), r.key = t, r;
 }
-A$1.get = (e) => b().get(e)[2];
-A$1.set = (e, t) => {
+A.get = (e) => b().get(e)[2];
+A.set = (e, t) => {
   const r = b(), a = Date.now();
   let i = r.get(e);
   i ? (i[0] = a, i[1] = Promise.resolve(t), i[2] = t, i[3] = "preload") : (r.set(e, i = [a, Promise.resolve(t), t, "preload", createSignal(a)]), i[4].count = 0);
 };
-A$1.delete = (e) => b().delete(e);
-A$1.clear = () => b().clear();
-function M(e, t) {
+A.delete = (e) => b().delete(e);
+A.clear = () => b().clear();
+function M$1(e, t) {
   for (let r of t) if (r && e.startsWith(r)) return true;
   return false;
 }
-function F$1(e) {
-  return JSON.stringify(e, (t, r) => q$1(r) ? Object.keys(r).sort().reduce((a, i) => (a[i] = r[i], a), {}) : r);
+function F(e) {
+  return JSON.stringify(e, (t, r) => X(r) ? Object.keys(r).sort().reduce((a, i) => (a[i] = r[i], a), {}) : r);
 }
-function q$1(e) {
+function X(e) {
   let t;
   return e != null && typeof e == "object" && (!(t = Object.getPrototypeOf(e)) || t === Object.prototype);
 }
 const S = /* @__PURE__ */ new Map();
-function Y(e) {
+function Y$1(e) {
   const t = L();
   return (...r) => e.apply({ r: t }, r);
 }
@@ -9375,8 +6530,8 @@ function _$1(e, t) {
       return e.call(this, ...r, ...s);
     };
     a.base = e.base;
-    const i = new URL(t, Pe);
-    return i.searchParams.set("args", F$1(r)), _$1(a, (i.origin === "https://action" ? i.origin : "") + i.pathname + i.search);
+    const i = new URL(t, Pe$1);
+    return i.searchParams.set("args", F(r)), _$1(a, (i.origin === "https://action" ? i.origin : "") + i.pathname + i.search);
   }, e.url = t, isServer || (S.set(t, e), getOwner() && onCleanup(() => S.delete(t))), e;
 }
 const W = (e) => e.split("").reduce((t, r) => (t << 5) - t + r.charCodeAt(0) | 0, 0);
@@ -9391,569 +6546,700 @@ async function G(e, t, r) {
     if (t) return { error: e };
     a = e;
   }
-  return D(s, (h) => h[0] = 0), d && d.forEach((h) => A$1.set(h, i[h])), await X(s, false), a != null ? { data: a } : void 0;
+  return D(s, (h) => h[0] = 0), d && d.forEach((h) => A.set(h, i[h])), await U(s, false), a != null ? { data: a } : void 0;
 }
 
-const A = { NORMAL: 0, WILDCARD: 1, PLACEHOLDER: 2 };
-function at(e = {}) {
-  const r = { options: e, rootNode: le(), staticRoutesMap: {} }, t = (n) => e.strictTrailingSlash ? n : n.replace(/\/$/, "") || "/";
-  if (e.routes) for (const n in e.routes) Q(r, t(n), e.routes[n]);
-  return { ctx: r, lookup: (n) => it(r, t(n)), insert: (n, s) => Q(r, t(n), s), remove: (n) => lt(r, t(n)) };
-}
-function it(e, r) {
-  const t = e.staticRoutesMap[r];
-  if (t) return t.data;
-  const n = r.split("/"), s = {};
-  let o = false, i = null, a = e.rootNode, c = null;
-  for (let l = 0; l < n.length; l++) {
-    const m = n[l];
-    a.wildcardChildNode !== null && (i = a.wildcardChildNode, c = n.slice(l).join("/"));
-    const C = a.children.get(m);
-    if (C === void 0) {
-      if (a && a.placeholderChildren.length > 1) {
-        const y = n.length - l;
-        a = a.placeholderChildren.find((P) => P.maxDepth === y) || null;
-      } else a = a.placeholderChildren[0] || null;
-      if (!a) break;
-      a.paramName && (s[a.paramName] = m), o = true;
-    } else a = C;
-  }
-  return (a === null || a.data === null) && i !== null && (a = i, s[a.paramName || "_"] = c, o = true), a ? o ? { ...a.data, params: o ? s : void 0 } : a.data : null;
-}
-function Q(e, r, t) {
-  let n = true;
-  const s = r.split("/");
-  let o = e.rootNode, i = 0;
-  const a = [o];
-  for (const c of s) {
-    let l;
-    if (l = o.children.get(c)) o = l;
-    else {
-      const m = ct(c);
-      l = le({ type: m, parent: o }), o.children.set(c, l), m === A.PLACEHOLDER ? (l.paramName = c === "*" ? `_${i++}` : c.slice(1), o.placeholderChildren.push(l), n = false) : m === A.WILDCARD && (o.wildcardChildNode = l, l.paramName = c.slice(3) || "_", n = false), a.push(l), o = l;
-    }
-  }
-  for (const [c, l] of a.entries()) l.maxDepth = Math.max(a.length - c, l.maxDepth || 0);
-  return o.data = t, n === true && (e.staticRoutesMap[r] = o), o;
-}
-function lt(e, r) {
-  let t = false;
-  const n = r.split("/");
-  let s = e.rootNode;
-  for (const o of n) if (s = s.children.get(o), !s) return t;
-  if (s.data) {
-    const o = n.at(-1) || "";
-    s.data = null, Object.keys(s.children).length === 0 && s.parent && (s.parent.children.delete(o), s.parent.wildcardChildNode = null, s.parent.placeholderChildren = []), t = true;
-  }
-  return t;
-}
-function le(e = {}) {
-  return { type: e.type || A.NORMAL, maxDepth: 0, parent: e.parent || null, children: /* @__PURE__ */ new Map(), data: e.data || null, paramName: e.paramName || null, wildcardChildNode: null, placeholderChildren: [] };
-}
-function ct(e) {
-  return e.startsWith("**") ? A.WILDCARD : e[0] === ":" || e === "*" ? A.PLACEHOLDER : A.NORMAL;
-}
-const ce = [{ page: true, $component: { src: "src/routes/index.tsx?pick=default&pick=$css", build: () => import('../build/index16.mjs'), import: () => import('../build/index16.mjs') }, path: "/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/index.tsx" }, { page: true, $component: { src: "src/routes/[...404].tsx?pick=default&pick=$css", build: () => import('../build/_...404_2.mjs'), import: () => import('../build/_...404_2.mjs') }, path: "/*404", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/[...404].tsx" }, { page: true, $component: { src: "src/routes/UI/Cursor.tsx?pick=default&pick=$css", build: () => import('../build/Cursor2.mjs'), import: () => import('../build/Cursor2.mjs') }, path: "/UI/Cursor", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/UI/Cursor.tsx" }, { page: true, $component: { src: "src/routes/UI/Waves.tsx?pick=default&pick=$css", build: () => import('../build/Waves2.mjs'), import: () => import('../build/Waves2.mjs') }, path: "/UI/Waves", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/UI/Waves.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css", build: () => import('../build/index22.mjs'), import: () => import('../build/index22.mjs') }, path: "/(Pages)/LoginRegistration/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css", build: () => import('../build/riv2.mjs'), import: () => import('../build/riv2.mjs') }, path: "/(Pages)/LoginRegistration/riv", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/riv.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css", build: () => import('../build/index32.mjs'), import: () => import('../build/index32.mjs') }, path: "/(Pages)/Wallets/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css", build: () => import('../build/_...slug_2.mjs'), import: () => import('../build/_...slug_2.mjs') }, path: "/(Pages)/Wallets/*slug", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/[...slug].tsx" }, { page: true, $component: { src: "src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css", build: () => import('../build/deleteWallet2.mjs'), import: () => import('../build/deleteWallet2.mjs') }, path: "/API/Wallets/deleteWallet", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/deleteWallet.ts" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css", build: () => import('../build/Toggle2.mjs'), import: () => import('../build/Toggle2.mjs') }, path: "/(Pages)/LoginRegistration/components/Toggle", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/components/Toggle.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css", build: () => import('../build/index42.mjs'), import: () => import('../build/index42.mjs') }, path: "/(Pages)/LoginRegistration/Login/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Login/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css", build: () => import('../build/index52.mjs'), import: () => import('../build/index52.mjs') }, path: "/(Pages)/LoginRegistration/Registration/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css", build: () => import('../build/index62.mjs'), import: () => import('../build/index62.mjs') }, path: "/(Pages)/Wallets/Wallet/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/Wallet/index.tsx" }, { page: true, $component: { src: "src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css", build: () => import('../build/getTransactions2.mjs'), import: () => import('../build/getTransactions2.mjs') }, path: "/API/Wallets/Wallet/getTransactions", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/Wallet/getTransactions.ts" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css", build: () => import('../build/index72.mjs'), import: () => import('../build/index72.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Credentials/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css", build: () => import('../build/index82.mjs'), import: () => import('../build/index82.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Email/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css", build: () => import('../build/index92.mjs'), import: () => import('../build/index92.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Phone/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css", build: () => import('../build/sendOtp2.mjs'), import: () => import('../build/sendOtp2.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Phone/sendOtp", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css", build: () => import('../build/index102.mjs'), import: () => import('../build/index102.mjs') }, path: "/(Pages)/Wallets/_components/Card/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/Card/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css", build: () => import('../build/index112.mjs'), import: () => import('../build/index112.mjs') }, path: "/(Pages)/Wallets/_components/Card3D/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/Card3D/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx?pick=default&pick=$css", build: () => import('../build/LazyLoadSpline2.mjs'), import: () => import('../build/LazyLoadSpline2.mjs') }, path: "/(Pages)/Wallets/_components/Card3D/LazyLoadSpline", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/Card3D/LazyLoadSpline.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css", build: () => import('../build/index122.mjs'), import: () => import('../build/index122.mjs') }, path: "/(Pages)/Wallets/_components/cardHolder/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css", build: () => import('../build/index132.mjs'), import: () => import('../build/index132.mjs') }, path: "/(Pages)/Wallets/_components/SetWallet/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css", build: () => import('../build/otpInput2.mjs'), import: () => import('../build/otpInput2.mjs') }, path: "/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css", build: () => import('../build/index142.mjs'), import: () => import('../build/index142.mjs') }, path: "/(Pages)/LoginRegistration/Registration/components/ProgressBar/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css", build: () => import('../build/index152.mjs'), import: () => import('../build/index152.mjs') }, path: "/(Pages)/Wallets/Wallet/components/table.tsx/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css", build: () => import('../build/Card2.mjs'), import: () => import('../build/Card2.mjs') }, path: "/(Pages)/Wallets/_components/cardHolder/Card/Card", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx" }], ut = pt(ce.filter((e) => e.page));
-function pt(e) {
-  function r(t, n, s, o) {
-    const i = Object.values(t).find((a) => s.startsWith(a.id + "/"));
-    return i ? (r(i.children || (i.children = []), n, s.slice(i.id.length)), t) : (t.push({ ...n, id: s, path: s.replace(/\([^)/]+\)/g, "").replace(/\/+/g, "/") }), t);
-  }
-  return e.sort((t, n) => t.path.length - n.path.length).reduce((t, n) => r(t, n, n.path, n.path), []);
-}
-function dt(e, r) {
-  const t = ht.lookup(e);
-  if (t && t.route) {
-    const n = r === "HEAD" ? t.route.$HEAD || t.route.$GET : t.route[`$${r}`];
-    return n === void 0 ? void 0 : { handler: n, params: t.params };
-  }
-}
-function mt(e) {
-  return e.$HEAD || e.$GET || e.$POST || e.$PUT || e.$PATCH || e.$DELETE;
-}
-const ht = at({ routes: ce.reduce((e, r) => {
-  if (!mt(r)) return e;
-  let t = r.path.replace(/\([^)/]+\)/g, "").replace(/\/+/g, "/").replace(/\*([^/]*)/g, (n, s) => `**:${s}`).split("/").map((n) => n.startsWith(":") || n.startsWith("*") ? n : encodeURIComponent(n)).join("/");
-  if (/:[^/]*\?/g.test(t)) throw new Error(`Optional parameters are not supported in API routes: ${t}`);
-  if (e[t]) throw new Error(`Duplicate API routes for "${t}" found at "${e[t].route.path}" and "${r.path}"`);
-  return e[t] = { route: r }, e;
-}, {}) });
-var ft = " ";
-const Pt = { style: (e) => ssrElement("style", e.attrs, () => e.children, true), link: (e) => ssrElement("link", e.attrs, void 0, true), script: (e) => e.attrs.src ? ssrElement("script", mergeProps(() => e.attrs, { get id() {
-  return e.key;
-} }), () => ssr(ft), true) : null, noscript: (e) => ssrElement("noscript", e.attrs, () => escape(e.children), true) };
-function q(e, r) {
-  let { tag: t, attrs: { key: n, ...s } = { key: void 0 }, children: o } = e;
-  return Pt[t]({ attrs: { ...s, nonce: r }, key: n, children: o });
-}
-function xt(e, r, t, n = "default") {
-  return lazy(async () => {
-    var _a;
-    {
-      const o = (await e.import())[n], a = (await ((_a = r.inputs) == null ? void 0 : _a[e.src].assets())).filter((l) => l.tag === "style" || l.attrs.rel === "stylesheet");
-      return { default: (l) => [...a.map((m) => q(m)), createComponent(o, l)] };
-    }
-  });
-}
-function ue() {
-  function e(t) {
-    return { ...t, ...t.$$route ? t.$$route.require().route : void 0, info: { ...t.$$route ? t.$$route.require().route.info : {}, filesystem: true }, component: t.$component && xt(t.$component, globalThis.MANIFEST.client, globalThis.MANIFEST.ssr), children: t.children ? t.children.map(e) : void 0 };
-  }
-  return ut.map(e);
-}
-let Z;
-const $t = isServer ? () => getRequestEvent().routes : () => Z || (Z = ue());
-function vt(e) {
-  const r = de$1(e.nativeEvent, "flash");
-  if (r) try {
-    let t = JSON.parse(r);
-    if (!t || !t.result) return;
-    const n = [...t.input.slice(0, -1), new Map(t.input[t.input.length - 1])], s = t.error ? new Error(t.result) : t.result;
-    return { input: n, url: t.url, pending: false, result: t.thrown ? void 0 : s, error: t.thrown ? s : void 0 };
-  } catch (t) {
-    console.error(t);
-  } finally {
-    le$1(e.nativeEvent, "flash", "", { maxAge: 0 });
-  }
-}
-async function kt(e) {
-  const r = globalThis.MANIFEST.client;
-  return globalThis.MANIFEST.ssr, e.response.headers.set("Content-Type", "text/html"), Object.assign(e, { manifest: await r.json(), assets: [...await r.inputs[r.handler].assets()], router: { submission: vt(e) }, routes: ue(), complete: false, $islands: /* @__PURE__ */ new Set() });
-}
-const yt = /* @__PURE__ */ new Set([301, 302, 303, 307, 308]);
-function F(e) {
-  return e.status && yt.has(e.status) ? e.status : 302;
-}
-function Ct(e, r, t = {}, n) {
-  return eventHandler({ handler: (s) => {
-    const o = ye$1(s);
-    return provideRequestEvent(o, async () => {
-      const i = dt(new URL(o.request.url).pathname, o.request.method);
-      if (i) {
-        const P = await i.handler.import(), k = o.request.method === "HEAD" ? P.HEAD || P.GET : P[o.request.method];
-        o.params = i.params || {}, sharedConfig.context = { event: o };
-        const u = await k(o);
-        if (u !== void 0) return u;
-        if (o.request.method !== "GET") throw new Error(`API handler for ${o.request.method} "${o.request.url}" did not return a response.`);
-      }
-      const a = await r(o), c = typeof t == "function" ? await t(a) : { ...t }, l = c.mode || "stream";
-      if (c.nonce && (a.nonce = c.nonce), l === "sync") {
-        const P = renderToString(() => (sharedConfig.context.event = a, e(a)), c);
-        if (a.complete = true, a.response && a.response.headers.get("Location")) {
-          const k = F(a.response);
-          return ue$1(s, a.response.headers.get("Location"), k);
-        }
-        return P;
-      }
-      if (c.onCompleteAll) {
-        const P = c.onCompleteAll;
-        c.onCompleteAll = (k) => {
-          te(a)(k), P(k);
-        };
-      } else c.onCompleteAll = te(a);
-      if (c.onCompleteShell) {
-        const P = c.onCompleteShell;
-        c.onCompleteShell = (k) => {
-          ee(a, s)(), P(k);
-        };
-      } else c.onCompleteShell = ee(a, s);
-      const m = renderToStream(() => (sharedConfig.context.event = a, e(a)), c);
-      if (a.response && a.response.headers.get("Location")) {
-        const P = F(a.response);
-        return ue$1(s, a.response.headers.get("Location"), P);
-      }
-      if (l === "async") return m;
-      const { writable: C, readable: y } = new TransformStream();
-      return m.pipeTo(C), y;
-    });
-  } });
-}
-function ee(e, r) {
-  return () => {
-    if (e.response && e.response.headers.get("Location")) {
-      const t = F(e.response);
-      R$1(r, t), pe$1(r, "Location", e.response.headers.get("Location"));
-    }
+function Y(e) {
+  return async (s) => {
+    const t = He$1(s), r = await e(t);
+    r && await Se$1(s, r);
   };
 }
-function te(e) {
-  return ({ write: r }) => {
-    e.complete = true;
-    const t = e.response && e.response.headers.get("Location");
-    t && r(`<script>window.location="${t}"<\/script>`);
+function Z(e) {
+  return async (s, t) => {
+    const r = He$1(s), o = await e(r, t);
+    o && await Se$1(s, o);
   };
 }
-function Rt(e, r, t) {
-  return Ct(e, kt, r);
+function Pt({ onRequest: e, onBeforeResponse: s }) {
+  return pe$1({ onRequest: typeof e == "function" ? Y(e) : Array.isArray(e) ? e.map(Y) : void 0, onBeforeResponse: typeof s == "function" ? Z(s) : Array.isArray(s) ? s.map(Z) : void 0 });
 }
-const pe = createContext$1(), de = ["title", "meta"], j = [], B = ["name", "http-equiv", "content", "charset", "media"].concat(["property"]), _ = (e, r) => {
-  const t = Object.fromEntries(Object.entries(e.props).filter(([n]) => r.includes(n)).sort());
-  return (Object.hasOwn(t, "name") || Object.hasOwn(t, "property")) && (t.name = t.name || t.property, delete t.property), e.tag + JSON.stringify(t);
-};
-function wt() {
-  if (!sharedConfig.context) {
-    const t = document.head.querySelectorAll("[data-sm]");
-    Array.prototype.forEach.call(t, (n) => n.parentNode.removeChild(n));
-  }
-  const e = /* @__PURE__ */ new Map();
-  function r(t) {
-    if (t.ref) return t.ref;
-    let n = document.querySelector(`[data-sm="${t.id}"]`);
-    return n ? (n.tagName.toLowerCase() !== t.tag && (n.parentNode && n.parentNode.removeChild(n), n = document.createElement(t.tag)), n.removeAttribute("data-sm")) : n = document.createElement(t.tag), n;
-  }
-  return { addTag(t) {
-    if (de.indexOf(t.tag) !== -1) {
-      const o = t.tag === "title" ? j : B, i = _(t, o);
-      e.has(i) || e.set(i, []);
-      let a = e.get(i), c = a.length;
-      a = [...a, t], e.set(i, a);
-      let l = r(t);
-      t.ref = l, spread(l, t.props);
-      let m = null;
-      for (var n = c - 1; n >= 0; n--) if (a[n] != null) {
-        m = a[n];
-        break;
-      }
-      return l.parentNode != document.head && document.head.appendChild(l), m && m.ref && m.ref.parentNode && document.head.removeChild(m.ref), c;
-    }
-    let s = r(t);
-    return t.ref = s, spread(s, t.props), s.parentNode != document.head && document.head.appendChild(s), -1;
-  }, removeTag(t, n) {
-    const s = t.tag === "title" ? j : B, o = _(t, s);
-    if (t.ref) {
-      const i = e.get(o);
-      if (i) {
-        if (t.ref.parentNode) {
-          t.ref.parentNode.removeChild(t.ref);
-          for (let a = n - 1; a >= 0; a--) i[a] != null && document.head.appendChild(i[a].ref);
-        }
-        i[n] = null, e.set(o, i);
-      } else t.ref.parentNode && t.ref.parentNode.removeChild(t.ref);
-    }
-  } };
-}
-function bt() {
-  const e = [];
-  return useAssets(() => ssr(At(e))), { addTag(r) {
-    if (de.indexOf(r.tag) !== -1) {
-      const t = r.tag === "title" ? j : B, n = _(r, t), s = e.findIndex((o) => o.tag === r.tag && _(o, t) === n);
-      s !== -1 && e.splice(s, 1);
-    }
-    return e.push(r), e.length;
-  }, removeTag(r, t) {
-  } };
-}
-const Et = (e) => {
-  const r = isServer ? bt() : wt();
-  return createComponent$1(pe.Provider, { value: r, get children() {
-    return e.children;
-  } });
-}, Lt = (e, r, t) => (Tt({ tag: e, props: r, setting: t, id: createUniqueId(), get name() {
-  return r.name || r.property;
-} }), null);
-function Tt(e) {
-  const r = useContext(pe);
-  if (!r) throw new Error("<MetaProvider /> should be in the tree");
-  createRenderEffect(() => {
-    const t = r.addTag(e);
-    onCleanup(() => r.removeTag(e, t));
-  });
-}
-function At(e) {
-  return e.map((r) => {
-    var _a, _b;
-    const n = Object.keys(r.props).map((o) => o === "children" ? "" : ` ${o}="${escape(r.props[o], true)}"`).join("");
-    let s = r.props.children;
-    return Array.isArray(s) && (s = s.join("")), ((_a = r.setting) == null ? void 0 : _a.close) ? `<${r.tag} data-sm="${r.id}"${n}>${((_b = r.setting) == null ? void 0 : _b.escape) ? escape(s) : s || ""}</${r.tag}>` : `<${r.tag} data-sm="${r.id}"${n}/>`;
-  }).join("");
-}
-const St = (e) => Lt("title", e, { escape: true, close: true }), me = (e) => (r) => {
-  const { base: t } = r, n = children(() => r.children), s = createMemo(() => Oe(n(), r.base || ""));
-  let o;
-  const i = Ne(e, s, () => o, { base: t, singleFlight: r.singleFlight, transformUrl: r.transformUrl });
-  return e.create && e.create(i), createComponent$1(Ee.Provider, { value: i, get children() {
-    return createComponent$1(Nt, { routerState: i, get root() {
-      return r.root;
+const pe = (e) => (s) => {
+  const { base: t } = s, r = children(() => s.children), o = createMemo(() => Oe(r(), s.base || ""));
+  let n;
+  const a = Ne(e, o, () => n, { base: t, singleFlight: s.singleFlight, transformUrl: s.transformUrl });
+  return e.create && e.create(a), createComponent$1(Ee.Provider, { value: a, get children() {
+    return createComponent$1(xt, { routerState: a, get root() {
+      return s.root;
     }, get preload() {
-      return r.rootPreload || r.rootLoad;
+      return s.rootPreload || s.rootLoad;
     }, get children() {
-      return [(o = getOwner()) && null, createComponent$1(Mt, { routerState: i, get branches() {
-        return s();
+      return [(n = getOwner()) && null, createComponent$1(bt, { routerState: a, get branches() {
+        return o();
       } })];
     } });
   } });
 };
-function Nt(e) {
-  const r = e.routerState.location, t = e.routerState.params, n = createMemo(() => e.preload && untrack(() => {
-    Ke(true), e.preload({ params: t, location: r, intent: ze() || "initial" }), Ke(false);
+function xt(e) {
+  const s = e.routerState.location, t = e.routerState.params, r = createMemo(() => e.preload && untrack(() => {
+    Ke(true), e.preload({ params: t, location: s, intent: ze() || "initial" }), Ke(false);
   }));
   return createComponent$1(Show, { get when() {
     return e.root;
   }, keyed: true, get fallback() {
     return e.children;
-  }, children: (s) => createComponent$1(s, { params: t, location: r, get data() {
-    return n();
+  }, children: (o) => createComponent$1(o, { params: t, location: s, get data() {
+    return r();
   }, get children() {
     return e.children;
   } }) });
 }
-function Mt(e) {
+function bt(e) {
   if (isServer) {
-    const s = getRequestEvent();
-    if (s && s.router && s.router.dataOnly) {
-      Wt(s, e.routerState, e.branches);
+    const o = getRequestEvent();
+    if (o && o.router && o.router.dataOnly) {
+      kt(o, e.routerState, e.branches);
       return;
     }
-    s && ((s.router || (s.router = {})).matches || (s.router.matches = e.routerState.matches().map(({ route: o, path: i, params: a }) => ({ path: o.originalPath, pattern: o.pattern, match: i, params: a, info: o.info }))));
+    o && ((o.router || (o.router = {})).matches || (o.router.matches = e.routerState.matches().map(({ route: n, path: a, params: i }) => ({ path: n.originalPath, pattern: n.pattern, match: a, params: i, info: n.info }))));
   }
-  const r = [];
+  const s = [];
   let t;
-  const n = createMemo(on(e.routerState.matches, (s, o, i) => {
-    let a = o && s.length === o.length;
+  const r = createMemo(on(e.routerState.matches, (o, n, a) => {
+    let i = n && o.length === n.length;
     const c = [];
-    for (let l = 0, m = s.length; l < m; l++) {
-      const C = o && o[l], y = s[l];
-      i && C && y.route.key === C.route.key ? c[l] = i[l] : (a = false, r[l] && r[l](), createRoot((P) => {
-        r[l] = P, c[l] = Te(e.routerState, c[l - 1] || e.routerState.base, re(() => n()[l + 1]), () => e.routerState.matches()[l]);
+    for (let l = 0, d = o.length; l < d; l++) {
+      const $ = n && n[l], T = o[l];
+      a && $ && T.route.key === $.route.key ? c[l] = a[l] : (i = false, s[l] && s[l](), createRoot((f) => {
+        s[l] = f, c[l] = Te(e.routerState, c[l - 1] || e.routerState.base, Q(() => r()[l + 1]), () => e.routerState.matches()[l]);
       }));
     }
-    return r.splice(s.length).forEach((l) => l()), i && a ? i : (t = c[0], c);
+    return s.splice(o.length).forEach((l) => l()), a && i ? a : (t = c[0], c);
   }));
-  return re(() => n() && t)();
+  return Q(() => r() && t)();
 }
-const re = (e) => () => createComponent$1(Show, { get when() {
+const Q = (e) => () => createComponent$1(Show, { get when() {
   return e();
-}, keyed: true, children: (r) => createComponent$1(te$1.Provider, { value: r, get children() {
-  return r.outlet();
+}, keyed: true, children: (s) => createComponent$1(te$1.Provider, { value: s, get children() {
+  return s.outlet();
 } }) });
-function Wt(e, r, t) {
-  const n = new URL(e.request.url), s = M$2(t, new URL(e.router.previousUrl || e.request.url).pathname), o = M$2(t, n.pathname);
-  for (let i = 0; i < o.length; i++) {
-    (!s[i] || o[i].route !== s[i].route) && (e.router.dataOnly = true);
-    const { route: a, params: c } = o[i];
-    a.preload && a.preload({ params: c, location: r.location, intent: "preload" });
+function kt(e, s, t) {
+  const r = new URL(e.request.url), o = M$3(t, new URL(e.router.previousUrl || e.request.url).pathname), n = M$3(t, r.pathname);
+  for (let a = 0; a < n.length; a++) {
+    (!o[a] || n[a].route !== o[a].route) && (e.router.dataOnly = true);
+    const { route: i, params: c } = n[a];
+    i.preload && i.preload({ params: c, location: s.location, intent: "preload" });
   }
 }
-function Dt([e, r], t, n) {
-  return [e, n ? (s) => r(n(s)) : r];
+function $t([e, s], t, r) {
+  return [e, r ? (o) => s(r(o)) : s];
 }
-function It(e) {
-  let r = false;
-  const t = (s) => typeof s == "string" ? { value: s } : s, n = Dt(createSignal(t(e.get()), { equals: (s, o) => s.value === o.value && s.state === o.state }), void 0, (s) => (!r && e.set(s), sharedConfig.registry && !sharedConfig.done && (sharedConfig.done = true), s));
-  return e.init && onCleanup(e.init((s = e.get()) => {
-    r = true, n[1](t(s)), r = false;
-  })), me({ signal: n, create: e.create, utils: e.utils });
+function Tt(e) {
+  let s = false;
+  const t = (o) => typeof o == "string" ? { value: o } : o, r = $t(createSignal(t(e.get()), { equals: (o, n) => o.value === n.value && o.state === n.state }), void 0, (o) => (!s && e.set(o), sharedConfig.registry && !sharedConfig.done && (sharedConfig.done = true), o));
+  return e.init && onCleanup(e.init((o = e.get()) => {
+    s = true, r[1](t(o)), s = false;
+  })), pe({ signal: r, create: e.create, utils: e.utils });
 }
-function Ut(e, r, t) {
-  return e.addEventListener(r, t), () => e.removeEventListener(r, t);
+function At(e, s, t) {
+  return e.addEventListener(s, t), () => e.removeEventListener(s, t);
 }
-function Ot(e, r) {
+function Ct(e, s) {
   const t = e && document.getElementById(e);
-  t ? t.scrollIntoView() : r && window.scrollTo(0, 0);
+  t ? t.scrollIntoView() : s && window.scrollTo(0, 0);
 }
-function _t(e) {
-  const r = new URL(e);
-  return r.pathname + r.search;
+function Rt(e) {
+  const s = new URL(e);
+  return s.pathname + s.search;
 }
-function Ht(e) {
-  let r;
-  const t = { value: e.url || (r = getRequestEvent()) && _t(r.request.url) || "" };
-  return me({ signal: [() => t, (n) => Object.assign(t, n)] })(e);
+function vt(e) {
+  let s;
+  const t = { value: e.url || (s = getRequestEvent()) && Rt(s.request.url) || "" };
+  return pe({ signal: [() => t, (r) => Object.assign(t, r)] })(e);
 }
-function qt(e = true, r = false, t = "/_server", n) {
-  return (s) => {
-    const o = s.base.path(), i = s.navigatorFactory(s.base);
-    let a, c;
+function yt(e = true, s = false, t = "/_server", r) {
+  return (o) => {
+    const n = o.base.path(), a = o.navigatorFactory(o.base);
+    let i, c;
     function l(u) {
       return u.namespaceURI === "http://www.w3.org/2000/svg";
     }
-    function m(u) {
+    function d(u) {
       if (u.defaultPrevented || u.button !== 0 || u.metaKey || u.altKey || u.ctrlKey || u.shiftKey) return;
-      const p = u.composedPath().find((M) => M instanceof Node && M.nodeName.toUpperCase() === "A");
-      if (!p || r && !p.hasAttribute("link")) return;
-      const f = l(p), g = f ? p.href.baseVal : p.href;
-      if ((f ? p.target.baseVal : p.target) || !g && !p.hasAttribute("state")) return;
-      const b = (p.getAttribute("rel") || "").split(/\s+/);
-      if (p.hasAttribute("download") || b && b.includes("external")) return;
-      const L = f ? new URL(g, document.baseURI) : new URL(g);
-      if (!(L.origin !== window.location.origin || o && L.pathname && !L.pathname.toLowerCase().startsWith(o.toLowerCase()))) return [p, L];
+      const m = u.composedPath().find((K) => K instanceof Node && K.nodeName.toUpperCase() === "A");
+      if (!m || s && !m.hasAttribute("link")) return;
+      const g = l(m), h = g ? m.href.baseVal : m.href;
+      if ((g ? m.target.baseVal : m.target) || !h && !m.hasAttribute("state")) return;
+      const y = (m.getAttribute("rel") || "").split(/\s+/);
+      if (m.hasAttribute("download") || y && y.includes("external")) return;
+      const L = g ? new URL(h, document.baseURI) : new URL(h);
+      if (!(L.origin !== window.location.origin || n && L.pathname && !L.pathname.toLowerCase().startsWith(n.toLowerCase()))) return [m, L];
     }
-    function C(u) {
-      const p = m(u);
-      if (!p) return;
-      const [f, g] = p, N = s.parsePath(g.pathname + g.search + g.hash), b = f.getAttribute("state");
-      u.preventDefault(), i(N, { resolve: false, replace: f.hasAttribute("replace"), scroll: !f.hasAttribute("noscroll"), state: b ? JSON.parse(b) : void 0 });
+    function $(u) {
+      const m = d(u);
+      if (!m) return;
+      const [g, h] = m, B = o.parsePath(h.pathname + h.search + h.hash), y = g.getAttribute("state");
+      u.preventDefault(), a(B, { resolve: false, replace: g.hasAttribute("replace"), scroll: !g.hasAttribute("noscroll"), state: y ? JSON.parse(y) : void 0 });
     }
-    function y(u) {
-      const p = m(u);
-      if (!p) return;
-      const [f, g] = p;
-      n && (g.pathname = n(g.pathname)), s.preloadRoute(g, f.getAttribute("preload") !== "false");
+    function T(u) {
+      const m = d(u);
+      if (!m) return;
+      const [g, h] = m;
+      r && (h.pathname = r(h.pathname)), o.preloadRoute(h, g.getAttribute("preload") !== "false");
     }
-    function P(u) {
-      clearTimeout(a);
-      const p = m(u);
-      if (!p) return c = null;
-      const [f, g] = p;
-      c !== f && (n && (g.pathname = n(g.pathname)), a = setTimeout(() => {
-        s.preloadRoute(g, f.getAttribute("preload") !== "false"), c = f;
+    function f(u) {
+      clearTimeout(i);
+      const m = d(u);
+      if (!m) return c = null;
+      const [g, h] = m;
+      c !== g && (r && (h.pathname = r(h.pathname)), i = setTimeout(() => {
+        o.preloadRoute(h, g.getAttribute("preload") !== "false"), c = g;
       }, 20));
     }
-    function k(u) {
+    function b(u) {
       if (u.defaultPrevented) return;
-      let p = u.submitter && u.submitter.hasAttribute("formaction") ? u.submitter.getAttribute("formaction") : u.target.getAttribute("action");
-      if (!p) return;
-      if (!p.startsWith("https://action/")) {
-        const g = new URL(p, Pe);
-        if (p = s.parsePath(g.pathname + g.search), !p.startsWith(t)) return;
+      let m = u.submitter && u.submitter.hasAttribute("formaction") ? u.submitter.getAttribute("formaction") : u.target.getAttribute("action");
+      if (!m) return;
+      if (!m.startsWith("https://action/")) {
+        const h = new URL(m, Pe$1);
+        if (m = o.parsePath(h.pathname + h.search), !m.startsWith(t)) return;
       }
       if (u.target.method.toUpperCase() !== "POST") throw new Error("Only POST forms are supported for Actions");
-      const f = S.get(p);
-      if (f) {
+      const g = S.get(m);
+      if (g) {
         u.preventDefault();
-        const g = new FormData(u.target, u.submitter);
-        f.call({ r: s, f: u.target }, u.target.enctype === "multipart/form-data" ? g : new URLSearchParams(g));
+        const h = new FormData(u.target, u.submitter);
+        g.call({ r: o, f: u.target }, u.target.enctype === "multipart/form-data" ? h : new URLSearchParams(h));
       }
     }
-    delegateEvents(["click", "submit"]), document.addEventListener("click", C), e && (document.addEventListener("mousemove", P, { passive: true }), document.addEventListener("focusin", y, { passive: true }), document.addEventListener("touchstart", y, { passive: true })), document.addEventListener("submit", k), onCleanup(() => {
-      document.removeEventListener("click", C), e && (document.removeEventListener("mousemove", P), document.removeEventListener("focusin", y), document.removeEventListener("touchstart", y)), document.removeEventListener("submit", k);
+    delegateEvents(["click", "submit"]), document.addEventListener("click", $), e && (document.addEventListener("mousemove", f, { passive: true }), document.addEventListener("focusin", T, { passive: true }), document.addEventListener("touchstart", T, { passive: true })), document.addEventListener("submit", b), onCleanup(() => {
+      document.removeEventListener("click", $), e && (document.removeEventListener("mousemove", f), document.removeEventListener("focusin", T), document.removeEventListener("touchstart", T)), document.removeEventListener("submit", b);
     });
   };
 }
-function Ft(e) {
-  if (isServer) return Ht(e);
-  const r = () => {
-    const n = window.location.pathname.replace(/^\/+/, "/") + window.location.search, s = window.history.state && window.history.state._depth && Object.keys(window.history.state).length === 1 ? void 0 : window.history.state;
-    return { value: n + window.location.hash, state: s };
+function wt(e) {
+  if (isServer) return vt(e);
+  const s = () => {
+    const r = window.location.pathname.replace(/^\/+/, "/") + window.location.search, o = window.history.state && window.history.state._depth && Object.keys(window.history.state).length === 1 ? void 0 : window.history.state;
+    return { value: r + window.location.hash, state: o };
   }, t = ye();
-  return It({ get: r, set({ value: n, replace: s, scroll: o, state: i }) {
-    s ? window.history.replaceState(qe(i), "", n) : window.history.pushState(i, "", n), Ot(decodeURIComponent(window.location.hash.slice(1)), o), V();
-  }, init: (n) => Ut(window, "popstate", Ie(n, (s) => {
-    if (s && s < 0) return !t.confirm(s);
+  return Tt({ get: s, set({ value: r, replace: o, scroll: n, state: a }) {
+    o ? window.history.replaceState(qe(a), "", r) : window.history.pushState(a, "", r), Ct(decodeURIComponent(window.location.hash.slice(1)), n), V();
+  }, init: (r) => At(window, "popstate", Ie(r, (o) => {
+    if (o && o < 0) return !t.confirm(o);
     {
-      const o = r();
-      return !t.confirm(o.value, { state: o.state });
+      const n = s();
+      return !t.confirm(n.value, { state: n.state });
     }
-  })), create: qt(e.preload, e.explicitLinks, e.actionBase, e.transformUrl), utils: { go: (n) => window.history.go(n), beforeLeave: t } })(e);
+  })), create: yt(e.preload, e.explicitLinks, e.actionBase, e.transformUrl), utils: { go: (r) => window.history.go(r), beforeLeave: t } })(e);
 }
-var se = ["<div", ' class="', '" style="', '"></div>'], jt = ["<div", ' class="cursor-magnetic-ring" style="', '"></div>'], Bt = ["<div", ' class="cursor-trail-particle" style="', '"></div>'];
-const Xt = () => {
-  const [e, r] = createSignal({ x: 0, y: 0 }), [t, n] = createSignal([]), [s, o] = createSignal(false), [i, a] = createSignal(false), [c, l] = createSignal({ x: 0, y: 0 }), [m, C] = createSignal({ x: 0, y: 0 }), [y, P] = createSignal(false), k = 8, u = 15;
-  return onMount(() => {
-    let p = 0, f = 0, g = performance.now();
-    const N = document.createElement("style");
-    N.textContent = "* { cursor: none !important; }", document.head.appendChild(N);
-    const b = (x) => {
-      const $ = performance.now(), R = $ - g;
-      if (R > 0) {
-        const W = Math.abs((x.clientX - p) / R) * 20, H = Math.abs((x.clientY - f) / R) * 20, xe = Math.min(Math.sqrt(W * W + H * H), 10);
-        l({ x: W, y: H }), document.documentElement.style.setProperty("--cursor-speed", xe);
-      }
-      C(e()), r({ x: x.clientX, y: x.clientY }), p = x.clientX, f = x.clientY, g = $;
-    }, L = (x) => {
-      const $ = x.target, R = $.tagName === "INPUT" || $.tagName === "TEXTAREA", W = $.tagName === "A" || $.tagName === "BUTTON" || $.classList.contains("clickable") || $.closest("button") || $.closest("a") || R;
-      P(R), o(W);
-    }, M = (x) => {
-      a(true), fe(x.clientX, x.clientY);
-      const $ = x.target, R = $.tagName === "INPUT" || $.tagName === "TEXTAREA";
-      P(R);
-    }, K = () => {
-      a(false);
-    }, fe = (x, $) => {
-    }, Pe = setInterval(() => {
-      n((x) => [...x, { ...e(), timestamp: Date.now() }].slice(-8));
-    }, u), z = (x) => {
-      const $ = x.target, R = x.relatedTarget;
-      ($.tagName === "INPUT" || $.tagName === "TEXTAREA") && (!R || R.tagName !== "INPUT" && R.tagName !== "TEXTAREA") && P(false);
-    };
-    document.addEventListener("mousemove", b), document.addEventListener("mouseover", L), document.addEventListener("mouseout", z), document.addEventListener("mousedown", M), document.addEventListener("mouseup", K), document.body.style.cursor = "none", onCleanup(() => {
-      document.removeEventListener("mousemove", b), document.removeEventListener("mouseover", L), document.removeEventListener("mouseout", z), document.removeEventListener("mousedown", M), document.removeEventListener("mouseup", K), clearInterval(Pe);
-    });
-  }), [t().map((p, f) => ssr(Bt, ssrHydrationKey(), `left:${escape(p.x, true)}px;top:${escape(p.y, true)}px` + (";opacity:" + escape(f, true) / escape(k, true)) + `;transform:scale(${0.5 + escape(f, true) / escape(k, true) / 2});animation-delay:${escape(f, true) * 50}ms`)), ssr(se, ssrHydrationKey(), `cursor-outer ${s() ? "hovering" : ""} ${i() ? "clicking" : ""} ${y() ? "text-input" : ""}`, `left:${escape(e().x, true)}px;top:${escape(e().y, true)}px`), ssr(se, ssrHydrationKey(), `cursor-inner ${s() ? "hovering" : ""} ${i() ? "clicking" : ""} ${y() ? "text-input" : ""}`, `left:${escape(e().x, true)}px;top:${escape(e().y, true)}px`), ssr(jt, ssrHydrationKey(), `left:${escape(e().x, true)}px;top:${escape(e().y, true)}px` + (";opacity:" + (s() ? 1 : 0)) + `;transform:translate(-50%, -50%) scale(${s() ? 1 : 0}) rotate(${escape(e().x, true) / 5}deg)`)];
-};
-function Kt() {
-  return createComponent$1(Ft, { root: (e) => createComponent$1(Et, { get children() {
-    return [createComponent$1(St, { children: "Pulsix" }), createComponent$1(Xt, {}), createComponent$1(y, {}), createComponent$1(Suspense, { get children() {
-      return e.children;
-    } })];
-  } }), get children() {
-    return createComponent$1($t, {});
-  } });
-}
-const he = isServer ? (e) => {
-  const r = getRequestEvent();
-  return r.response.status = e.code, r.response.statusText = e.text, onCleanup(() => !r.nativeEvent.handled && !r.complete && (r.response.status = 200)), null;
-} : (e) => null;
-var zt = ["<span", ' style="font-size:1.5em;text-align:center;position:fixed;left:0px;bottom:55%;width:100%;">', "</span>"], Yt = ["<span", ' style="font-size:1.5em;text-align:center;position:fixed;left:0px;bottom:55%;width:100%;">500 | Internal Server Error</span>'];
-const Jt = (e) => {
-  const r = isServer ? "500 | Internal Server Error" : "Error | Uncaught Client Exception";
-  return createComponent$1(ErrorBoundary, { fallback: (t) => (console.error(t), [ssr(zt, ssrHydrationKey(), escape(r)), createComponent$1(he, { code: 500 })]), get children() {
-    return e.children;
-  } });
-}, Vt = (e) => {
-  let r = false;
-  const t = catchError(() => e.children, (n) => {
-    console.error(n), r = !!n;
-  });
-  return r ? [ssr(Yt, ssrHydrationKey()), createComponent$1(he, { code: 500 })] : t;
-};
-var ne = ["<script", ">", "<\/script>"], Gt = ["<script", ' type="module"', " async", "><\/script>"], Qt = ["<script", ' type="module" async', "><\/script>"];
-const Zt = ssr("<!DOCTYPE html>");
-function ge(e, r, t = []) {
-  for (let n = 0; n < r.length; n++) {
-    const s = r[n];
-    if (s.path !== e[0].path) continue;
-    let o = [...t, s];
-    if (s.children) {
-      const i = e.slice(1);
-      if (i.length === 0 || (o = ge(i, s.children, o), !o)) continue;
-    }
-    return o;
+const de = ["http://localhost:3000", "https://tuo-dominio-produzione.com", "https://dominio-sito-esterno-1.com"];
+async function Et(e) {
+  const s = e.request.headers.get("authorization");
+  if (!s || !s.startsWith("Bearer ")) return i({ error: "Authentication required", code: "NO_AUTH_HEADER" }, { status: 401 });
+  const t$1 = s.substring(7);
+  let r = null;
+  const o = o$3.env.JWT_SECRET || "", n = o$3.env.JWT_ISSUER || "pulsix";
+  if (!o) return console.error("[Auth Logic] Errore critico: JWT_SECRET non configurato!"), i({ error: "Server configuration error", code: "JWT_SECRET_MISSING" }, { status: 500 });
+  try {
+    r = O$3.verify(t$1, o, { issuer: n });
+  } catch (c) {
+    let l = "Invalid or expired token", d = "INVALID_TOKEN";
+    return c instanceof O$3.TokenExpiredError ? (l = "Token expired", d = "TOKEN_EXPIRED", console.log(`[Auth Logic] Token scaduto per ${e.request.url}.`)) : c instanceof O$3.JsonWebTokenError ? (l = `Invalid token (${c.message})`, d = "TOKEN_INVALID_SIGNATURE_OR_PAYLOAD", console.warn(`[Auth Logic] Errore verifica token per ${e.request.url}: ${c.message}`)) : console.error(`[Auth Logic] Errore verifica token (sconosciuto) per ${e.request.url}:`, c), i({ error: l, code: d }, { status: 401 });
+  }
+  if (typeof r != "object" || r === null || typeof r.sub != "number" || typeof r.jti != "string") return console.log("[Auth Logic] Payload token decodificato non valido. Payload:", r), i({ error: "Invalid token payload structure or types", code: "INVALID_TOKEN_PAYLOAD" }, { status: 401 });
+  const a = r.sub, i$1 = r.jti;
+  try {
+    const l = (await t.query("SELECT id, state FROM auth.users WHERE id = $1", [a])).rows[0];
+    return l ? l.state === "blocked" || l.state === "sospended" ? (console.warn(`[Auth Logic] Accesso negato per utente ${a} (Stato: ${l.state})`), i({ error: `User account is ${l.state}`, code: `USER_${l.state.toUpperCase()}` }, { status: 403 })) : (console.log(`[Auth Logic] Utente ${a} autenticato per ${e.request.url}.`), { user: { id: a, tokenId: i$1, state: l.state } }) : (console.warn(`[Auth Logic] Utente ${a} non trovato.`), i({ error: "User associated with token not found", code: "USER_NOT_FOUND" }, { status: 401 }));
+  } catch (c) {
+    return console.error(`[Auth Logic] Errore DB check utente ${a}:`, c), i({ error: "Internal server error during user check" }, { status: 500 });
   }
 }
-function er(e) {
-  const r = getRequestEvent(), t = r.nonce;
-  let n = [];
+async function Lt(e) {
+  const s = e.nativeEvent;
+  if (isPreflightRequest(s)) {
+    const t = e.request.headers.get("origin");
+    return handleCors(s, { origin: (o) => !o || de.includes(o), methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], allowHeaders: ["Authorization", "Content-Type", "Accept", "X-Requested-With"], credentials: true, maxAge: "86400" }) ? new Response(null, { status: 204 }) : (console.error(`[CORS Middleware] Preflight check failed for origin: ${t}`), i({ error: "CORS Preflight Check Failed" }, { status: 403 }));
+  }
+}
+async function St(e) {
+}
+const Wt = ["/API/Auth/login", "/API/Auth/registration", "/API/Auth/refresh", "/API/Auth/logout"], It = "/API/";
+async function Ut(e) {
+  var _a;
+  const t = new URL(e.request.url).pathname;
+  if (!t.startsWith(It)) return;
+  let r = null;
+  if (Wt.some((a) => {
+    let i = false;
+    return typeof a == "string" ? i = a.endsWith("/") ? t.startsWith(a) : t === a : i = a.test(t), i && (r = a), i;
+  })) {
+    console.log(`[ApiAuth Middleware] SKIPPING AUTH for public API path "${t}" (matched: ${r})`);
+    return;
+  }
+  console.log(`[ApiAuth Middleware] Path "${t}" is a PROTECTED API endpoint. Running auth check...`);
+  const n = await Et(e);
+  if (n instanceof Response) return console.warn(`[ApiAuth Middleware] Auth check failed for API "${t}". Status: ${n.status}`), n;
+  e.locals.user = n.user, console.log(`[ApiAuth Middleware] Auth successful for user ${(_a = n.user) == null ? void 0 : _a.id} on API path "${t}"`);
+}
+const ee = Pt({ onRequest: [(e) => {
+  e.locals.startTime = Date.now();
+}, Lt, St, Ut], onBeforeResponse: [(e) => {
+  appendCorsHeaders(e.nativeEvent, { origin: (s) => !s || de.includes(s), credentials: true });
+}, (e) => {
+  const s = e.locals;
+  s.startTime && (Date.now() - s.startTime, new URL(e.request.url).pathname);
+}] }), R = { NORMAL: 0, WILDCARD: 1, PLACEHOLDER: 2 };
+function Dt(e = {}) {
+  const s = { options: e, rootNode: me(), staticRoutesMap: {} }, t = (r) => e.strictTrailingSlash ? r : r.replace(/\/$/, "") || "/";
+  if (e.routes) for (const r in e.routes) te(s, t(r), e.routes[r]);
+  return { ctx: s, lookup: (r) => Mt(s, t(r)), insert: (r, o) => te(s, t(r), o), remove: (r) => Ot(s, t(r)) };
+}
+function Mt(e, s) {
+  const t = e.staticRoutesMap[s];
+  if (t) return t.data;
+  const r = s.split("/"), o = {};
+  let n = false, a = null, i = e.rootNode, c = null;
+  for (let l = 0; l < r.length; l++) {
+    const d = r[l];
+    i.wildcardChildNode !== null && (a = i.wildcardChildNode, c = r.slice(l).join("/"));
+    const $ = i.children.get(d);
+    if ($ === void 0) {
+      if (i && i.placeholderChildren.length > 1) {
+        const T = r.length - l;
+        i = i.placeholderChildren.find((f) => f.maxDepth === T) || null;
+      } else i = i.placeholderChildren[0] || null;
+      if (!i) break;
+      i.paramName && (o[i.paramName] = d), n = true;
+    } else i = $;
+  }
+  return (i === null || i.data === null) && a !== null && (i = a, o[i.paramName || "_"] = c, n = true), i ? n ? { ...i.data, params: n ? o : void 0 } : i.data : null;
+}
+function te(e, s, t) {
+  let r = true;
+  const o = s.split("/");
+  let n = e.rootNode, a = 0;
+  const i = [n];
+  for (const c of o) {
+    let l;
+    if (l = n.children.get(c)) n = l;
+    else {
+      const d = Nt(c);
+      l = me({ type: d, parent: n }), n.children.set(c, l), d === R.PLACEHOLDER ? (l.paramName = c === "*" ? `_${a++}` : c.slice(1), n.placeholderChildren.push(l), r = false) : d === R.WILDCARD && (n.wildcardChildNode = l, l.paramName = c.slice(3) || "_", r = false), i.push(l), n = l;
+    }
+  }
+  for (const [c, l] of i.entries()) l.maxDepth = Math.max(i.length - c, l.maxDepth || 0);
+  return n.data = t, r === true && (e.staticRoutesMap[s] = n), n;
+}
+function Ot(e, s) {
+  let t = false;
+  const r = s.split("/");
+  let o = e.rootNode;
+  for (const n of r) if (o = o.children.get(n), !o) return t;
+  if (o.data) {
+    const n = r.at(-1) || "";
+    o.data = null, Object.keys(o.children).length === 0 && o.parent && (o.parent.children.delete(n), o.parent.wildcardChildNode = null, o.parent.placeholderChildren = []), t = true;
+  }
+  return t;
+}
+function me(e = {}) {
+  return { type: e.type || R.NORMAL, maxDepth: 0, parent: e.parent || null, children: /* @__PURE__ */ new Map(), data: e.data || null, paramName: e.paramName || null, wildcardChildNode: null, placeholderChildren: [] };
+}
+function Nt(e) {
+  return e.startsWith("**") ? R.WILDCARD : e[0] === ":" || e === "*" ? R.PLACEHOLDER : R.NORMAL;
+}
+const he = [{ page: true, $component: { src: "src/routes/index.tsx?pick=default&pick=$css", build: () => import('../build/index27.mjs'), import: () => import('../build/index27.mjs') }, path: "/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/index.tsx" }, { page: true, $component: { src: "src/routes/[...404].tsx?pick=default&pick=$css", build: () => import('../build/_...404_2.mjs'), import: () => import('../build/_...404_2.mjs') }, path: "/*404", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/[...404].tsx" }, { page: false, $POST: { src: "src/routes/API/prova.ts?pick=POST", build: () => import('../build/prova2.mjs'), import: () => import('../build/prova2.mjs') }, path: "/API/prova", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/prova.ts" }, { page: true, $component: { src: "src/routes/UI/Cursor.tsx?pick=default&pick=$css", build: () => import('../build/Cursor2.mjs'), import: () => import('../build/Cursor2.mjs') }, path: "/UI/Cursor", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/UI/Cursor.tsx" }, { page: true, $component: { src: "src/routes/UI/Loading.tsx?pick=default&pick=$css", build: () => import('../build/Loading2.mjs'), import: () => import('../build/Loading2.mjs') }, path: "/UI/Loading", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/UI/Loading.tsx" }, { page: true, $component: { src: "src/routes/UI/Waves.tsx?pick=default&pick=$css", build: () => import('../build/Waves2.mjs'), import: () => import('../build/Waves2.mjs') }, path: "/UI/Waves", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/UI/Waves.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/index.tsx?pick=default&pick=$css", build: () => import('../build/index28.mjs'), import: () => import('../build/index28.mjs') }, path: "/(Pages)/LoginRegistration/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/riv.tsx?pick=default&pick=$css", build: () => import('../build/riv2.mjs'), import: () => import('../build/riv2.mjs') }, path: "/(Pages)/LoginRegistration/riv", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/riv.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/index.tsx?pick=default&pick=$css", build: () => import('../build/index32.mjs'), import: () => import('../build/index32.mjs') }, path: "/(Pages)/Wallets/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css", build: () => import('../build/_...slug_2.mjs'), import: () => import('../build/_...slug_2.mjs') }, path: "/(Pages)/Wallets/*slug", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/[...slug].tsx" }, { page: false, $POST: { src: "src/routes/API/Auth/logout.ts?pick=POST", build: () => import('../build/logout2.mjs'), import: () => import('../build/logout2.mjs') }, path: "/API/Auth/logout", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Auth/logout.ts" }, { page: false, $POST: { src: "src/routes/API/Auth/refresh.ts?pick=POST", build: () => import('../build/refresh2.mjs'), import: () => import('../build/refresh2.mjs') }, path: "/API/Auth/refresh", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Auth/refresh.ts" }, { page: false, $POST: { src: "src/routes/API/lib/addTransaction.ts?pick=POST", build: () => import('../build/addTransaction3.mjs'), import: () => import('../build/addTransaction3.mjs') }, path: "/API/lib/addTransaction", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/lib/addTransaction.ts" }, { page: false, $POST: { src: "src/routes/API/lib/getWalletsPaths.ts?pick=POST", build: () => import('../build/getWalletsPaths2.mjs'), import: () => import('../build/getWalletsPaths2.mjs') }, path: "/API/lib/getWalletsPaths", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/lib/getWalletsPaths.ts" }, { page: false, $POST: { src: "src/routes/API/Wallets/addWallet.ts?pick=POST", build: () => import('../build/addWallet2.mjs'), import: () => import('../build/addWallet2.mjs') }, path: "/API/Wallets/addWallet", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/addWallet.ts" }, { page: true, $component: { src: "src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=$css", build: () => import('../build/deleteWallet2.mjs'), import: () => import('../build/deleteWallet2.mjs') }, path: "/API/Wallets/deleteWallet", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/deleteWallet.ts" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css", build: () => import('../build/index42.mjs'), import: () => import('../build/index42.mjs') }, path: "/(Pages)/(lib)/Login/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Login/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css", build: () => import('../build/index52.mjs'), import: () => import('../build/index52.mjs') }, path: "/(Pages)/(lib)/Transactions/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/components/Toggle.tsx?pick=default&pick=$css", build: () => import('../build/Toggle2.mjs'), import: () => import('../build/Toggle2.mjs') }, path: "/(Pages)/LoginRegistration/components/Toggle", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/components/Toggle.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css", build: () => import('../build/index62.mjs'), import: () => import('../build/index62.mjs') }, path: "/(Pages)/LoginRegistration/Login/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Login/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/index.tsx?pick=default&pick=$css", build: () => import('../build/index72.mjs'), import: () => import('../build/index72.mjs') }, path: "/(Pages)/LoginRegistration/Registration/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/Wallet/index.tsx?pick=default&pick=$css", build: () => import('../build/index82.mjs'), import: () => import('../build/index82.mjs') }, path: "/(Pages)/Wallets/Wallet/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/Wallet/index.tsx" }, { page: false, $POST: { src: "src/routes/API/Auth/login/index.ts?pick=POST", build: () => import('../build/index92.mjs'), import: () => import('../build/index92.mjs') }, path: "/API/Auth/login/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Auth/login/index.ts" }, { page: false, $POST: { src: "src/routes/API/Wallets/Wallet/addTransaction.ts?pick=POST", build: () => import('../build/addTransaction22.mjs'), import: () => import('../build/addTransaction22.mjs') }, path: "/API/Wallets/Wallet/addTransaction", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/Wallet/addTransaction.ts" }, { page: true, $component: { src: "src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=$css", build: () => import('../build/getTransactions2.mjs'), import: () => import('../build/getTransactions2.mjs') }, path: "/API/Wallets/Wallet/getTransactions", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/Wallet/getTransactions.ts" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx?pick=default&pick=$css", build: () => import('../build/pathWallets2.mjs'), import: () => import('../build/pathWallets2.mjs') }, path: "/(Pages)/(lib)/Transactions/utils/pathWallets", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/utils/pathWallets.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx?pick=default&pick=$css", build: () => import('../build/index102.mjs'), import: () => import('../build/index102.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Credentials/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Credentials/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx?pick=default&pick=$css", build: () => import('../build/index112.mjs'), import: () => import('../build/index112.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Email/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Email/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx?pick=default&pick=$css", build: () => import('../build/index122.mjs'), import: () => import('../build/index122.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Phone/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Phone/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx?pick=default&pick=$css", build: () => import('../build/sendOtp2.mjs'), import: () => import('../build/sendOtp2.mjs') }, path: "/(Pages)/LoginRegistration/Registration/Phone/sendOtp", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/Phone/sendOtp.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css", build: () => import('../build/index132.mjs'), import: () => import('../build/index132.mjs') }, path: "/(Pages)/Wallets/_components/addWallet/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/addWallet/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/Card/index.tsx?pick=default&pick=$css", build: () => import('../build/index142.mjs'), import: () => import('../build/index142.mjs') }, path: "/(Pages)/Wallets/_components/Card/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/Card/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/Card3D/index.tsx?pick=default&pick=$css", build: () => import('../build/index152.mjs'), import: () => import('../build/index152.mjs') }, path: "/(Pages)/Wallets/_components/Card3D/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/Card3D/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts?pick=default&pick=$css", build: () => import('../build/preLoader2.mjs'), import: () => import('../build/preLoader2.mjs') }, path: "/(Pages)/Wallets/_components/Card3D/preLoader", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/Card3D/preLoader.ts" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx?pick=default&pick=$css", build: () => import('../build/index162.mjs'), import: () => import('../build/index162.mjs') }, path: "/(Pages)/Wallets/_components/cardHolder/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/cardHolder/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx?pick=default&pick=$css", build: () => import('../build/index172.mjs'), import: () => import('../build/index172.mjs') }, path: "/(Pages)/Wallets/_components/SetWallet/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/SetWallet/index.tsx" }, { page: false, $POST: { src: "src/routes/API/Wallets/Wallet/addTransactionByFile/addTransactions.ts?pick=POST", build: () => import('../build/addTransactions2.mjs'), import: () => import('../build/addTransactions2.mjs') }, path: "/API/Wallets/Wallet/addTransactionByFile/addTransactions", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/Wallet/addTransactionByFile/addTransactions.ts" }, { page: false, $POST: { src: "src/routes/API/Wallets/Wallet/addTransactionByFile/uploadFile.ts?pick=POST", build: () => import('../build/uploadFile3.mjs'), import: () => import('../build/uploadFile3.mjs') }, path: "/API/Wallets/Wallet/addTransactionByFile/uploadFile", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/Wallet/addTransactionByFile/uploadFile.ts" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css", build: () => import('../build/index182.mjs'), import: () => import('../build/index182.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csv/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css", build: () => import('../build/index192.mjs'), import: () => import('../build/index192.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csvChat/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css", build: () => import('../build/mapper2.mjs'), import: () => import('../build/mapper2.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csvChat/mapper", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx?pick=default&pick=$css", build: () => import('../build/preview2.mjs'), import: () => import('../build/preview2.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csvChat/preview", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csvChat/preview.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css", build: () => import('../build/uploadFile22.mjs'), import: () => import('../build/uploadFile22.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csvChat/uploadFile", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx?pick=default&pick=$css", build: () => import('../build/otpInput2.mjs'), import: () => import('../build/otpInput2.mjs') }, path: "/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/components/inputOtp/otpInput.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx?pick=default&pick=$css", build: () => import('../build/index202.mjs'), import: () => import('../build/index202.mjs') }, path: "/(Pages)/LoginRegistration/Registration/components/ProgressBar/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/components/ProgressBar/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx?pick=default&pick=$css", build: () => import('../build/index212.mjs'), import: () => import('../build/index212.mjs') }, path: "/(Pages)/LoginRegistration/Registration/components/spline/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/LoginRegistration/Registration/components/spline/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx?pick=default&pick=$css", build: () => import('../build/index222.mjs'), import: () => import('../build/index222.mjs') }, path: "/(Pages)/Wallets/Wallet/components/table.tsx/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/Wallet/components/table.tsx/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx?pick=default&pick=$css", build: () => import('../build/Card2.mjs'), import: () => import('../build/Card2.mjs') }, path: "/(Pages)/Wallets/_components/cardHolder/Card/Card", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/Wallets/_components/cardHolder/Card/Card.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css", build: () => import('../build/index232.mjs'), import: () => import('../build/index232.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csv/mapper/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx?pick=default&pick=$css", build: () => import('../build/index242.mjs'), import: () => import('../build/index242.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csv/Preview/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csv/Preview/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css", build: () => import('../build/index252.mjs'), import: () => import('../build/index252.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csv/Upload/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx" }, { page: true, $component: { src: "src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx?pick=default&pick=$css", build: () => import('../build/index262.mjs'), import: () => import('../build/index262.mjs') }, path: "/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/", filePath: "C:/Users/Matteo/Desktop/Pulsix/src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/DropZone/index.tsx" }], _t = Ht(he.filter((e) => e.page));
+function Ht(e) {
+  function s(t, r, o, n) {
+    const a = Object.values(t).find((i) => o.startsWith(i.id + "/"));
+    return a ? (s(a.children || (a.children = []), r, o.slice(a.id.length)), t) : (t.push({ ...r, id: o, path: o.replace(/\([^)/]+\)/g, "").replace(/\/+/g, "/") }), t);
+  }
+  return e.sort((t, r) => t.path.length - r.path.length).reduce((t, r) => s(t, r, r.path, r.path), []);
+}
+function Ft(e, s) {
+  const t = jt.lookup(e);
+  if (t && t.route) {
+    const r = s === "HEAD" ? t.route.$HEAD || t.route.$GET : t.route[`$${s}`];
+    return r === void 0 ? void 0 : { handler: r, params: t.params };
+  }
+}
+function qt(e) {
+  return e.$HEAD || e.$GET || e.$POST || e.$PUT || e.$PATCH || e.$DELETE;
+}
+const jt = Dt({ routes: he.reduce((e, s) => {
+  if (!qt(s)) return e;
+  let t = s.path.replace(/\([^)/]+\)/g, "").replace(/\/+/g, "/").replace(/\*([^/]*)/g, (r, o) => `**:${o}`).split("/").map((r) => r.startsWith(":") || r.startsWith("*") ? r : encodeURIComponent(r)).join("/");
+  if (/:[^/]*\?/g.test(t)) throw new Error(`Optional parameters are not supported in API routes: ${t}`);
+  if (e[t]) throw new Error(`Duplicate API routes for "${t}" found at "${e[t].route.path}" and "${s.path}"`);
+  return e[t] = { route: s }, e;
+}, {}) });
+var Kt = " ";
+const zt = { style: (e) => ssrElement("style", e.attrs, () => e.children, true), link: (e) => ssrElement("link", e.attrs, void 0, true), script: (e) => e.attrs.src ? ssrElement("script", mergeProps(() => e.attrs, { get id() {
+  return e.key;
+} }), () => ssr(Kt), true) : null, noscript: (e) => ssrElement("noscript", e.attrs, () => escape(e.children), true) };
+function O(e, s) {
+  let { tag: t, attrs: { key: r, ...o } = { key: void 0 }, children: n } = e;
+  return zt[t]({ attrs: { ...o, nonce: s }, key: r, children: n });
+}
+function Jt(e, s, t, r = "default") {
+  return lazy(async () => {
+    var _a;
+    {
+      const n = (await e.import())[r], i = (await ((_a = s.inputs) == null ? void 0 : _a[e.src].assets())).filter((l) => l.tag === "style" || l.attrs.rel === "stylesheet");
+      return { default: (l) => [...i.map((d) => O(d)), createComponent(n, l)] };
+    }
+  });
+}
+function fe() {
+  function e(t) {
+    return { ...t, ...t.$$route ? t.$$route.require().route : void 0, info: { ...t.$$route ? t.$$route.require().route.info : {}, filesystem: true }, component: t.$component && Jt(t.$component, globalThis.MANIFEST.client, globalThis.MANIFEST.ssr), children: t.children ? t.children.map(e) : void 0 };
+  }
+  return _t.map(e);
+}
+let se;
+const Gt = isServer ? () => getRequestEvent().routes : () => se || (se = fe());
+function Vt(e) {
+  const s = ye$1(e.nativeEvent, "flash");
+  if (s) try {
+    let t = JSON.parse(s);
+    if (!t || !t.result) return;
+    const r = [...t.input.slice(0, -1), new Map(t.input[t.input.length - 1])], o = t.error ? new Error(t.result) : t.result;
+    return { input: r, url: t.url, pending: false, result: t.thrown ? void 0 : o, error: t.thrown ? o : void 0 };
+  } catch (t) {
+    console.error(t);
+  } finally {
+    Re$1(e.nativeEvent, "flash", "", { maxAge: 0 });
+  }
+}
+async function Xt(e) {
+  const s = globalThis.MANIFEST.client;
+  return globalThis.MANIFEST.ssr, e.response.headers.set("Content-Type", "text/html"), Object.assign(e, { manifest: await s.json(), assets: [...await s.inputs[s.handler].assets()], router: { submission: Vt(e) }, routes: fe(), complete: false, $islands: /* @__PURE__ */ new Set() });
+}
+const Yt = /* @__PURE__ */ new Set([301, 302, 303, 307, 308]);
+function N(e) {
+  return e.status && Yt.has(e.status) ? e.status : 302;
+}
+function Zt(e, s, t = {}, r) {
+  return eventHandler({ handler: (o) => {
+    const n = He$1(o);
+    return provideRequestEvent(n, async () => {
+      const a = Ft(new URL(n.request.url).pathname, n.request.method);
+      if (a) {
+        const f = await a.handler.import(), b = n.request.method === "HEAD" ? f.HEAD || f.GET : f[n.request.method];
+        n.params = a.params || {}, sharedConfig.context = { event: n };
+        const u = await b(n);
+        if (u !== void 0) return u;
+        if (n.request.method !== "GET") throw new Error(`API handler for ${n.request.method} "${n.request.url}" did not return a response.`);
+      }
+      const i = await s(n), c = typeof t == "function" ? await t(i) : { ...t }, l = c.mode || "stream";
+      if (c.nonce && (i.nonce = c.nonce), l === "sync") {
+        const f = renderToString(() => (sharedConfig.context.event = i, e(i)), c);
+        if (i.complete = true, i.response && i.response.headers.get("Location")) {
+          const b = N(i.response);
+          return ge$1(o, i.response.headers.get("Location"), b);
+        }
+        return f;
+      }
+      if (c.onCompleteAll) {
+        const f = c.onCompleteAll;
+        c.onCompleteAll = (b) => {
+          oe(i)(b), f(b);
+        };
+      } else c.onCompleteAll = oe(i);
+      if (c.onCompleteShell) {
+        const f = c.onCompleteShell;
+        c.onCompleteShell = (b) => {
+          re(i, o)(), f(b);
+        };
+      } else c.onCompleteShell = re(i, o);
+      const d = renderToStream(() => (sharedConfig.context.event = i, e(i)), c);
+      if (i.response && i.response.headers.get("Location")) {
+        const f = N(i.response);
+        return ge$1(o, i.response.headers.get("Location"), f);
+      }
+      if (l === "async") return d;
+      const { writable: $, readable: T } = new TransformStream();
+      return d.pipeTo($), T;
+    });
+  } });
+}
+function re(e, s) {
+  return () => {
+    if (e.response && e.response.headers.get("Location")) {
+      const t = N(e.response);
+      b$2(s, t), me$1(s, "Location", e.response.headers.get("Location"));
+    }
+  };
+}
+function oe(e) {
+  return ({ write: s }) => {
+    e.complete = true;
+    const t = e.response && e.response.headers.get("Location");
+    t && s(`<script>window.location="${t}"<\/script>`);
+  };
+}
+function Qt(e, s, t) {
+  return Zt(e, Xt, s);
+}
+const ge = createContext$1(), Pe = ["title", "meta"], _ = [], H = ["name", "http-equiv", "content", "charset", "media"].concat(["property"]), I = (e, s) => {
+  const t = Object.fromEntries(Object.entries(e.props).filter(([r]) => s.includes(r)).sort());
+  return (Object.hasOwn(t, "name") || Object.hasOwn(t, "property")) && (t.name = t.name || t.property, delete t.property), e.tag + JSON.stringify(t);
+};
+function es() {
+  if (!sharedConfig.context) {
+    const t = document.head.querySelectorAll("[data-sm]");
+    Array.prototype.forEach.call(t, (r) => r.parentNode.removeChild(r));
+  }
+  const e = /* @__PURE__ */ new Map();
+  function s(t) {
+    if (t.ref) return t.ref;
+    let r = document.querySelector(`[data-sm="${t.id}"]`);
+    return r ? (r.tagName.toLowerCase() !== t.tag && (r.parentNode && r.parentNode.removeChild(r), r = document.createElement(t.tag)), r.removeAttribute("data-sm")) : r = document.createElement(t.tag), r;
+  }
+  return { addTag(t) {
+    if (Pe.indexOf(t.tag) !== -1) {
+      const n = t.tag === "title" ? _ : H, a = I(t, n);
+      e.has(a) || e.set(a, []);
+      let i = e.get(a), c = i.length;
+      i = [...i, t], e.set(a, i);
+      let l = s(t);
+      t.ref = l, spread(l, t.props);
+      let d = null;
+      for (var r = c - 1; r >= 0; r--) if (i[r] != null) {
+        d = i[r];
+        break;
+      }
+      return l.parentNode != document.head && document.head.appendChild(l), d && d.ref && d.ref.parentNode && document.head.removeChild(d.ref), c;
+    }
+    let o = s(t);
+    return t.ref = o, spread(o, t.props), o.parentNode != document.head && document.head.appendChild(o), -1;
+  }, removeTag(t, r) {
+    const o = t.tag === "title" ? _ : H, n = I(t, o);
+    if (t.ref) {
+      const a = e.get(n);
+      if (a) {
+        if (t.ref.parentNode) {
+          t.ref.parentNode.removeChild(t.ref);
+          for (let i = r - 1; i >= 0; i--) a[i] != null && document.head.appendChild(a[i].ref);
+        }
+        a[r] = null, e.set(n, a);
+      } else t.ref.parentNode && t.ref.parentNode.removeChild(t.ref);
+    }
+  } };
+}
+function ts() {
+  const e = [];
+  return useAssets(() => ssr(os(e))), { addTag(s) {
+    if (Pe.indexOf(s.tag) !== -1) {
+      const t = s.tag === "title" ? _ : H, r = I(s, t), o = e.findIndex((n) => n.tag === s.tag && I(n, t) === r);
+      o !== -1 && e.splice(o, 1);
+    }
+    return e.push(s), e.length;
+  }, removeTag(s, t) {
+  } };
+}
+const ss = (e) => {
+  const s = isServer ? ts() : es();
+  return createComponent$1(ge.Provider, { value: s, get children() {
+    return e.children;
+  } });
+}, xe = (e, s, t) => (rs({ tag: e, props: s, setting: t, id: createUniqueId(), get name() {
+  return s.name || s.property;
+} }), null);
+function rs(e) {
+  const s = useContext(ge);
+  if (!s) throw new Error("<MetaProvider /> should be in the tree");
+  createRenderEffect(() => {
+    const t = s.addTag(e);
+    onCleanup(() => s.removeTag(e, t));
+  });
+}
+function os(e) {
+  return e.map((s) => {
+    var _a, _b;
+    const r = Object.keys(s.props).map((n) => n === "children" ? "" : ` ${n}="${escape(s.props[n], true)}"`).join("");
+    let o = s.props.children;
+    return Array.isArray(o) && (o = o.join("")), ((_a = s.setting) == null ? void 0 : _a.close) ? `<${s.tag} data-sm="${s.id}"${r}>${((_b = s.setting) == null ? void 0 : _b.escape) ? escape(o) : o || ""}</${s.tag}>` : `<${s.tag} data-sm="${s.id}"${r}/>`;
+  }).join("");
+}
+const ns = (e) => xe("title", e, { escape: true, close: true }), is = (e) => xe("link", e);
+var as = ["<div", ` class="fancy-spinner-container"><style>
+          .fancy-spinner-container {
+            /* Positioning and perspective for the container */
+            position: relative; /* Changed from absolute for easier embedding */
+            width: 265px; /* Approximate width */
+            height: 265px; /* Approximate height */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 200px; /* For 3D effect */
+          }
+
+          .fancy-spinner-particle-i {
+            /* Absolute positioning for each particle's container */
+            display: block;
+            position: absolute;
+            /* Center the particle based on its own size */
+            left: 50%;
+            top: 50%;
+            margin-left: -32.5px;
+            margin-top: -32.5px;
+            width: 65px; /* Set width/height for transform origin */
+            height: 65px;
+          }
+
+          .fancy-spinner-particle-b {
+            /* Styles for the visible part of the particle */
+            display: block;
+            width: 65px;
+            height: 65px;
+            border: 2px solid white; /* White border, adjust color as needed */
+            opacity: 0; /* Start invisible */
+            transform: scale(0.7); /* Start slightly scaled down */
+
+            /* Apply the animation */
+            animation-name: spin;
+            animation-duration: 3s;
+            animation-iteration-count: infinite;
+            /* Custom cubic-bezier timing function from original SCSS */
+            animation-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.275);
+          }
+
+          /* Keyframes for the spin animation */
+          @keyframes spin {
+            0% {
+              transform: rotate(0deg);
+              opacity: 0; /* Ensure starts invisible */
+            }
+            40% {
+              /* Rotate, move slightly, become visible */
+              transform: rotate(-180deg) translateX(-32.5px);
+              opacity: 1;
+            }
+            100% {
+              /* Keep rotation, scale down, fade out (back to initial opacity 0) */
+              transform: rotate(-180deg) scale(0.7);
+              opacity: 0;
+            }
+          }
+        </style><div class="fancy-spinner">`, "</div></div>"], ls = ["<i", ' class="fancy-spinner-particle-i" style="', '"><b class="fancy-spinner-particle-b" style="', '"></b></i>'];
+const M = 50, cs = 100, us = 3, ps = () => {
+  const e = Array.from({ length: M });
+  return ssr(as, ssrHydrationKey(), escape(createComponent$1(For, { each: e, children: (s, t) => {
+    const r = t() + 1, o = r / M * 360, n = r * (us / M);
+    return ssr(ls, ssrHydrationKey(), `transform:rotate(${escape(o, true)}deg) translate3d(${escape(cs, true)}px, 0, 0)`, `animation-delay:${escape(n, true)}s`);
+  } })));
+};
+var ds = ["<div", ' class="', '">', "</div>"], ms = ["<div", ">Caricamento route...</div>"];
+const hs = ["/LoginRegistration"], fs = ["/", "/LoginRegistration", "/LoginRegistration/registration", "/LoginRegistration/Login", "/login"], gs = (e) => {
+  const s = Me(), t = De();
+  let r;
+  createEffect(() => {
+    const n = j.isLoading, a = j.isAuthenticated, i = t.pathname;
+    if (n) {
+      console.log("Effect Exit: Still loading.");
+      return;
+    }
+    console.log(i), r = hs.includes(i);
+    const c = fs.includes(i);
+    a || c || (console.log(`NOT AUTHENTICATED on PROTECTED path (${i}). Redirecting to /LoginRegistration.`), s("/LoginRegistration", { replace: true }));
+  });
+  const o = "/_build/manifest.webmanifest";
+  return createComponent$1(ss, { get children() {
+    return [createComponent$1(ns, { children: "Pulsix" }), createComponent$1(is, { rel: "manifest", href: o }), createComponent$1(J, {}), createComponent$1(Show, { get when() {
+      return !j.isLoading;
+    }, get fallback() {
+      return ssr(ds, ssrHydrationKey(), `${r ? "bg-black" : ""} fixed inset-0 flex items-center justify-center z-50`, escape(createComponent$1(ps, {})));
+    }, get children() {
+      return [createComponent$1(y, {}), createComponent$1(Suspense, { get fallback() {
+        return ssr(ms, ssrHydrationKey());
+      }, get children() {
+        return e.children;
+      } })];
+    } })];
+  } });
+};
+function Ps() {
+  return onMount(() => {
+    j.isAuthenticated || j.initialize();
+  }), createComponent$1(wt, { root: gs, get children() {
+    return createComponent$1(Gt, {});
+  } });
+}
+const be = isServer ? (e) => {
+  const s = getRequestEvent();
+  return s.response.status = e.code, s.response.statusText = e.text, onCleanup(() => !s.nativeEvent.handled && !s.complete && (s.response.status = 200)), null;
+} : (e) => null;
+var xs = ["<span", ' style="font-size:1.5em;text-align:center;position:fixed;left:0px;bottom:55%;width:100%;">', "</span>"], bs = ["<span", ' style="font-size:1.5em;text-align:center;position:fixed;left:0px;bottom:55%;width:100%;">500 | Internal Server Error</span>'];
+const ks = (e) => {
+  const s = isServer ? "500 | Internal Server Error" : "Error | Uncaught Client Exception";
+  return createComponent$1(ErrorBoundary, { fallback: (t) => (console.error(t), [ssr(xs, ssrHydrationKey(), escape(s)), createComponent$1(be, { code: 500 })]), get children() {
+    return e.children;
+  } });
+}, $s = (e) => {
+  let s = false;
+  const t = catchError(() => e.children, (r) => {
+    console.error(r), s = !!r;
+  });
+  return s ? [ssr(bs, ssrHydrationKey()), createComponent$1(be, { code: 500 })] : t;
+};
+var ne = ["<script", ">", "<\/script>"], Ts = ["<script", ' type="module"', " async", "><\/script>"], As = ["<script", ' type="module" async', "><\/script>"];
+const Cs = ssr("<!DOCTYPE html>");
+function ke(e, s, t = []) {
+  for (let r = 0; r < s.length; r++) {
+    const o = s[r];
+    if (o.path !== e[0].path) continue;
+    let n = [...t, o];
+    if (o.children) {
+      const a = e.slice(1);
+      if (a.length === 0 || (n = ke(a, o.children, n), !n)) continue;
+    }
+    return n;
+  }
+}
+function Rs(e) {
+  const s = getRequestEvent(), t = s.nonce;
+  let r = [];
   return Promise.resolve().then(async () => {
-    let s = [];
-    if (r.router && r.router.matches) {
-      const o = [...r.router.matches];
-      for (; o.length && (!o[0].info || !o[0].info.filesystem); ) o.shift();
-      const i = o.length && ge(o, r.routes);
-      if (i) {
-        const a = globalThis.MANIFEST.client.inputs;
-        for (let c = 0; c < i.length; c++) {
-          const l = i[c], m = a[l.$component.src];
-          s.push(m.assets());
+    let o = [];
+    if (s.router && s.router.matches) {
+      const n = [...s.router.matches];
+      for (; n.length && (!n[0].info || !n[0].info.filesystem); ) n.shift();
+      const a = n.length && ke(n, s.routes);
+      if (a) {
+        const i = globalThis.MANIFEST.client.inputs;
+        for (let c = 0; c < a.length; c++) {
+          const l = a[c], d = i[l.$component.src];
+          o.push(d.assets());
         }
       }
     }
-    n = await Promise.all(s).then((o) => [...new Map(o.flat().map((i) => [i.attrs.key, i])).values()].filter((i) => i.attrs.rel === "modulepreload" && !r.assets.find((a) => a.attrs.key === i.attrs.key)));
-  }), useAssets(() => n.length ? n.map((s) => q(s)) : void 0), createComponent$1(NoHydration, { get children() {
-    return [Zt, createComponent$1(Vt, { get children() {
+    r = await Promise.all(o).then((n) => [...new Map(n.flat().map((a) => [a.attrs.key, a])).values()].filter((a) => a.attrs.rel === "modulepreload" && !s.assets.find((i) => i.attrs.key === a.attrs.key)));
+  }), useAssets(() => r.length ? r.map((o) => O(o)) : void 0), createComponent$1(NoHydration, { get children() {
+    return [Cs, createComponent$1($s, { get children() {
       return createComponent$1(e.document, { get assets() {
-        return [createComponent$1(HydrationScript, {}), r.assets.map((s) => q(s, t))];
+        return [createComponent$1(HydrationScript, {}), s.assets.map((o) => O(o, t))];
       }, get scripts() {
-        return t ? [ssr(ne, ssrHydrationKey() + ssrAttribute("nonce", escape(t, true), false), `window.manifest = ${JSON.stringify(r.manifest)}`), ssr(Gt, ssrHydrationKey(), ssrAttribute("nonce", escape(t, true), false), ssrAttribute("src", escape(globalThis.MANIFEST.client.inputs[globalThis.MANIFEST.client.handler].output.path, true), false))] : [ssr(ne, ssrHydrationKey(), `window.manifest = ${JSON.stringify(r.manifest)}`), ssr(Qt, ssrHydrationKey(), ssrAttribute("src", escape(globalThis.MANIFEST.client.inputs[globalThis.MANIFEST.client.handler].output.path, true), false))];
+        return t ? [ssr(ne, ssrHydrationKey() + ssrAttribute("nonce", escape(t, true), false), `window.manifest = ${JSON.stringify(s.manifest)}`), ssr(Ts, ssrHydrationKey(), ssrAttribute("nonce", escape(t, true), false), ssrAttribute("src", escape(globalThis.MANIFEST.client.inputs[globalThis.MANIFEST.client.handler].output.path, true), false))] : [ssr(ne, ssrHydrationKey(), `window.manifest = ${JSON.stringify(s.manifest)}`), ssr(As, ssrHydrationKey(), ssrAttribute("src", escape(globalThis.MANIFEST.client.inputs[globalThis.MANIFEST.client.handler].output.path, true), false))];
       }, get children() {
         return createComponent$1(Hydration, { get children() {
-          return createComponent$1(Jt, { get children() {
-            return createComponent$1(Kt, {});
+          return createComponent$1(ks, { get children() {
+            return createComponent$1(Ps, {});
           } });
         } });
       } });
     } })];
   } });
 }
-var tr = ['<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/public/logo.png">', "</head>"], rr = ["<html", ' lang="en">', '<body><div id="app">', "</div><!--$-->", "<!--/--></body></html>"];
-const gr = Rt(() => createComponent$1(er, { document: ({ assets: e, children: r, scripts: t }) => ssr(rr, ssrHydrationKey(), createComponent$1(NoHydration, { get children() {
-  return ssr(tr, escape(e));
-} }), escape(r), escape(t)) }));
+var vs = ['<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/public/logo.png">', "</head>"], ys = ["<html", ' lang="en">', '<body><div id="app">', "</div><!--$-->", "<!--/--></body></html>"];
+const ie = Qt(() => createComponent$1(Rs, { document: ({ assets: e, children: s, scripts: t }) => ssr(ys, ssrHydrationKey(), createComponent$1(NoHydration, { get children() {
+  return ssr(vs, escape(e));
+} }), escape(s), escape(t)) })), Vs = eventHandler({ onRequest: ee.onRequest, onBeforeResponse: ee.onBeforeResponse, handler: ie, websocket: ie.__websocket__ });
 
 const handlers = [
-  { route: '', handler: _zBFq2t, lazy: false, middleware: true, method: undefined },
-  { route: '/_server', handler: bs, lazy: false, middleware: true, method: undefined },
-  { route: '/', handler: gr, lazy: false, middleware: true, method: undefined }
+  { route: '/_server', handler: qs, lazy: false, middleware: true, method: undefined },
+  { route: '/', handler: Vs, lazy: false, middleware: true, method: undefined }
 ];
 
 function wrapToPromise(value) {
@@ -10585,7 +7871,7 @@ function ignoreExists(err) {
   return err.code === "EEXIST" ? null : err;
 }
 async function writeFile(path, data, encoding) {
-  await ensuredir(dirname$1(path));
+  await ensuredir(dirname(path));
   return promises.writeFile(path, data, encoding);
 }
 function readFile(path, encoding) {
@@ -10601,7 +7887,7 @@ async function ensuredir(dir) {
   if (existsSync(dir)) {
     return;
   }
-  await ensuredir(dirname$1(dir)).catch(ignoreExists);
+  await ensuredir(dirname(dir)).catch(ignoreExists);
   await promises.mkdir(dir).catch(ignoreExists);
 }
 async function readdirRecursive(dir, ignore, maxDepth) {
@@ -10612,7 +7898,7 @@ async function readdirRecursive(dir, ignore, maxDepth) {
   const files = [];
   await Promise.all(
     entries.map(async (entry) => {
-      const entryPath = resolve$1(dir, entry.name);
+      const entryPath = resolve(dir, entry.name);
       if (entry.isDirectory()) {
         if (maxDepth === void 0 || maxDepth > 0) {
           const dirFiles = await readdirRecursive(
@@ -10635,7 +7921,7 @@ async function rmRecursive(dir) {
   const entries = await readdir(dir);
   await Promise.all(
     entries.map((entry) => {
-      const entryPath = resolve$1(dir, entry.name);
+      const entryPath = resolve(dir, entry.name);
       if (entry.isDirectory()) {
         return rmRecursive(entryPath).then(() => promises.rmdir(entryPath));
       } else {
@@ -10651,7 +7937,7 @@ const unstorage_47drivers_47fs_45lite = defineDriver((opts = {}) => {
   if (!opts.base) {
     throw createRequiredError(DRIVER_NAME, "base");
   }
-  opts.base = resolve$1(opts.base);
+  opts.base = resolve(opts.base);
   const r = (key) => {
     if (PATH_TRAVERSE_RE.test(key)) {
       throw createError(
@@ -11741,7 +9027,7 @@ function createNitroApp() {
     if (!input.toString().startsWith("/")) {
       return globalThis.fetch(input, init);
     }
-    return O$1(
+    return O$2(
       nodeHandler,
       input,
       init
@@ -11809,251 +9095,5 @@ function useNitroApp() {
 }
 runNitroPlugins(nitroApp);
 
-const debug = (...args) => {
-};
-function GracefulShutdown(server, opts) {
-  opts = opts || {};
-  const options = Object.assign(
-    {
-      signals: "SIGINT SIGTERM",
-      timeout: 3e4,
-      development: false,
-      forceExit: true,
-      onShutdown: (signal) => Promise.resolve(signal),
-      preShutdown: (signal) => Promise.resolve(signal)
-    },
-    opts
-  );
-  let isShuttingDown = false;
-  const connections = {};
-  let connectionCounter = 0;
-  const secureConnections = {};
-  let secureConnectionCounter = 0;
-  let failed = false;
-  let finalRun = false;
-  function onceFactory() {
-    let called = false;
-    return (emitter, events, callback) => {
-      function call() {
-        if (!called) {
-          called = true;
-          return Reflect.apply(callback, this, arguments);
-        }
-      }
-      for (const e of events) {
-        emitter.on(e, call);
-      }
-    };
-  }
-  const signals = options.signals.split(" ").map((s) => s.trim()).filter((s) => s.length > 0);
-  const once = onceFactory();
-  once(process, signals, (signal) => {
-    debug("received shut down signal", signal);
-    shutdown(signal).then(() => {
-      if (options.forceExit) {
-        process.exit(failed ? 1 : 0);
-      }
-    }).catch((error) => {
-      debug("server shut down error occurred", error);
-      process.exit(1);
-    });
-  });
-  function isFunction(functionToCheck) {
-    const getType = Object.prototype.toString.call(functionToCheck);
-    return /^\[object\s([A-Za-z]+)?Function]$/.test(getType);
-  }
-  function destroy(socket, force = false) {
-    if (socket._isIdle && isShuttingDown || force) {
-      socket.destroy();
-      if (socket.server instanceof http.Server) {
-        delete connections[socket._connectionId];
-      } else {
-        delete secureConnections[socket._connectionId];
-      }
-    }
-  }
-  function destroyAllConnections(force = false) {
-    debug("Destroy Connections : " + (force ? "forced close" : "close"));
-    let counter = 0;
-    let secureCounter = 0;
-    for (const key of Object.keys(connections)) {
-      const socket = connections[key];
-      const serverResponse = socket._httpMessage;
-      if (serverResponse && !force) {
-        if (!serverResponse.headersSent) {
-          serverResponse.setHeader("connection", "close");
-        }
-      } else {
-        counter++;
-        destroy(socket);
-      }
-    }
-    debug("Connections destroyed : " + counter);
-    debug("Connection Counter    : " + connectionCounter);
-    for (const key of Object.keys(secureConnections)) {
-      const socket = secureConnections[key];
-      const serverResponse = socket._httpMessage;
-      if (serverResponse && !force) {
-        if (!serverResponse.headersSent) {
-          serverResponse.setHeader("connection", "close");
-        }
-      } else {
-        secureCounter++;
-        destroy(socket);
-      }
-    }
-    debug("Secure Connections destroyed : " + secureCounter);
-    debug("Secure Connection Counter    : " + secureConnectionCounter);
-  }
-  server.on("request", (req, res) => {
-    req.socket._isIdle = false;
-    if (isShuttingDown && !res.headersSent) {
-      res.setHeader("connection", "close");
-    }
-    res.on("finish", () => {
-      req.socket._isIdle = true;
-      destroy(req.socket);
-    });
-  });
-  server.on("connection", (socket) => {
-    if (isShuttingDown) {
-      socket.destroy();
-    } else {
-      const id = connectionCounter++;
-      socket._isIdle = true;
-      socket._connectionId = id;
-      connections[id] = socket;
-      socket.once("close", () => {
-        delete connections[socket._connectionId];
-      });
-    }
-  });
-  server.on("secureConnection", (socket) => {
-    if (isShuttingDown) {
-      socket.destroy();
-    } else {
-      const id = secureConnectionCounter++;
-      socket._isIdle = true;
-      socket._connectionId = id;
-      secureConnections[id] = socket;
-      socket.once("close", () => {
-        delete secureConnections[socket._connectionId];
-      });
-    }
-  });
-  process.on("close", () => {
-    debug("closed");
-  });
-  function shutdown(sig) {
-    function cleanupHttp() {
-      destroyAllConnections();
-      debug("Close http server");
-      return new Promise((resolve, reject) => {
-        server.close((err) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve(true);
-        });
-      });
-    }
-    debug("shutdown signal - " + sig);
-    if (options.development) {
-      debug("DEV-Mode - immediate forceful shutdown");
-      return process.exit(0);
-    }
-    function finalHandler() {
-      if (!finalRun) {
-        finalRun = true;
-        if (options.finally && isFunction(options.finally)) {
-          debug("executing finally()");
-          options.finally();
-        }
-      }
-      return Promise.resolve();
-    }
-    function waitForReadyToShutDown(totalNumInterval) {
-      debug(`waitForReadyToShutDown... ${totalNumInterval}`);
-      if (totalNumInterval === 0) {
-        debug(
-          `Could not close connections in time (${options.timeout}ms), will forcefully shut down`
-        );
-        return Promise.resolve(true);
-      }
-      const allConnectionsClosed = Object.keys(connections).length === 0 && Object.keys(secureConnections).length === 0;
-      if (allConnectionsClosed) {
-        debug("All connections closed. Continue to shutting down");
-        return Promise.resolve(false);
-      }
-      debug("Schedule the next waitForReadyToShutdown");
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(waitForReadyToShutDown(totalNumInterval - 1));
-        }, 250);
-      });
-    }
-    if (isShuttingDown) {
-      return Promise.resolve();
-    }
-    debug("shutting down");
-    return options.preShutdown(sig).then(() => {
-      isShuttingDown = true;
-      cleanupHttp();
-    }).then(() => {
-      const pollIterations = options.timeout ? Math.round(options.timeout / 250) : 0;
-      return waitForReadyToShutDown(pollIterations);
-    }).then((force) => {
-      debug("Do onShutdown now");
-      if (force) {
-        destroyAllConnections(force);
-      }
-      return options.onShutdown(sig);
-    }).then(finalHandler).catch((error) => {
-      const errString = typeof error === "string" ? error : JSON.stringify(error);
-      debug(errString);
-      failed = true;
-      throw errString;
-    });
-  }
-  function shutdownManual() {
-    return shutdown("manual");
-  }
-  return shutdownManual;
-}
-
-function getGracefulShutdownConfig() {
-  return {
-    disabled: !!process.env.NITRO_SHUTDOWN_DISABLED,
-    signals: (process.env.NITRO_SHUTDOWN_SIGNALS || "SIGTERM SIGINT").split(" ").map((s) => s.trim()),
-    timeout: Number.parseInt(process.env.NITRO_SHUTDOWN_TIMEOUT || "", 10) || 3e4,
-    forceExit: !process.env.NITRO_SHUTDOWN_NO_FORCE_EXIT
-  };
-}
-function setupGracefulShutdown(listener, nitroApp) {
-  const shutdownConfig = getGracefulShutdownConfig();
-  if (shutdownConfig.disabled) {
-    return;
-  }
-  GracefulShutdown(listener, {
-    signals: shutdownConfig.signals.join(" "),
-    timeout: shutdownConfig.timeout,
-    forceExit: shutdownConfig.forceExit,
-    onShutdown: async () => {
-      await new Promise((resolve) => {
-        const timeout = setTimeout(() => {
-          console.warn("Graceful shutdown timeout, force exiting...");
-          resolve();
-        }, shutdownConfig.timeout);
-        nitroApp.hooks.callHook("close").catch((error) => {
-          console.error(error);
-        }).finally(() => {
-          clearTimeout(timeout);
-          resolve();
-        });
-      });
-    }
-  });
-}
-
-export { A$2 as A, De as D, Me as M, Q$1 as Q, Ue as U, Y, trapUnhandledNodeErrors as a, useNitroApp as b, de$3 as c, destr as d, b$1 as e, fe as f, ge$3 as g, ge$1 as h, setupGracefulShutdown as s, toNodeListener as t, useRuntimeConfig as u, ys as y };
+export { A$1 as A, Bs as B, De as D, G$1 as G, Me as M, Q$1 as Q, Re$3 as R, Ue as U, Y$1 as Y, toNodeListener as a, be$4 as b, t$1 as c, b$1 as d, i as e, xe$2 as f, t as g, he$2 as h, i$1 as i, be$2 as j, he$1 as k, ye$1 as l, j as m, Re$1 as n, trapUnhandledNodeErrors as t, useNitroApp as u, xe$4 as x, ye$3 as y };
 //# sourceMappingURL=nitro.mjs.map

@@ -1,1 +1,30 @@
-import{ssr as i,ssrHydrationKey as s,escape as o,createComponent as l}from"solid-js/web";import{createSignal as h,onMount as w,onCleanup as p,createResource as D,createEffect as f,Show as m,Suspense as x}from"solid-js";import"@splinetool/runtime";var R=["<div",' style="','">Caricamento Scena 3D...</div>'],S=["<div",' style="','"><strong>Errore Caricamento Spline</strong><pre style="','">',"</pre></div>"],E=["<canvas",' style="','"></canvas>'],z=["<div",' class="landing-container"> <div class="spline-wrapper" style="','"><!--$-->',"<!--/--><!--$-->","<!--/--><!--$-->","<!--/--></div></div>"];function N(e){const[C,$]=h(!1),y=()=>{switch(console.log(`[Card3D ${e.id}] Calcolo URL per colore: ${e.color}`),e.color){case"purple":return"https://prod.spline.design/j0mVtZ9nPBu6RBRy/scene.splinecode";default:return"https://prod.spline.design/mzKeaOgjz2ILR0uC/scene.splinecode"}};w(()=>{console.error(`[Card3D ${e.id}] Errore: Canvas ref non trovato in onMount!`),p(()=>{console.log(`[Card3D ${e.id}] Cleanup: reset isCanvasReady.`),$(!1)})});const[n]=D(()=>C()?y():null,async a=>{throw console.error(`[Card3D ${e.id}] Fetcher: CanvasRef è nullo! Impossibile caricare.`),new Error("Canvas element reference is missing.")});return f(a=>{const t=n();return a&&a!==t&&(console.log(`[Card3D ${e.id}] createEffect[cleanup]: Dispose istanza Spline precedente.`),a.dispose()),t},void 0),p(()=>{const a=n.latest;a?(console.log(`[Card3D ${e.id}] onCleanup: Dispose istanza Spline finale.`),a.dispose()):console.log(`[Card3D ${e.id}] onCleanup: Nessuna istanza Spline da pulire.`)}),f(()=>{const a=n();if(!a||n.loading||n.error)return;console.log(`[Card3D ${e.id}] Effetto Variabili: Esecuzione...`);const t="Group 2",b={x:1.2,y:1.2,z:1.2},c="wallet_name",d=e.name,u="balance",v=r=>{switch(r){case"EUR":return"€";case"USD":return"$";case"GBP":return"£";default:return r}},g=`${e.balance} ${v(e.currency)}`;console.log(`[Card3D ${e.id}] -> Aggiorno: ${c}=${d}, ${u}=${g}`);try{a.setVariable(c,d),a.setVariable(u,g);const r=a.findObjectByName(t);r?typeof r?.scale?.x=="number"?Object.assign(r.scale,b):console.warn(`[Card3D ${e.id}] -> ATTENZIONE: 'scale' non trovato su '${t}'.`):console.warn(`[Card3D ${e.id}] -> ATTENZIONE: Oggetto '${t}' non trovato.`)}catch(r){console.error(`[Card3D ${e.id}] -> ERRORE durante interazione Spline:`,r)}}),i(z,s(),"width:80%;height:500px;position:relative",o(l(m,{get when(){return n.loading},get children(){return i(R,s(),"position:absolute;inset:0;background:rgba(230, 230, 230, 0.8);display:flex;justify-content:center;align-items:center;border-radius:8px;z-index:10;color:#555;font-size:1.1em")}})),o(l(m,{get when(){return n.error&&!n.loading},get children(){return i(S,s(),"position:absolute;inset:0;background:rgba(255, 200, 200, 0.9);color:darkred;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:15px;border-radius:8px;z-index:10;text-align:center;font-size:0.9em","margin-top:8px;white-space:pre-wrap;max-height:100px;overflow:auto",o(n.error?.message)||o(JSON.stringify(n.error)))}})),o(l(x,{get fallback(){return[]},get children(){return i(E,s(),"width:100%;height:100%;display:block;outline:none"+(";opacity:"+(n.loading||n.error?.3:1))+";background-color:transparent;transition:opacity 0.4s ease-in-out")}})))}export{N as default};
+import{createComponent as e,ssr as l,ssrHydrationKey as d,escape as a}from"solid-js/web";import u from"axios";import{createSignal as t,createMemo as f,Switch as h,Match as n}from"solid-js";import{B as g}from"./assets/ButtonSparkle-BxHzGCPC.js";import{S as x,I as y,a as b,g as v}from"./assets/Inputs-Cq_fgt2H.js";import{O as S}from"./assets/otpInput-gt68IOgQ.js";import{n as s}from"./assets/index-CI1g57kZ.js";import"solid-js/store";import"gsap";import"./assets/server-fns-runtime-DEO2-sKc.js";import"solid-js/web/storage";import"./assets/fetchEvent-BW7O4Ysp.js";import"h3";import"vite-plugin-node-polyfills/shims/global";import"node:async_hooks";import"./assets/db.server-CDeyn5Z_.js";import"vite-plugin-node-polyfills/shims/process";import"pg";import"./assets/action-CiKOD-Zz.js";import"./assets/routing-Th2JWmJV.js";import"bcryptjs";import"firebase/app";import"firebase/analytics";import"firebase/auth";import"./assets/icons-N8M97GAt.js";var w=["<form",' class="','" style="','"><!--$-->',"<!--/--><!--$-->","<!--/--></form>"];const[m,P]=t("");function U(){const[r,p]=t("wait"),[I,o]=t("");f(()=>{s()==1&&x("email",!1)});async function c(){try{P(Math.floor(1e5+Math.random()*9e5).toString());const C=await u.post("https://api.brevo.com/v3/smtp/email",{sender:{name:"Pulsix",email:"pulsixcustomer@outlook.com"},to:[{email:v("email")}],subject:"Pulsix verification code",htmlContent:`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              .code {
+                font-size: 24px;
+                font-weight: bold;
+                color: #4a4a4a;
+                background-color: #000000;
+                padding: 15px;
+                border-radius: 8px;
+                text-align: center;
+                letter-spacing: 5px;
+                margin: 20px 0;
+              }
+            </style>
+          </head>
+          <body>
+            <h2>Pulsix verification code</h2>
+            <p>Ecco il tuo codice di verifica:</p>
+            
+            <div class="code">${m()}</div>
+            
+            <p>Inserisci questo codice nella pagina di verifica per completare la registrazione.</p>
+            <p>Se non hai richiesto questa verifica, puoi ignorare questa email.</p>
+            <p>Cordiali saluti,<br>Il tuo team</p>
+          </body>
+          </html>
+        `},{headers:{"api-key":"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","Content-Type":"application/json"}});o("success")}catch(i){console.error("Error sending email:",i),o("error")}}return e(h,{get children(){return[e(n,{get when(){return r()=="wait"},get children(){return l(w,d(),"w-300 mt-100","justify-items:center",a(e(y,{type:"email",name:"email",placeholder:"Email",get mountOn(){return s()==1},required:!0})),a(e(g,{shadow:10,text:"Send code",get disabled(){return!b()},class:"h-50 mb-30",onClick:()=>{c(),p("sended")}})))}}),e(n,{get when(){return r()=="sended"},get children(){return e(S,{get code(){return m()}})}})]}})}export{m as code,U as default,P as setCode};

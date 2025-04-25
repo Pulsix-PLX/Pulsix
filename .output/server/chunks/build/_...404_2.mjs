@@ -1,7 +1,7 @@
 import { ssr, ssrHydrationKey, escape, createComponent } from 'solid-js/web';
 import { onMount, onCleanup } from 'solid-js';
-import { B } from './ButtonSparkle-DNpTyev32.mjs';
-import { e as b } from '../_/nitro.mjs';
+import { B } from './ButtonSparkle-BxHzGCPC2.mjs';
+import { d as b } from '../_/nitro.mjs';
 import 'solid-js/store';
 import 'node:crypto';
 import 'node:http';
@@ -11,9 +11,14 @@ import 'node:buffer';
 import 'vinxi/lib/invariant';
 import 'vinxi/lib/path';
 import 'node:url';
-import 'node:fs';
-import 'solid-js/web/storage';
+import 'vite-plugin-node-polyfills/shims/process';
+import 'vite-plugin-node-polyfills/shims/global';
 import 'node:async_hooks';
+import 'jsonwebtoken';
+import 'pg';
+import 'solid-js/web/storage';
+import 'axios';
+import 'node:fs';
 import 'node:path';
 
 var l = ["<div", ' class="page-404-container"><h1 class="Error404 ">404</h1><div class="cloak__wrapper"><div class="cloak__container"><div class="cloak"></div></div></div><div class="button-container" style="', '">', "</div></div>"];

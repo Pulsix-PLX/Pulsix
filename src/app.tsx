@@ -1,6 +1,6 @@
 // src/App.tsx
 
-import { MetaProvider, Title } from '@solidjs/meta';
+import { Link, MetaProvider, Title } from '@solidjs/meta';
 import { Router, useLocation, useNavigate, RouteSectionProps } from '@solidjs/router';
 import { FileRoutes } from '@solidjs/start/router';
 import { Suspense, onMount, Show, createEffect, Component, JSX } from 'solid-js';
@@ -53,10 +53,11 @@ const RootLayout: Component<RouteSectionProps> = (props) => {
     
   }); 
 
-
+  const manifestPath = "/_build/manifest.webmanifest"; // <--- CONTROLLA E AGGIUSTA QUESTO PATH!
   return (
     <MetaProvider>
       <Title>Pulsix</Title>
+      <Link rel="manifest" href={manifestPath} />
       <CustomCursor />
 
       <Show when={!authStore.isLoading}

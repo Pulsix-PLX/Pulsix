@@ -1,25 +1,58 @@
-import { ssr, ssrHydrationKey, escape } from 'solid-js/web';
-import { createSignal, createMemo, createEffect } from 'solid-js';
-import { r as r$1, x as x$1 } from './icons-N8M97GAt2.mjs';
+import { createComponent, ssr, ssrHydrationKey } from 'solid-js/web';
+import { createSignal, Show } from 'solid-js';
+import { S, x, A as A$2 } from './prova-B1NEQR2_.mjs';
+import { m } from './index-D0aODT57.mjs';
+import { A as A$1 } from '../_/nitro.mjs';
+import './exchangeRates-BGrzYQig.mjs';
+import './Card.module-nMwE8ysR2.mjs';
+import './server-fns-runtime-C3tiYEg6.mjs';
+import 'solid-js/web/storage';
+import './auth.server-ChqlnWrh.mjs';
+import 'vite-plugin-node-polyfills/shims/process';
+import 'node:crypto';
+import 'node:http';
+import 'node:https';
+import 'node:events';
+import 'node:buffer';
+import 'vinxi/lib/invariant';
+import 'vinxi/lib/path';
+import 'node:url';
+import 'vite-plugin-node-polyfills/shims/global';
+import 'node:async_hooks';
+import 'jsonwebtoken';
+import 'pg';
+import 'solid-js/store';
+import 'axios';
+import 'node:fs';
+import 'node:path';
 
-var f = ["<div", ' class="', '"><div class="', '"><div class="', '"><!--$-->', "<!--/--><!--$-->", '<!--/--><div class="', '"></div></div><div class="', '"><!--$-->', "<!--/--><!--$-->", '<!--/--><div class="', '"></div></div><div class="', '"><!--$-->', "<!--/--><!--$-->", '<!--/--><div class="', '"></div></div></div><div class="', '"></div></div>'], h = ["<button", ' class="CM mt-500 bg-white text-black w-185 h-100">button</button>'], b = ["<button", ' class="CM mt-500 ml-200 bg-white text-black w-185 h-100">Reset</button>'], a = ["<div", ' class="glow" style="', '"></div>'];
-const [r, x] = createSignal(0);
-function A() {
-  const [g, S] = createSignal(null), l = 3;
-  return Array.from({ length: l }, (n, s) => s + 1), createMemo(() => {
-    typeof document < "u" && document.documentElement.style.setProperty("--width-upline", `${r() / l * 100}%`);
-  }), createEffect((n) => {
-    const s = r();
-    if (n !== void 0 && n !== s && typeof document < "u") {
-      const c = document.querySelector(`.${r$1.Line}`);
-      if (c && (c.classList.add("flash"), setTimeout(() => c.classList.remove("flash"), 700)), s > 0) for (let d = 0; d < s; d++) {
-        const $ = document.querySelectorAll(`.${r$1.Connector}`)[d];
-        $ && $.classList.add("connector-appear");
-      }
-    }
-    return s;
-  }), [ssr(f, ssrHydrationKey(), `CM mt-20 ${escape(r$1.ProgressBar, true)}`, `CM gap-150 ${escape(r$1.Steps, true)}`, `${`${escape(r$1.Step, true)}` || ""} ${r() >= 1 ? escape(escape(r$1.StepDone, true), true) : ""}`, escape(x$1[0].svg), r() >= 1 && ssr(a, ssrHydrationKey(), "position:absolute;width:100%;height:100%;border-radius:50%;z-index:-1"), `${`${escape(r$1.Connector, true)}` || ""} ${r() >= 1 ? escape(escape(r$1.ConnectorActive, true), true) : ""}`, `${`${escape(r$1.Step, true)}` || ""} ${r() >= 2 ? escape(escape(r$1.StepDone, true), true) : ""}`, escape(x$1[1].svg), r() >= 2 && ssr(a, ssrHydrationKey(), "position:absolute;width:100%;height:100%;border-radius:50%;z-index:-1"), `${`${escape(r$1.Connector, true)}` || ""} ${r() >= 2 ? escape(escape(r$1.ConnectorActive, true), true) : ""}`, `${`${escape(r$1.Step, true)}` || ""} ${r() >= 3 ? escape(escape(r$1.StepDone, true), true) : ""}`, escape(x$1[2].svg), r() >= 3 && ssr(a, ssrHydrationKey(), "position:absolute;width:100%;height:100%;border-radius:50%;z-index:-1"), `${`${escape(r$1.Connector, true)}` || ""} ${r() >= 3 ? escape(escape(r$1.ConnectorActive, true), true) : ""}`, `mt-0 ${escape(r$1.Line, true)}`), ssr(h, ssrHydrationKey()), ssr(b, ssrHydrationKey())];
+var h = ["<img", ' class="absolute w-23 cursor-pointer z-100" src="/icons/edit.png">'];
+function A(e) {
+  const [a, n] = createSignal(false);
+  return createComponent(A$1, { get href() {
+    return e.href;
+  }, onclick: (o) => {
+    console.log("Link clicked. Edit mode:", m()), m() ? (console.log("Preventing default link action and stopping propagation because edit=true"), o.preventDefault(), o.stopPropagation()) : e.onClick && (console.log("Executing props.onclick"), e.onClick());
+  }, onmouseenter: () => n(true), onmouseleave: () => n(false), get children() {
+    return createComponent(S, { get children() {
+      return createComponent(x, { class: "border-black border-4 w-[21vw] h-[12.5vw] rounded-xl -mt-100", get color() {
+        return e.color;
+      }, get children() {
+        return [createComponent(A$2, { translateZ: 10, class: "absolute ml-[17.7vw] mt-[9.2vw]", as: "button", get children() {
+          return createComponent(Show, { get when() {
+            return a();
+          }, get children() {
+            return ssr(h, ssrHydrationKey());
+          } });
+        } }), createComponent(A$2, { translateZ: 20, class: "text-white text-[1vw] text-center mt-[1vw]", get children() {
+          return e.name;
+        } }), createComponent(A$2, { as: "p", translateZ: 40, class: "text-white text-[1vw] text-center", get children() {
+          return [e.balance, e.currency == "USD" ? "$" : e.currency == "EUR" ? "\u20AC" : e.currency];
+        } })];
+      } });
+    } });
+  } });
 }
 
-export { A as default, r as next, x as setNext };
+export { A as default };
 //# sourceMappingURL=index142.mjs.map

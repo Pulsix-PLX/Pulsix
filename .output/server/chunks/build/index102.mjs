@@ -1,13 +1,15 @@
-import { createComponent, ssr, ssrHydrationKey } from 'solid-js/web';
-import { createSignal, Show } from 'solid-js';
-import { S, x, A as A$1 } from './prova-BQfA7nlw.mjs';
-import { m } from './index-DYZ-zTTq.mjs';
-import { A } from '../_/nitro.mjs';
-import './exchangeRates-B5IJmiQP.mjs';
-import './db.server-Cxzv6220.mjs';
+import { ssr, ssrHydrationKey, escape, createComponent } from 'solid-js/web';
+import { onMount } from 'solid-js';
+import { B } from './ButtonSparkle-BxHzGCPC2.mjs';
+import { r, J, u as ut, m as mt } from './Inputs-D1T1pLkj.mjs';
+import { r as rt } from './Title-C8lsFfVd2.mjs';
+import { x, s } from './index-CI1g57kZ2.mjs';
+import { n } from './index.module-B9JvMj-k2.mjs';
+import 'solid-js/store';
+import 'gsap';
+import './server-fns-runtime-C3tiYEg6.mjs';
 import 'solid-js/web/storage';
-import 'pg';
-import './Card.module-nMwE8ysR2.mjs';
+import '../_/nitro.mjs';
 import 'node:crypto';
 import 'node:http';
 import 'node:https';
@@ -16,37 +18,26 @@ import 'node:buffer';
 import 'vinxi/lib/invariant';
 import 'vinxi/lib/path';
 import 'node:url';
-import 'node:fs';
+import 'vite-plugin-node-polyfills/shims/process';
+import 'vite-plugin-node-polyfills/shims/global';
 import 'node:async_hooks';
+import 'jsonwebtoken';
+import 'pg';
+import 'axios';
+import 'node:fs';
 import 'node:path';
+import './icons-N8M97GAt2.mjs';
 
-var h = ["<img", ' class="absolute w-23 cursor-pointer z-100" src="/icons/edit.png">'];
-function P(e) {
-  const [a, n] = createSignal(false);
-  return createComponent(A, { get href() {
-    return e.href;
-  }, onclick: (o) => {
-    console.log("Link clicked. Edit mode:", m()), m() ? (console.log("Preventing default link action and stopping propagation because edit=true"), o.preventDefault(), o.stopPropagation()) : e.onClick && (console.log("Executing props.onclick"), e.onClick());
-  }, onmouseenter: () => n(true), onmouseleave: () => n(false), get children() {
-    return createComponent(S, { get children() {
-      return createComponent(x, { class: "border-black border-4 w-[20vw] h-[12vw] rounded-xl -mt-100", get color() {
-        return e.color;
-      }, get children() {
-        return [createComponent(A$1, { translateZ: 10, class: "absolute ml-[16.5vw] mt-[8.6vw]", as: "button", get children() {
-          return createComponent(Show, { get when() {
-            return a();
-          }, get children() {
-            return ssr(h, ssrHydrationKey());
-          } });
-        } }), createComponent(A$1, { translateZ: 20, class: "text-white text-[1vw] text-center mt-[1vw]", get children() {
-          return e.name;
-        } }), createComponent(A$1, { as: "p", translateZ: 40, class: "text-white text-[1vw] text-center", get children() {
-          return [e.balance, e.currency == "USD" ? "$" : e.currency == "EUR" ? "\u20AC" : e.currency];
-        } })];
-      } });
-    } });
-  } });
+var c = ["<div", ' class="', '" style="', '"><!--$-->', '<!--/--><form class="', '" style="', '"><!--$-->', "<!--/--><!--$-->", "<!--/--><!--$-->", "<!--/--><!--$-->", "<!--/--><!--$-->", "<!--/--><!--$-->", "<!--/--><!--$-->", "<!--/--></form></div>"];
+function H() {
+  return onMount(() => {
+    r({}), J({});
+  }), ssr(c, ssrHydrationKey(), `w-500 ${escape(n.formContainer, true)} ${ut() ? escape(n.valid, true) : ""}`, "justify-items:center", escape(createComponent(rt, { title: "Credentials", class: "-mt-40" })), "w-300 mt-100", "justify-items:center", escape(createComponent(mt, { name: "username", type: "username", placeholder: "Username", required: true })), escape(createComponent(mt, { name: "password", type: "password", placeholder: "Password", required: true })), escape(createComponent(mt, { name: "passwordConfirm", type: "passwordConfirm", placeholder: "Confirm", required: true })), escape(createComponent(mt, { name: "dateOfBirthday", type: "date", placeholder: "Date of Birthday", required: true })), escape(createComponent(mt, { name: "name", type: "text", placeholder: "Name", required: true })), escape(createComponent(mt, { name: "surname", type: "text", placeholder: "Surmane", required: true })), escape(createComponent(B, { shadow: 10, text: "Next", get disabled() {
+    return !ut();
+  }, class: "h-50", onClick: () => {
+    x(s() + 1);
+  } })));
 }
 
-export { P as default };
+export { H as default };
 //# sourceMappingURL=index102.mjs.map

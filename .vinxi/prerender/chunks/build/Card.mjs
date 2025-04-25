@@ -1,8 +1,8 @@
 import { createComponent, ssr, ssrHydrationKey, escape } from 'file://C:/Users/Matteo/Desktop/Pulsix/node_modules/.pnpm/solid-js@1.9.5/node_modules/solid-js/web/dist/server.js';
 import { _ } from './Card.module-nMwE8ysR.mjs';
-import { A } from './components-CJF4pMQg.mjs';
+import { A } from './components-Bjb1kgqQ.mjs';
 import 'file://C:/Users/Matteo/Desktop/Pulsix/node_modules/.pnpm/solid-js@1.9.5/node_modules/solid-js/dist/server.js';
-import './routing-BSDkuvr3.mjs';
+import './routing-Th2JWmJV.mjs';
 
 var l = ["<div", ' class><p class="', '">', '</p><p class="', '"><!--$-->', "<!--/--><!--$-->", "<!--/--></p></div>"];
 function $(t) {

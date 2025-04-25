@@ -1,6 +1,6 @@
 {
-  "date": "2025-04-12T15:15:47.025Z",
-  "preset": "node-server",
+  "date": "2025-04-25T10:31:46.097Z",
+  "preset": "node-listener",
   "framework": {
     "name": "nitro",
     "version": ""
@@ -8,8 +8,6 @@
   "versions": {
     "nitro": "2.11.6"
   },
-  "commands": {
-    "preview": "node ./server/index.mjs"
-  },
+  "commands": {},
   "config": {}
 }

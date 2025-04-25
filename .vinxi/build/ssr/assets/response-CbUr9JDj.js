@@ -1,0 +1,1 @@
+function i(n,r={}){const{revalidate:s,...t}=r,e=new Headers(t.headers);s!==void 0&&e.set("X-Revalidate",s.toString()),e.set("Content-Type","application/json");const o=new Response(JSON.stringify(n),{...t,headers:e});return o.customBody=()=>n,o}export{i as j};

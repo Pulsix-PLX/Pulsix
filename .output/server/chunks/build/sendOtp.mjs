@@ -1,11 +1,11 @@
-import { g, I, d, h, p } from './otpInput-Dlb7jUEo.mjs';
+import { g, I, d, h, p } from './otpInput-gt68IOgQ.mjs';
 import { createSignal } from 'solid-js';
-import { j } from './Inputs-CEYxPBfP.mjs';
+import { J } from './Inputs-Cq_fgt2H.mjs';
 import { signInWithPhoneNumber } from 'firebase/auth';
 import 'solid-js/web';
 import './index-CI1g57kZ.mjs';
 import './icons-N8M97GAt.mjs';
-import './server-fns-runtime-4T1EILgx.mjs';
+import './server-fns-runtime-DEO2-sKc.mjs';
 import 'solid-js/web/storage';
 import '../_/nitro.mjs';
 import 'node:crypto';
@@ -16,24 +16,27 @@ import 'node:buffer';
 import 'vinxi/lib/invariant';
 import 'vinxi/lib/path';
 import 'node:url';
-import 'node:fs';
+import 'vite-plugin-node-polyfills/shims/process';
+import 'vite-plugin-node-polyfills/shims/global';
 import 'node:async_hooks';
-import 'node:path';
-import './db.server-BYnrqg0d.mjs';
+import 'jsonwebtoken';
 import 'pg';
+import 'solid-js/store';
+import 'axios';
+import 'node:fs';
+import 'node:path';
 import 'bcryptjs';
-import './action-BVKOmiKt.mjs';
-import './routing-BSDkuvr3.mjs';
+import './action-CiKOD-Zz.mjs';
+import './routing-Th2JWmJV.mjs';
 import 'firebase/app';
 import 'firebase/analytics';
-import './ButtonSparkle-DNpTyev3.mjs';
-import 'solid-js/store';
+import './ButtonSparkle-BxHzGCPC.mjs';
 import 'gsap';
 
-const [C, u] = createSignal();
-async function H() {
+const [M, u] = createSignal();
+async function W() {
   const s = g();
-  j("phoneNumber", s), console.log("sendOTP called. phoneNumber:", g());
+  J("phoneNumber", s), console.log("sendOTP called. phoneNumber:", g());
   try {
     const e = window.recaptchaVerifier;
     console.log("Sending OTP with appVerifier:", e);
@@ -44,5 +47,5 @@ async function H() {
   }
 }
 
-export { C as confirmationResult, H as default, u as setConfirmationResult };
+export { M as confirmationResult, W as default, u as setConfirmationResult };
 //# sourceMappingURL=sendOtp.mjs.map

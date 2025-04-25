@@ -1,12 +1,12 @@
 import { ssr, ssrHydrationKey, escape, createComponent } from 'solid-js/web';
-import { onMount, onCleanup, createSignal } from 'solid-js';
-import { B } from './ButtonSparkle-DNpTyev32.mjs';
-import { r, j, y as ye, v as ve, f as fe } from './Inputs-BxVpbjg0.mjs';
-import { e as b$1, Y, M as Me, f as fe$1, Q } from '../_/nitro.mjs';
-import { w, D } from './db.server-Cxzv6220.mjs';
-import * as h from 'bcryptjs';
+import { onMount } from 'solid-js';
+import { B } from './ButtonSparkle-BxHzGCPC2.mjs';
+import { r, J, m as mt, u as ut } from './Inputs-D1T1pLkj.mjs';
+import { m as j, d as b } from '../_/nitro.mjs';
 import 'solid-js/store';
 import 'gsap';
+import './server-fns-runtime-C3tiYEg6.mjs';
+import 'solid-js/web/storage';
 import 'node:crypto';
 import 'node:http';
 import 'node:https';
@@ -15,35 +15,23 @@ import 'node:buffer';
 import 'vinxi/lib/invariant';
 import 'vinxi/lib/path';
 import 'node:url';
-import 'node:fs';
-import 'solid-js/web/storage';
+import 'vite-plugin-node-polyfills/shims/process';
+import 'vite-plugin-node-polyfills/shims/global';
 import 'node:async_hooks';
-import 'node:path';
+import 'jsonwebtoken';
 import 'pg';
+import 'axios';
+import 'node:fs';
+import 'node:path';
 
-const R = w(async (r) => {
-  const { password: a, username: l } = r;
-  try {
-    const e = await D.query("SELECT id, username, password FROM users WHERE username = $1", [l]);
-    if (e.rows.length === 0) return { success: false, message: "Credenziali non valide" };
-    const s = e.rows[0];
-    return await h.compare(a, s.password) ? (await (await fe$1({ password: process.env.SESSION_SECRET, name: "auth_session" })).update({ userId: s.id, username: s.username }), console.log(`Sessione (cookie criptato) aggiornata per utente ${s.username}`), { success: true }) : { success: false, message: "Credenziali non valide" };
-  } catch (e) {
-    return console.error("Errore durante il login:", e), process.env.SESSION_SECRET ? { success: false, message: "Errore durante il processo di login" } : (console.error("SESSION_SECRET non \xE8 impostata!"), { success: false, message: "Errore di configurazione server." });
-  }
-}, "src_routes_API_Auth_login_loginUser_ts--loginUser_action", "C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Auth/login/loginUser.ts?tsr-directive-use-server="), $ = Q(R, "loginUser");
-var P = ["<form", ' class="CM" method="post"><!--$-->', "<!--/--><!--$-->", "<!--/--><!--$-->", "<!--/--></form>"], b = ["<p", ' class="text-red-500">Wrong credentials</p>'];
-function G() {
-  onMount(() => {
-    b$1(false), r({}), j({}), console.log(ye("username")), console.log(ye("password"));
-  }), onCleanup(() => {
-    b$1(true);
-  });
-  const [r$1, a] = createSignal("");
-  return Y($), Me(), [r$1() && ssr(b, ssrHydrationKey()), " ", ssr(P, ssrHydrationKey(), escape(createComponent(ve, { type: "usernameLogin", name: "username", placeholder: "Username", required: true })), escape(createComponent(ve, { type: "password", name: "password", placeholder: "Password", required: true })), escape(createComponent(B, { text: "Login", class: "ml-[auto] mr-[auto]", get disabled() {
-    return !fe();
-  } })))];
+var d = ["<form", ' class="CM mt-[10vh]" method="post"><!--$-->', "<!--/--><!--$-->", "<!--/--><!--$-->", "<!--/--></form>"], c = ["<div", ' class="CM mt-[90vh]"><button class="text-blue-600 hover:text-white">Need to register?</button></div>'], f = ["<p", ' class="text-red-500">', "</p>"];
+function K() {
+  return onMount(() => {
+    b(false), r({}), J({});
+  }), [j.error && ssr(f, ssrHydrationKey(), escape(j.error)), ssr(d, ssrHydrationKey(), escape(createComponent(mt, { type: "usernameLogin", name: "username", placeholder: "Username", required: true })), escape(createComponent(mt, { type: "password", name: "password", placeholder: "Password", required: true })), escape(createComponent(B, { text: "Go Transactions", class: "ml-[auto] mr-[auto] ", get disabled() {
+    return !ut();
+  } }))), ssr(c, ssrHydrationKey())];
 }
 
-export { G as default };
+export { K as default };
 //# sourceMappingURL=index42.mjs.map

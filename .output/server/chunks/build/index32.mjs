@@ -1,10 +1,12 @@
 import { createComponent, ssr, ssrHydrationKey, escape } from 'solid-js/web';
 import { createSignal, onMount, createResource, Switch, Match, For } from 'solid-js';
 import { r as rt } from './Title-C8lsFfVd2.mjs';
-import { t as te, o as oe, n as ne } from './index-DFJEjzPR.mjs';
-import { F, V } from './exchangeRates-B5IJmiQP.mjs';
-import { m, P } from './index-DYZ-zTTq.mjs';
-import './db.server-Cxzv6220.mjs';
+import { p } from './getWallets.server-C5R6kBVO.mjs';
+import { v } from './auth.server-ChqlnWrh.mjs';
+import { X, Y as Y$1 } from './index-0U8vmGbf.mjs';
+import { m, Y } from './index-D0aODT57.mjs';
+import { z } from './exchangeRates-BGrzYQig.mjs';
+import './server-fns-runtime-C3tiYEg6.mjs';
 import 'solid-js/web/storage';
 import '../_/nitro.mjs';
 import 'node:crypto';
@@ -15,56 +17,60 @@ import 'node:buffer';
 import 'vinxi/lib/invariant';
 import 'vinxi/lib/path';
 import 'node:url';
-import 'node:fs';
+import 'vite-plugin-node-polyfills/shims/process';
+import 'vite-plugin-node-polyfills/shims/global';
 import 'node:async_hooks';
-import 'node:path';
+import 'jsonwebtoken';
 import 'pg';
-import './prova-BQfA7nlw.mjs';
-import './Inputs-BxVpbjg0.mjs';
 import 'solid-js/store';
+import 'axios';
+import 'node:fs';
+import 'node:path';
+import './prova-B1NEQR2_.mjs';
+import './Inputs-D1T1pLkj.mjs';
 import 'gsap';
-import './deleteWallet-CDUDB5HW.mjs';
-import './ButtonSparkle-DNpTyev32.mjs';
+import './deleteWallet-Cgff9KFR.mjs';
+import './ButtonSparkle-BxHzGCPC2.mjs';
 import './Card.module-nMwE8ysR2.mjs';
 
 var U = ["<p", ' class="CM mt-100">', "</p>"], x = ["<div", ' class="', '"><!--$-->', "<!--/--><!--$-->", "<!--/--></div>"];
-const [er, C] = createSignal(null), [nr, or] = createSignal(null);
-function cr() {
+const [ur, C] = createSignal(null), [sr, mr] = createSignal(null);
+function lr() {
   var _a, _b, _c, _d;
   const [_, I] = createSignal(null);
   onMount(async () => {
-    const r = await F();
+    const r = await v();
     I(r);
   });
-  const [c, { mutate: D, refetch: F$1 }] = createResource(() => ({ user: _(), editState: m() }), async (r) => te(r.user));
+  const [i, { mutate: D, refetch: F }] = createResource(() => ({ user: _(), editState: m() }), async (r) => p(r.user));
   function E(r) {
     var _a2;
     const n = [];
-    return (_a2 = c()) == null ? void 0 : _a2.filter((e) => e.container_id == r && e.type == "wallet").forEach((e) => {
+    return (_a2 = i()) == null ? void 0 : _a2.filter((e) => e.container_id == r && e.type == "wallet").forEach((e) => {
       n.push({ color: e.color, wallet: e.wallet_name, balance: e.balance, currency: e.currency, position: n.length, id: e.id });
     }), n;
   }
-  const d = "EUR", [m$1] = createResource(() => ({ containerId: null, targetCurrency: d }), async (r) => {
+  const l = "EUR", [d] = createResource(() => ({ containerId: null, targetCurrency: l }), async (r) => {
     const { containerId: n, targetCurrency: e } = r;
     try {
-      const o = await F();
+      const o = await v();
       if (o === null) throw new Error("Utente non autenticato per calcolo totale.");
-      return await V(n, e, o);
+      return await z(n, e, o);
     } catch (o) {
       throw console.error(`[ConvertedTotalResource] Error fetching/calculating total for container ${n}:`, o), o;
     }
   });
-  return [createComponent(rt, { title: "Wallets" }), ssr(U, ssrHydrationKey(), escape(((_b = (_a = m$1()) == null ? void 0 : _a.total_balance) != null ? _b : 0).toLocaleString("it-IT", { style: "currency", currency: (_d = (_c = m$1()) == null ? void 0 : _c.currency_code) != null ? _d : d, minimumFractionDigits: 2, maximumFractionDigits: 2 }))), createComponent(Switch, { get children() {
+  return [createComponent(rt, { title: "Wallets" }), ssr(U, ssrHydrationKey(), escape(((_b = (_a = d()) == null ? void 0 : _a.total_balance) != null ? _b : 0).toLocaleString("it-IT", { style: "currency", currency: (_d = (_c = d()) == null ? void 0 : _c.currency_code) != null ? _d : l, minimumFractionDigits: 2, maximumFractionDigits: 2 }))), createComponent(Switch, { get children() {
     return [createComponent(Match, { get when() {
-      return c() && m() == null;
+      return i() && m() == null;
     }, get children() {
       return ssr(x, ssrHydrationKey(), "ml-[13vw] mt-[20vw] grid grid-cols-3 gap-x-0 gap-y-300", escape(createComponent(For, { get each() {
-        return c();
+        return i();
       }, children: (r, n) => createComponent(Switch, { get children() {
         return createComponent(Match, { get when() {
           return r.type == "container" && r.container_id == null;
         }, get children() {
-          return createComponent(P, { get data() {
+          return createComponent(Y, { get data() {
             return E(r.id);
           }, get id() {
             return r.id;
@@ -79,12 +85,12 @@ function cr() {
           } });
         } });
       } }) })), escape(createComponent(For, { get each() {
-        return c();
+        return i();
       }, children: (r, n) => createComponent(Switch, { get children() {
         return createComponent(Match, { get when() {
           return r.type == "wallet" && r.container_id == null;
         }, get children() {
-          return createComponent(oe, { get balance() {
+          return createComponent(X, { get balance() {
             return r.balance;
           }, get name() {
             return r.wallet_name;
@@ -106,10 +112,10 @@ function cr() {
     } }), createComponent(Match, { get when() {
       return m();
     }, get children() {
-      return createComponent(ne, {});
+      return createComponent(Y$1, {});
     } })];
   } })];
 }
 
-export { cr as default, C as setWalletId, or as setWalletName, nr as walletName, er as walletid };
+export { lr as default, C as setWalletId, mr as setWalletName, sr as walletName, ur as walletid };
 //# sourceMappingURL=index32.mjs.map

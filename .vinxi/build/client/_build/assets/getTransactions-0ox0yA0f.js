@@ -1,1 +1,0 @@
-import{c as e}from"./server-runtime-6wq6LtAi.js";const t=e(()=>{},"src_routes_API_Wallets_Wallet_getTransactions_ts--getTransactions_1","C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/Wallet/getTransactions.ts?pick=default&pick=%24css&tsr-directive-use-server=");export{t as default};

@@ -5,6 +5,7 @@
     "dev": "vinxi dev --host",
     "build": "vinxi build",
     "start": "vinxi start",
+    "preview": "vinxi start",
     "version": "vinxi version"
   },
   "dependencies": {

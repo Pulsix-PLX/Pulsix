@@ -1,11 +1,12 @@
-import { createComponent, ssr, ssrHydrationKey, escape, ssrAttribute } from 'solid-js/web';
-import { createSignal, createResource, For, Show } from 'solid-js';
-import { F, V, q, J as J$1 } from './exchangeRates-B5IJmiQP.mjs';
-import { A } from '../_/nitro.mjs';
-import './db.server-Cxzv6220.mjs';
+import { createComponent, ssr, ssrHydrationKey, ssrAttribute, escape } from 'solid-js/web';
+import { e as ee$1, i as ie$1, m as me } from './otpInput-DH-dkh0p.mjs';
+import { createSignal, createMemo, onMount, onCleanup, Switch, Match, Show } from 'solid-js';
+import { B } from './ButtonSparkle-BxHzGCPC2.mjs';
+import { r, m as mt, u as ut } from './Inputs-D1T1pLkj.mjs';
+import { s } from './index-CI1g57kZ2.mjs';
+import './server-fns-runtime-C3tiYEg6.mjs';
 import 'solid-js/web/storage';
-import 'pg';
-import './Card.module-nMwE8ysR2.mjs';
+import '../_/nitro.mjs';
 import 'node:crypto';
 import 'node:http';
 import 'node:https';
@@ -14,68 +15,58 @@ import 'node:buffer';
 import 'vinxi/lib/invariant';
 import 'vinxi/lib/path';
 import 'node:url';
-import 'node:fs';
+import 'vite-plugin-node-polyfills/shims/process';
+import 'vite-plugin-node-polyfills/shims/global';
 import 'node:async_hooks';
+import 'jsonwebtoken';
+import 'pg';
+import 'solid-js/store';
+import 'axios';
+import 'node:fs';
 import 'node:path';
+import 'bcryptjs';
+import 'firebase/app';
+import 'firebase/analytics';
+import 'firebase/auth';
+import 'gsap';
+import './icons-N8M97GAt2.mjs';
 
-var _ = ["<img", ' class="absolute w-23 ml-[15.8vw] cursor-pointer z-100" src="/icons/edit.png" style="', '">'], E = ["<img", ' src="/img/wallets/backCardHolder.png" class="', '" style="', '">'], D = ["<span", ' class="text-orange-500 text-xs ml-1 cursor-help"', ">(\u26A0\uFE0F) </span>"], R = ["<span", ' class="text-red-500 text-xs cursor-help"', ">(Errore!)</span>"], U = ["<div", ' class="relative w-[17.7vw] inline-block"><img src="/img/wallets/frontCardHolder.png" class="block w-full"><p class="absolute bottom-[3.8vw] left-1/2 transform -translate-x-1/2 z-10 text-[1.2vw] text-center whitespace-nowrap w-[90%] overflow-hidden text-ellipsis">', '</p><p class="absolute bottom-[0.5vw] ml-[1vw] z-10 text-[1.3vw] whitespace-nowrap text-left"><!--$-->', "<!--/--><!--$-->", "<!--/--></p></div>"], I = ["<span", ">...</span>"];
-const [m, B] = createSignal(null);
-function J(t) {
-  const [h, S] = createSignal(false), u = [{ color: "", wallet: "nothing", balance: 0, currency: "USD", id: 0 }], g = "EUR", [r] = createResource(() => ({ containerId: t.id, targetCurrency: g }), async (n) => {
-    const { containerId: i, targetCurrency: f } = n;
-    try {
-      const c = await F();
-      if (c === null) throw new Error("Utente non autenticato per calcolo totale.");
-      return await V(i, f, c);
-    } catch (c) {
-      throw console.error(`[ConvertedTotalResource] Error fetching/calculating total for container ${i}:`, c), c;
-    }
-  }), p = (n) => {
-    console.log("Link clicked. Edit mode:", m()), m() ? (console.log("Preventing default link action and stopping propagation because edit=true"), n.preventDefault(), n.stopPropagation()) : t.onclick && (console.log("Executing props.onclick"), t.onclick());
-  };
-  return [createComponent(For, { get each() {
-    return t.data && t.data.length > 0 ? t.data : null;
-  }, children: (n, i) => createComponent(q, { get color() {
-    return n.color;
-  }, get wallet() {
-    return n.wallet;
-  }, get balance() {
-    return n.balance;
-  }, get position() {
-    return i();
-  }, get currency() {
-    return n.currency;
-  }, get id() {
-    return n.id;
-  } }) }), createComponent(A, { get href() {
-    return t.href;
-  }, onclick: p, get children() {
-    var _a, _b, _c, _d;
-    return [createComponent(Show, { get when() {
-      return h();
+var y = ["<div", ">", "</div>"], P = ["<form", ' class="', '" style="', '"><div class="flex flex-row items-center mt-50"><select', ' class="Input Prefix mr-7 border border-gray-300 p-2"><option value="+39">+39 (Italy)</option><option value="+1">+1 (USA)</option><option value="+44">+44 (UK)</option></select><!--$-->', "<!--/--></div><!--$-->", "<!--/--><!--$-->", '<!--/--><div id="recaptcha-container" class="ml-100 mt-250"></div></form>'];
+const [x, Z] = createSignal(""), [A, ee] = createSignal(""), [I, te] = createSignal(""), [O, re] = createSignal("+39"), [oe, ne] = createSignal(""), [V, ie] = createSignal(null);
+function se() {
+  const [o, p] = createSignal("wait");
+  return createMemo(() => {
+    s() == 2 && r("phone", false);
+  }), onMount(() => {
+    console.log("Component mounted. Initializing reCAPTCHA..."), ee$1();
+  }), onCleanup(() => {
+    console.log("Component unmounted. Cleaning up reCAPTCHA..."), window.recaptchaVerifier && (window.recaptchaVerifier.clear(), window.recaptchaVerifier = null);
+  }), createComponent(Switch, { get children() {
+    return [createComponent(Match, { get when() {
+      return o() == "wait";
     }, get children() {
-      var _a2;
-      return ssr(_, ssrHydrationKey(), `margin-top:-${escape((_a2 = t.data) == null ? void 0 : _a2.length, true) * 2 + 2}vw`);
-    } }), ssr(E, ssrHydrationKey(), ` ${escape(J$1.backCardHolder, true)}`, `height:${((_b = escape((_a = t.data) == null ? void 0 : _a.length, true)) != null ? _b : escape(u.length, true)) * 2 + 11}vw;margin-top:-${((_d = escape((_c = t.data) == null ? void 0 : _c.length, true)) != null ? _d : escape(u.length, true)) * 2 + 2.5}vw;z-index:-10`), ssr(U, ssrHydrationKey(), escape(t.name), escape(createComponent(Show, { get when() {
-      return !r.loading && r.state !== "unresolved";
-    }, get fallback() {
-      return ssr(I, ssrHydrationKey());
-    }, get children() {
-      var _a2, _b2, _c2, _d2;
-      return [((_b2 = (_a2 = r()) == null ? void 0 : _a2.total_balance) != null ? _b2 : 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), " ", " ", ((_c2 = r()) == null ? void 0 : _c2.currency_code) == "USD" ? "$" : ((_d2 = r()) == null ? void 0 : _d2.currency_code) == "EUR" ? "\u20AC" : g, createComponent(Show, { get when() {
-        var _a3;
-        return ((_a3 = r()) == null ? void 0 : _a3.warnings) && r().warnings.length > 0;
+      return ssr(P, ssrHydrationKey(), "w-300 mt-100", "justify-items:center", ssrAttribute("value", escape(O(), true), false), escape(createComponent(mt, { type: "phoneNumber", name: "phone", placeholder: "Phone number", get mountOn() {
+        return s() == 1;
+      }, required: true })), escape(createComponent(Show, { get when() {
+        return I();
       }, get children() {
-        return ssr(D, ssrHydrationKey(), ssrAttribute("title", escape(r().warnings.join(`
-`), true), false));
-      } })];
-    } })), escape(createComponent(Show, { get when() {
-      return r.error;
+        return ssr(y, ssrHydrationKey(), escape(A()));
+      } })), escape(createComponent(B, { shadow: 10, text: "Send code", get disabled() {
+        return !ut();
+      }, class: "h-50 mb-30", onClick: async () => {
+        await ie$1(), p("sended");
+      } })));
+    } }), createComponent(Match, { get when() {
+      return o() == "sended";
     }, get children() {
-      return ssr(R, ssrHydrationKey(), ssrAttribute("title", escape(r.error.message, true), false));
-    } })))];
-  } })];
+      return createComponent(me, { get code() {
+        return x();
+      }, get otp() {
+        return V();
+      }, createUser: true });
+    } })];
+  } });
 }
 
-export { J as default, m as edit, B as setEdit };
+export { x as code, se as default, A as message, V as otpVerify, oe as phoneNumber, O as prefix, Z as setCode, ee as setMessage, ie as setOtp, ne as setPhoneNumber, re as setPrefix, te as setShowAlert, I as showAlert };
 //# sourceMappingURL=index122.mjs.map

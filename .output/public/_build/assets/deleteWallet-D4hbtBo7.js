@@ -1,0 +1,1 @@
+import{c as e}from"./server-runtime-G1njbCYf.js";import"./index-BbP3371Q.js";const l=e(()=>{},"src_routes_API_Wallets_deleteWallet_ts--deleteWallet_1","C:/Users/Matteo/Desktop/Pulsix/src/routes/API/Wallets/deleteWallet.ts?pick=default&pick=%24css&tsr-directive-use-server=");export{l as default};

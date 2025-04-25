@@ -1,0 +1,1 @@
+import o from"vite-plugin-node-polyfills/shims/process";import e from"pg";const{Pool:s}=e,t=new s({host:o.env.DB_HOST,user:o.env.DB_USER,password:o.env.DB_PASSWORD,port:o.env.DB_PORT?parseInt(o.env.DB_PORT,10):void 0,database:o.env.DB_NAME});export{t as d};
