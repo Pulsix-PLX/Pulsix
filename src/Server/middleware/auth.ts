@@ -19,6 +19,7 @@ import { db } from '../db.server'; // Verifica percorso
 // !!! ***Blocca solo richieste dal browser PERSONALIZZA QUESTA LISTA CON I DOMINI AUTORIZZATI *** !!!
 const allowedOrigins: ReadonlyArray<string> = [
     'http://localhost:3000',              // Sviluppo locale SolidStart
+    'http://localhost:3001',
     'https://tuo-dominio-produzione.com', // Il tuo dominio di produzione
     'https://dominio-sito-esterno-1.com',  // Sito esterno autorizzato
     // Aggiungi altri domini specifici qui

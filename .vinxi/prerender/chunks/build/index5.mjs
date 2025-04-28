@@ -3,7 +3,7 @@ import { createSignal, onMount, createEffect } from 'file://C:/Users/Matteo/Desk
 import { B } from './ButtonSparkle-BxHzGCPC.mjs';
 import { J, d as dt, u as ut, m as mt } from './Inputs-Cq_fgt2H.mjs';
 import { b } from './Menu-B3jw0GIl.mjs';
-import { j } from './auth-BeHg-fWi.mjs';
+import { j } from './auth-B-0Ucn5g.mjs';
 import { w } from './pathWallets-DBFK87xo.mjs';
 import 'file://C:/Users/Matteo/Desktop/Pulsix/node_modules/.pnpm/solid-js@1.9.5/node_modules/solid-js/store/dist/server.js';
 import 'file://C:/Users/Matteo/Desktop/Pulsix/node_modules/.pnpm/gsap@3.12.7/node_modules/gsap/dist/gsap.js';

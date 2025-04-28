@@ -1,7 +1,7 @@
 import { ssr, ssrHydrationKey, escape, createComponent, ssrAttribute } from 'file://C:/Users/Matteo/Desktop/Pulsix/node_modules/.pnpm/solid-js@1.9.5/node_modules/solid-js/web/dist/server.js';
 import { createSignal, createMemo, Show, For } from 'file://C:/Users/Matteo/Desktop/Pulsix/node_modules/.pnpm/solid-js@1.9.5/node_modules/solid-js/dist/server.js';
 import { B } from './ButtonSparkle-BxHzGCPC.mjs';
-import { j } from './auth-BeHg-fWi.mjs';
+import { j } from './auth-B-0Ucn5g.mjs';
 import 'file://C:/Users/Matteo/Desktop/Pulsix/node_modules/.pnpm/solid-js@1.9.5/node_modules/solid-js/store/dist/server.js';
 import 'file://C:/Users/Matteo/Desktop/Pulsix/node_modules/.pnpm/axios@1.8.3/node_modules/axios/index.js';
 

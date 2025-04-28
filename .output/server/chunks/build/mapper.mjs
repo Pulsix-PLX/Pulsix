@@ -1,7 +1,7 @@
 import { ssr, ssrHydrationKey, escape, createComponent, ssrAttribute } from 'solid-js/web';
 import { createSignal, createMemo, Show, For } from 'solid-js';
 import { B } from './ButtonSparkle-BxHzGCPC.mjs';
-import { j } from './auth-BeHg-fWi.mjs';
+import { j } from './auth-B-0Ucn5g.mjs';
 import 'solid-js/store';
 import 'axios';
 

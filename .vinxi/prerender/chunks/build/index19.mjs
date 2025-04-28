@@ -2,7 +2,7 @@ import { ssr, ssrHydrationKey, escape, createComponent, ssrAttribute } from 'fil
 import { createMemo, Show, createSignal, createEffect, onMount, onCleanup, For } from 'file://C:/Users/Matteo/Desktop/Pulsix/node_modules/.pnpm/solid-js@1.9.5/node_modules/solid-js/dist/server.js';
 import { o, n, a, l } from './context-XUFMQc9R.mjs';
 import { B } from './ButtonSparkle-BxHzGCPC.mjs';
-import { j } from './auth-BeHg-fWi.mjs';
+import { j } from './auth-B-0Ucn5g.mjs';
 import { b } from './Menu-B3jw0GIl.mjs';
 import { w } from './pathWallets-DBFK87xo.mjs';
 import 'file://C:/Users/Matteo/Desktop/Pulsix/node_modules/.pnpm/solid-js@1.9.5/node_modules/solid-js/store/dist/server.js';

@@ -1,6 +1,6 @@
 import { ssr, ssrHydrationKey, escape, createComponent, ssrAttribute } from 'file://C:/Users/Matteo/Desktop/Pulsix/node_modules/.pnpm/solid-js@1.9.5/node_modules/solid-js/web/dist/server.js';
 import { createSignal, createMemo, Show, For } from 'file://C:/Users/Matteo/Desktop/Pulsix/node_modules/.pnpm/solid-js@1.9.5/node_modules/solid-js/dist/server.js';
-import { j } from './auth-BeHg-fWi.mjs';
+import { j } from './auth-B-0Ucn5g.mjs';
 import { a, g } from './context-5bbmmXgY.mjs';
 import { B as B$1 } from './ButtonSparkle-BxHzGCPC.mjs';
 import { w } from './index-ClXKiMUD.mjs';

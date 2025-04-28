@@ -91,8 +91,8 @@
       "_routing-CrKy3yVb.js"
     ]
   },
-  "_auth-B7ef8sb9.js": {
-    "file": "assets/auth-B7ef8sb9.js",
+  "_auth-MpTwZCDD.js": {
+    "file": "assets/auth-MpTwZCDD.js",
     "name": "auth",
     "imports": [
       "_solid-DuWri35y.js",
@@ -497,7 +497,7 @@
     "isDynamicEntry": true
   },
   "src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css": {
-    "file": "assets/index-zMTDNupI.js",
+    "file": "assets/index-5JsSHjMu.js",
     "name": "index",
     "src": "src/routes/(Pages)/(lib)/Login/index.tsx?pick=default&pick=$css",
     "isEntry": true,
@@ -508,7 +508,7 @@
       "_ButtonSparkle-B8MvXRxa.js",
       "_Inputs-DcqJwVVk.js",
       "_Menu-CJHi8x7g.js",
-      "_auth-B7ef8sb9.js",
+      "_auth-MpTwZCDD.js",
       "_store-EkIb7068.js",
       "_server-runtime-G1njbCYf.js",
       "_index-BbP3371Q.js",
@@ -549,7 +549,7 @@
     ]
   },
   "src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css": {
-    "file": "assets/index-BpAElWHd.js",
+    "file": "assets/index-BPMvm1gE.js",
     "name": "index",
     "src": "src/routes/(Pages)/(lib)/Transactions/files/csv/Upload/index.tsx?pick=default&pick=$css",
     "isEntry": true,
@@ -557,7 +557,7 @@
     "imports": [
       "_web-DpIebe6J.js",
       "_solid-DuWri35y.js",
-      "_auth-B7ef8sb9.js",
+      "_auth-MpTwZCDD.js",
       "_ButtonSparkle-B8MvXRxa.js",
       "_context-DTlNXViu.js",
       "_index-BRALuBVh.js",
@@ -579,7 +579,7 @@
     ]
   },
   "src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css": {
-    "file": "assets/index-D2XrvAPe.js",
+    "file": "assets/index-BdyaySok.js",
     "name": "index",
     "src": "src/routes/(Pages)/(lib)/Transactions/files/csv/index.tsx?pick=default&pick=$css",
     "isEntry": true,
@@ -588,7 +588,7 @@
       "_web-DpIebe6J.js",
       "_solid-DuWri35y.js",
       "_context-DTlNXViu.js",
-      "_auth-B7ef8sb9.js",
+      "_auth-MpTwZCDD.js",
       "_ButtonSparkle-B8MvXRxa.js",
       "_index-BRALuBVh.js",
       "_Inputs-DcqJwVVk.js",
@@ -612,7 +612,7 @@
     ]
   },
   "src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css": {
-    "file": "assets/index-CqIoCKR7.js",
+    "file": "assets/index-Mr1H8tay.js",
     "name": "index",
     "src": "src/routes/(Pages)/(lib)/Transactions/files/csv/mapper/index.tsx?pick=default&pick=$css",
     "isEntry": true,
@@ -620,7 +620,7 @@
     "imports": [
       "_web-DpIebe6J.js",
       "_solid-DuWri35y.js",
-      "_auth-B7ef8sb9.js",
+      "_auth-MpTwZCDD.js",
       "_context-DTlNXViu.js",
       "_ButtonSparkle-B8MvXRxa.js",
       "_index-ClXKiMUD.js",
@@ -632,7 +632,7 @@
     ]
   },
   "src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css": {
-    "file": "assets/index-DRPEoOjA.js",
+    "file": "assets/index-DzWppUjc.js",
     "name": "index",
     "src": "src/routes/(Pages)/(lib)/Transactions/files/csvChat/index.tsx?pick=default&pick=$css",
     "isEntry": true,
@@ -642,7 +642,7 @@
       "_solid-DuWri35y.js",
       "_context-DGrJV8BX.js",
       "_ButtonSparkle-B8MvXRxa.js",
-      "_auth-B7ef8sb9.js",
+      "_auth-MpTwZCDD.js",
       "_Menu-CJHi8x7g.js",
       "_pathWallets-V9UfGynM.js",
       "_store-EkIb7068.js",
@@ -660,7 +660,7 @@
     ]
   },
   "src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css": {
-    "file": "assets/mapper-kaoi3FZI.js",
+    "file": "assets/mapper-By2X1Tw_.js",
     "name": "mapper",
     "src": "src/routes/(Pages)/(lib)/Transactions/files/csvChat/mapper.tsx?pick=default&pick=$css",
     "isEntry": true,
@@ -669,7 +669,7 @@
       "_web-DpIebe6J.js",
       "_solid-DuWri35y.js",
       "_ButtonSparkle-B8MvXRxa.js",
-      "_auth-B7ef8sb9.js",
+      "_auth-MpTwZCDD.js",
       "_store-EkIb7068.js",
       "_index-Ckjqp3wL.js",
       "_index-BbP3371Q.js",
@@ -692,7 +692,7 @@
     ]
   },
   "src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css": {
-    "file": "assets/uploadFile-e91vKR2f.js",
+    "file": "assets/uploadFile-0SCVVd4i.js",
     "name": "uploadFile",
     "src": "src/routes/(Pages)/(lib)/Transactions/files/csvChat/uploadFile.tsx?pick=default&pick=$css",
     "isEntry": true,
@@ -701,7 +701,7 @@
       "_web-DpIebe6J.js",
       "_solid-DuWri35y.js",
       "_ButtonSparkle-B8MvXRxa.js",
-      "_auth-B7ef8sb9.js",
+      "_auth-MpTwZCDD.js",
       "_context-DGrJV8BX.js",
       "_store-EkIb7068.js",
       "_index-Ckjqp3wL.js",
@@ -711,7 +711,7 @@
     ]
   },
   "src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css": {
-    "file": "assets/index-Cpvdl1_Z.js",
+    "file": "assets/index-Ba8ADhYD.js",
     "name": "index",
     "src": "src/routes/(Pages)/(lib)/Transactions/index.tsx?pick=default&pick=$css",
     "isEntry": true,
@@ -722,7 +722,7 @@
       "_ButtonSparkle-B8MvXRxa.js",
       "_Inputs-DcqJwVVk.js",
       "_Menu-CJHi8x7g.js",
-      "_auth-B7ef8sb9.js",
+      "_auth-MpTwZCDD.js",
       "_pathWallets-V9UfGynM.js",
       "_store-EkIb7068.js",
       "_server-runtime-G1njbCYf.js",
@@ -757,7 +757,7 @@
     ]
   },
   "src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css": {
-    "file": "assets/index-mWsjIETT.js",
+    "file": "assets/index-DqKpxG67.js",
     "name": "index",
     "src": "src/routes/(Pages)/LoginRegistration/Login/index.tsx?pick=default&pick=$css",
     "isEntry": true,
@@ -768,7 +768,7 @@
       "_ButtonSparkle-B8MvXRxa.js",
       "_Inputs-DcqJwVVk.js",
       "_Menu-CJHi8x7g.js",
-      "_auth-B7ef8sb9.js",
+      "_auth-MpTwZCDD.js",
       "_routing-CrKy3yVb.js",
       "_store-EkIb7068.js",
       "_server-runtime-G1njbCYf.js",
@@ -1035,7 +1035,7 @@
     ]
   },
   "src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css": {
-    "file": "assets/_...slug_-91RaIqCy.js",
+    "file": "assets/_...slug_-DppY26bs.js",
     "name": "_...slug_",
     "src": "src/routes/(Pages)/Wallets/[...slug].tsx?pick=default&pick=$css",
     "isEntry": true,
@@ -1056,7 +1056,7 @@
       "_preload-helper-CM3UJVvY.js",
       "_Inputs-DcqJwVVk.js",
       "_ButtonSparkle-B8MvXRxa.js",
-      "_auth-B7ef8sb9.js",
+      "_auth-MpTwZCDD.js",
       "_server-runtime-G1njbCYf.js",
       "_index-BbP3371Q.js",
       "_prova-m-C6m0c_.js",
@@ -1165,7 +1165,7 @@
     ]
   },
   "src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css": {
-    "file": "assets/index-vlmjMqrb.js",
+    "file": "assets/index-j6D49QOz.js",
     "name": "index",
     "src": "src/routes/(Pages)/Wallets/_components/addWallet/index.tsx?pick=default&pick=$css",
     "isEntry": true,
@@ -1177,7 +1177,7 @@
       "_Inputs-DcqJwVVk.js",
       "_index-2EPzZQ-a.js",
       "_ButtonSparkle-B8MvXRxa.js",
-      "_auth-B7ef8sb9.js",
+      "_auth-MpTwZCDD.js",
       "_store-EkIb7068.js",
       "_server-runtime-G1njbCYf.js",
       "_index-BbP3371Q.js",
@@ -1358,7 +1358,7 @@
     ]
   },
   "virtual:$vinxi/handler/client": {
-    "file": "assets/client-BvgNNfPt.js",
+    "file": "assets/client-CCV5rQcI.js",
     "name": "client",
     "src": "virtual:$vinxi/handler/client",
     "isEntry": true,
@@ -1369,7 +1369,7 @@
       "_preload-helper-CM3UJVvY.js",
       "_Menu-CJHi8x7g.js",
       "_Cursor-DO_Peo8w.js",
-      "_auth-B7ef8sb9.js",
+      "_auth-MpTwZCDD.js",
       "_routing-CrKy3yVb.js",
       "_action-Dtdjs7R9.js",
       "node_modules/.pnpm/pulsix@1.0.5/node_modules/pulsix/dist/index.mjs",
